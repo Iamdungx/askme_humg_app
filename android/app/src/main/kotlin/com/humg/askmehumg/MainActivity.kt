@@ -1,4 +1,4 @@
-package com.humg.askme_humg
+package com.humg.askmehumg
 
 import io.flutter.embedding.android.FlutterActivity
 
