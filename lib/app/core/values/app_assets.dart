@@ -1,3 +1,7 @@
 abstract final class AppAssets {
-  static const String appIcon = 'assets/images/app_icon.png';
+  // IMAGES
+  static const appIcon = 'assets/images/app_icon.png';
+
+  // SVGS
+  static const googleLogo = 'assets/svgs/google_logo.svg';
 }

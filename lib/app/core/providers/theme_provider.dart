@@ -41,7 +41,7 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     final stored = prefs.getString(_kThemeModeKey);
     final mode = _fromString(stored);
     if (mode == ThemeMode.system) {
-      scheduleMicrotask(() async {
+      Future.microtask(() async {
         try {
           await prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
         } catch (e, s) {

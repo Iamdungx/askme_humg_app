@@ -64,6 +64,7 @@ dependencies:
   url_launcher: ^6.3.1
   lucide_icons_flutter: ^3.1.10
   shared_preferences: ^2.5.4
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +90,7 @@ flutter:
     - .env
     - assets/icon/
     - assets/images/
+    - assets/svgs/
   fonts:
     - family: Inter
       fonts:

@@ -143,8 +143,7 @@ class _BrandHeader extends StatelessWidget {
             color: cs.surfaceContainerHigh,
           ),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            AppAssets.appIcon,
+          child: Image.asset(AppAssets.appIcon, width: 120, height: 120,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => Center(
               child: Text(
@@ -211,7 +210,8 @@ class _AuthActions extends StatelessWidget {
         AppButton(
           label: signInLabel,
           onPressed: onGoogleSignIn,
-          variant: AppButtonVariant.google,
+          variant: AppButtonVariant.secondary,
+          leading: Image.asset(AppAssets.googleLogo, width: 20, height: 20),
           isLoading: isLoading,
           minimumHeight: 56,
         ),
