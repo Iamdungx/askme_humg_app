@@ -67,3 +67,6 @@ lib/**/app_localizations*.dart
 # OS junk
 Thumbs.db
 *.orig
+
+.docs
+.cursor
