@@ -1,24 +1,36 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:askme_humg/config/di.dart';
+import 'package:askme_humg/config/env_reader.dart';
+import 'package:askme_humg/firebase_options.dart';
 
 class AppBootstrap {
   const AppBootstrap._();
 
   static Future<void> init() async {
-    // Global error presentation (extend to Sentry/Crashlytics if needed)
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.presentError(details);
     };
 
-    // Load environment variables from .env if present
     try {
       await dotenv.load(fileName: '.env');
-    } catch (_) {
-      // Ignore missing .env in CI/production or when using dart-define
-    }
+    } catch (_) {}
 
-    // Dependencies
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: EnvReader.isRelease
+          ? AndroidProvider.playIntegrity
+          : AndroidProvider.debug,
+      appleProvider: EnvReader.isRelease
+          ? AppleProvider.deviceCheck
+          : AppleProvider.debug,
+    );
+
     await setupDependencies();
   }
 }
