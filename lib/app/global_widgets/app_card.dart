@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 
 class AppCard extends StatelessWidget {
@@ -24,15 +23,16 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final radius = borderRadius ?? BorderRadius.circular(AppRadius.lg);
 
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: color ?? AppColors.surface,
+        color: color ?? cs.surface,
         borderRadius: radius,
         border: Border.all(
-          color: borderColor ?? AppColors.border,
+          color: borderColor ?? cs.outline,
           width: 1,
         ),
       ),
@@ -42,11 +42,10 @@ class AppCard extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            splashColor: AppColors.accent.withValues(alpha: 0.05),
-            highlightColor: AppColors.accent.withValues(alpha: 0.03),
+            splashColor: cs.primary.withValues(alpha: 0.05),
+            highlightColor: cs.primary.withValues(alpha: 0.03),
             child: Padding(
-              padding: padding ??
-                  const EdgeInsets.all(AppSpacing.lg),
+              padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
               child: child,
             ),
           ),

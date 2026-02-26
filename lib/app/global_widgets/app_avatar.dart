@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 
 class AppAvatar extends StatelessWidget {
   const AppAvatar({
@@ -9,7 +8,7 @@ class AppAvatar extends StatelessWidget {
     this.name,
     this.size = 40,
     this.showRing = true,
-    this.ringColor = AppColors.accent,
+    this.ringColor,
     this.ringWidth = 2,
   });
 
@@ -17,51 +16,55 @@ class AppAvatar extends StatelessWidget {
   final String? name;
   final double size;
   final bool showRing;
-  final Color ringColor;
+  /// Defaults to colorScheme.primary when null.
+  final Color? ringColor;
   final double ringWidth;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveRingColor =
+        ringColor ?? Theme.of(context).colorScheme.primary;
     return Container(
       width: size,
       height: size,
       decoration: showRing
           ? BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: ringColor, width: ringWidth),
+              border: Border.all(color: effectiveRingColor, width: ringWidth),
             )
           : null,
       child: Padding(
         padding: showRing ? EdgeInsets.all(ringWidth) : EdgeInsets.zero,
-        child: ClipOval(child: _buildImage()),
+        child: ClipOval(child: _buildImage(context)),
       ),
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(BuildContext context) {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: imageUrl!,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        placeholder: (_, __) => _buildFallback(),
-        errorWidget: (_, __, ___) => _buildFallback(),
+        placeholder: (_, __) => _buildFallback(context),
+        errorWidget: (_, __, ___) => _buildFallback(context),
       );
     }
-    return _buildFallback();
+    return _buildFallback(context);
   }
 
-  Widget _buildFallback() {
+  Widget _buildFallback(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final initial =
         (name != null && name!.isNotEmpty) ? name![0].toUpperCase() : '?';
     return Container(
-      color: AppColors.surfaceElevated,
+      color: cs.surfaceContainerHigh,
       alignment: Alignment.center,
       child: Text(
         initial,
         style: TextStyle(
-          color: AppColors.accent,
+          color: cs.primary,
           fontSize: size * 0.4,
           fontWeight: FontWeight.w700,
           fontFamily: 'Inter',

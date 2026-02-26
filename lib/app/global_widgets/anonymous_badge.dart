@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 
 class AnonymousBadge extends StatelessWidget {
@@ -16,58 +15,52 @@ class AnonymousBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (compact) return _buildCompact();
-    return _buildFull();
+    if (compact) return _buildCompact(context);
+    return _buildFull(context);
   }
 
-  Widget _buildFull() {
+  Widget _buildFull(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.anonymousBadge,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: cs.outline, width: 1),
       ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.lock_outline,
-                size: 12,
-                color: AppColors.anonymousBadgeText,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.anonymousBadgeText,
-                ),
-              ),
-            ],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.lock_outline, size: 12, color: cs.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: cs.onSurfaceVariant,
+            ),
           ),
+        ],
+      ),
     );
   }
 
-  Widget _buildCompact() {
+  Widget _buildCompact(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: AppColors.anonymousBadge,
+        color: cs.surfaceContainerHigh,
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: cs.outline, width: 1),
       ),
-      child: const Icon(
-        Icons.lock_outline,
-        size: 16,
-        color: AppColors.anonymousBadgeText,
-      ),
+      child: Icon(Icons.lock_outline, size: 16, color: cs.onSurfaceVariant),
     );
   }
 }

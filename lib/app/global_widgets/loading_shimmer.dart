@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 
 class LoadingShimmer extends StatelessWidget {
@@ -8,14 +7,15 @@ class LoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase,
-      highlightColor: AppColors.shimmerHighlight,
-      child: _buildSkeletonCard(),
+      baseColor: cs.surfaceContainerHigh,
+      highlightColor: cs.surfaceContainerHighest,
+      child: _buildSkeletonCard(cs),
     );
   }
 
-  Widget _buildSkeletonCard() {
+  Widget _buildSkeletonCard(ColorScheme cs) {
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -23,50 +23,45 @@ class LoadingShimmer extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: cs.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar + name row
           Row(
             children: [
-              _box(width: 40, height: 40, radius: 20),
+              _box(cs, width: 40, height: 40, radius: 20),
               const SizedBox(width: AppSpacing.sm),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _box(width: 120, height: 12),
+                  _box(cs, width: 120, height: 12),
                   const SizedBox(height: 4),
-                  _box(width: 80, height: 10),
+                  _box(cs, width: 80, height: 10),
                 ],
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          // Question chip
-          _box(width: 140, height: 20, radius: AppRadius.full),
+          _box(cs, width: 140, height: 20, radius: AppRadius.full),
           const SizedBox(height: AppSpacing.sm),
-          // Question text
-          _box(width: double.infinity, height: 12),
+          _box(cs, width: double.infinity, height: 12),
           const SizedBox(height: 4),
-          _box(width: 200, height: 12),
+          _box(cs, width: 200, height: 12),
           const SizedBox(height: AppSpacing.md),
-          // Answer text
-          _box(width: double.infinity, height: 12),
+          _box(cs, width: double.infinity, height: 12),
           const SizedBox(height: 4),
-          _box(width: double.infinity, height: 12),
+          _box(cs, width: double.infinity, height: 12),
           const SizedBox(height: 4),
-          _box(width: 160, height: 12),
+          _box(cs, width: 160, height: 12),
           const SizedBox(height: AppSpacing.md),
-          // Actions row
           Row(
             children: [
-              _box(width: 48, height: 20),
+              _box(cs, width: 48, height: 20),
               const SizedBox(width: AppSpacing.lg),
-              _box(width: 48, height: 20),
+              _box(cs, width: 48, height: 20),
             ],
           ),
         ],
@@ -74,7 +69,8 @@ class LoadingShimmer extends StatelessWidget {
     );
   }
 
-  Widget _box({
+  Widget _box(
+    ColorScheme cs, {
     required double width,
     required double height,
     double radius = AppRadius.sm,
@@ -83,7 +79,7 @@ class LoadingShimmer extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(radius),
       ),
     );

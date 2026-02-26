@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/app/core/values/app_assets.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -17,7 +16,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to feed after animations complete
     Future.delayed(const Duration(milliseconds: 2800), () {
       if (mounted) context.go('/');
     });
@@ -25,14 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: cs.surface,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // HUMG Logo
             Image.asset(
               AppAssets.appIcon,
               width: 96,
@@ -50,9 +49,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: AppSpacing.xl),
 
-            // App name — "Askme" + "HUMG" (accent)
             RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 children: [
                   TextSpan(
                     text: 'Askme',
@@ -60,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       fontFamily: 'Inter',
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: cs.onSurface,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -70,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       fontFamily: 'Inter',
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.accent,
+                      color: cs.primary,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -89,24 +87,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: AppSpacing.sm),
 
-            // Tagline
             Text(
               l10n.splashTagline,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
+                color: cs.onSurfaceVariant,
                 letterSpacing: 0.2,
               ),
-            )
-                .animate()
-                .fadeIn(delay: 700.ms, duration: 500.ms),
+            ).animate().fadeIn(delay: 700.ms, duration: 500.ms),
 
             const SizedBox(height: 64),
 
-            // Loading dot indicator
-            _PulsingDots()
+            _PulsingDots(color: cs.primary)
                 .animate()
                 .fadeIn(delay: 1000.ms, duration: 400.ms),
           ],
@@ -117,6 +111,10 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class _PulsingDots extends StatelessWidget {
+  const _PulsingDots({required this.color});
+
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -126,10 +124,7 @@ class _PulsingDots extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           width: 6,
           height: 6,
-          decoration: const BoxDecoration(
-            color: AppColors.accent,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         )
             .animate(onPlay: (c) => c.repeat())
             .fadeIn(delay: Duration(milliseconds: i * 180), duration: 300.ms)
