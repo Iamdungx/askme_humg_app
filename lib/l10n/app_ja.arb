@@ -1,8 +1,108 @@
 {
   "@@locale": "ja",
-  "appTitle": "Flutter App Base",
-  "hello": "こんにちは世界！",
-  "languageEnglish": "英語",
-  "languageVietnamese": "ベトナム語"
-}
 
+  "appTitle": "AskmeHUMG",
+  "languageEnglish": "英語",
+  "languageVietnamese": "ベトナム語",
+  "languageJapanese": "日本語",
+
+  "commonRetry": "再試行",
+  "commonCancel": "キャンセル",
+  "commonConfirm": "確認",
+  "commonSave": "保存",
+  "commonDelete": "削除",
+  "commonShare": "シェア",
+  "commonLoading": "読み込み中...",
+  "commonEmpty": "データなし",
+  "commonError": "エラーが発生しました",
+  "commonUnknownError": "不明なエラー",
+
+  "splashTagline": "匿名Q&A · HUMG",
+
+  "authSignInWithGoogle": "Googleでサインイン",
+  "authSignOut": "サインアウト",
+  "authWelcome": "AskmeHUMGへようこそ",
+  "authSubtitle": "@humg.edu.vnのメールでサインインしてください",
+  "authErrorInvalidDomain": "@humg.edu.vnのメールのみ受け付けています",
+  "authErrorSignInFailed": "サインインに失敗しました。もう一度お試しください。",
+  "authErrorSignOutFailed": "サインアウトに失敗しました。",
+
+  "profileAnswerCount": "{count}件の回答",
+  "@profileAnswerCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileTotalLikes": "{count}いいね",
+  "@profileTotalLikes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileAskAnonymously": "匿名で質問する",
+  "profileShareLink": "リンクをシェア",
+  "profileEmptyAnswers": "まだ回答がありません",
+  "profileBlockedUser": "このアカウントはブロックされています",
+
+  "inboxTitle": "受信箱",
+  "inboxTabUnanswered": "未回答",
+  "inboxTabAnswered": "回答済み",
+  "inboxEmptyUnanswered": "まだ質問がありません",
+  "inboxEmptyAnswered": "まだ公開された回答がありません",
+  "inboxQuestionFrom": "匿名の質問",
+  "inboxDeleteQuestion": "質問を削除",
+  "inboxDeleteConfirm": "この質問を削除してもよろしいですか？",
+
+  "questionSubmitTitle": "匿名で質問する",
+  "questionSubmitHint": "質問を入力してください（最大300文字）...",
+  "questionSubmitButton": "送信",
+  "questionSubmitSuccess": "質問が送信されました！",
+  "questionSubmitErrorTooLong": "質問は300文字以内にしてください",
+  "questionSubmitErrorEmpty": "質問を入力してください",
+  "questionSubmitErrorRateLimit": "質問の送信回数が多すぎます。後でもう一度お試しください。",
+  "questionCharCount": "{current}/300",
+  "@questionCharCount": {
+    "placeholders": { "current": { "type": "int" } }
+  },
+
+  "answerComposeTitle": "回答を書く",
+  "answerComposeHint": "回答を入力してください...",
+  "answerPublishToggle": "フィードに公開する",
+  "answerPublishButton": "回答を投稿",
+  "answerPublishSuccess": "回答が投稿されました！",
+  "answerErrorEmpty": "回答を入力してください",
+
+  "feedTitle": "フィード",
+  "feedEmpty": "まだ投稿がありません。最初に投稿しましょう！",
+  "feedLoadMore": "もっと読む",
+  "feedErrorLoad": "フィードの読み込みに失敗しました。再試行しますか？",
+
+  "likeButton": "いいね",
+  "likeCount": "{count}",
+  "@likeCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "commentTitle": "コメント",
+  "commentInputHint": "コメントを書く...",
+  "commentAnonymousToggle": "匿名でコメント",
+  "commentSubmitButton": "投稿",
+  "commentEmpty": "まだコメントがありません",
+  "commentCount": "{count}件のコメント",
+  "@commentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "reportTitle": "コンテンツを報告",
+  "reportReasonSpam": "スパム",
+  "reportReasonHateSpeech": "ヘイトスピーチ",
+  "reportReasonHarassment": "ハラスメント",
+  "reportReasonOther": "その他",
+  "reportSubmitButton": "報告する",
+  "reportSuccess": "報告が送信されました。ありがとうございます！",
+
+  "adminDashboardTitle": "モデレーション",
+  "adminReportPending": "保留中",
+  "adminReportResolved": "解決済み",
+  "adminActionRemove": "コンテンツを削除",
+  "adminActionDismiss": "却下",
+  "adminActionResolvedSuccess": "報告が解決されました"
+}

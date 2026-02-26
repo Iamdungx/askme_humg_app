@@ -62,6 +62,7 @@ dependencies:
   logger: ^2.5.0
   timeago: ^3.7.0
   url_launcher: ^6.3.1
+  lucide_icons_flutter: ^3.1.10
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +86,7 @@ flutter:
   generate: true
   assets:
     - assets/icon/
+    - assets/images/
   fonts:
     - family: Inter
       fonts:
@@ -93,20 +95,20 @@ flutter:
           style: italic
 
 flutter_native_splash:
-  color: "#FFFFFF"
-  image: assets/icon/app_icon.jpg
+  color: "#0A0D1A"
+  image: assets/images/humg_logo.png
   android: true
   ios: true
   android_gravity: center
+  ios_content_mode: center
   fullscreen: true
-  # Optional dark mode
-  color_dark: "#121212"
-  image_dark: assets/icon/app_icon.jpg
+  color_dark: "#0A0D1A"
+  image_dark: assets/images/humg_logo.png
   android_12:
-    image: assets/icon/app_icon.jpg
-    icon_background_color: "#FFFFFF"
-    image_dark: assets/icon/app_icon.jpg
-    icon_background_color_dark: "#121212"
+    image: assets/images/humg_logo.png
+    icon_background_color: "#0A0D1A"
+    image_dark: assets/images/humg_logo.png
+    icon_background_color_dark: "#0A0D1A"
 
 flutter_launcher_icons:
   android: true

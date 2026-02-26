@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 
 // Placeholder screens — sẽ được thay bằng màn hình thật sau khi implement từng feature
 class _PlaceholderScreen extends StatelessWidget {
@@ -16,9 +17,16 @@ class _PlaceholderScreen extends StatelessWidget {
 }
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   debugLogDiagnostics: true,
   routes: [
+    // Splash
+    GoRoute(
+      path: '/splash',
+      name: 'splash',
+      builder: (_, __) => const SplashScreen(),
+    ),
+
     // Feed (Home)
     GoRoute(
       path: '/',
