@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:askme_humg/app/core/values/app_assets.dart';
 import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -33,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // HUMG Logo
             Image.asset(
-              'assets/images/humg_logo.webp',
+              AppAssets.appIcon,
               width: 96,
               height: 96,
               fit: BoxFit.contain,
