@@ -1,7 +1,108 @@
 {
   "@@locale": "en",
-  "appTitle": "Flutter App Base",
-  "hello": "Hello World!",
+
+  "appTitle": "AskmeHUMG",
   "languageEnglish": "English",
-  "languageVietnamese": "Vietnamese"
+  "languageVietnamese": "Vietnamese",
+  "languageJapanese": "Japanese",
+
+  "commonRetry": "Retry",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
+  "commonSave": "Save",
+  "commonDelete": "Delete",
+  "commonShare": "Share",
+  "commonLoading": "Loading...",
+  "commonEmpty": "No data",
+  "commonError": "Something went wrong",
+  "commonUnknownError": "Unknown error",
+
+  "splashTagline": "Anonymous Q&A · HUMG",
+
+  "authSignInWithGoogle": "Sign in with Google",
+  "authSignOut": "Sign out",
+  "authWelcome": "Welcome to AskmeHUMG",
+  "authSubtitle": "Sign in with your @humg.edu.vn email to get started",
+  "authErrorInvalidDomain": "Only @humg.edu.vn emails are accepted",
+  "authErrorSignInFailed": "Sign in failed. Please try again.",
+  "authErrorSignOutFailed": "Sign out failed.",
+
+  "profileAnswerCount": "{count} answers",
+  "@profileAnswerCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileTotalLikes": "{count} likes",
+  "@profileTotalLikes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileAskAnonymously": "Ask anonymously",
+  "profileShareLink": "Share link",
+  "profileEmptyAnswers": "No answers yet",
+  "profileBlockedUser": "This account has been blocked",
+
+  "inboxTitle": "Inbox",
+  "inboxTabUnanswered": "Unanswered",
+  "inboxTabAnswered": "Answered",
+  "inboxEmptyUnanswered": "No questions yet",
+  "inboxEmptyAnswered": "No published answers yet",
+  "inboxQuestionFrom": "Anonymous question",
+  "inboxDeleteQuestion": "Delete question",
+  "inboxDeleteConfirm": "Are you sure you want to delete this question?",
+
+  "questionSubmitTitle": "Ask anonymously",
+  "questionSubmitHint": "Type your question (max 300 characters)...",
+  "questionSubmitButton": "Send",
+  "questionSubmitSuccess": "Question sent!",
+  "questionSubmitErrorTooLong": "Question must not exceed 300 characters",
+  "questionSubmitErrorEmpty": "Please enter a question",
+  "questionSubmitErrorRateLimit": "Too many questions sent. Please try again later.",
+  "questionCharCount": "{current}/300",
+  "@questionCharCount": {
+    "placeholders": { "current": { "type": "int" } }
+  },
+
+  "answerComposeTitle": "Write an answer",
+  "answerComposeHint": "Type your answer...",
+  "answerPublishToggle": "Publish to Feed",
+  "answerPublishButton": "Post answer",
+  "answerPublishSuccess": "Answer posted!",
+  "answerErrorEmpty": "Please enter an answer",
+
+  "feedTitle": "Feed",
+  "feedEmpty": "No posts yet. Be the first!",
+  "feedLoadMore": "Load more",
+  "feedErrorLoad": "Failed to load feed. Try again?",
+
+  "likeButton": "Like",
+  "likeCount": "{count}",
+  "@likeCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "commentTitle": "Comments",
+  "commentInputHint": "Write a comment...",
+  "commentAnonymousToggle": "Comment anonymously",
+  "commentSubmitButton": "Post",
+  "commentEmpty": "No comments yet",
+  "commentCount": "{count} comments",
+  "@commentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "reportTitle": "Report content",
+  "reportReasonSpam": "Spam",
+  "reportReasonHateSpeech": "Hate speech",
+  "reportReasonHarassment": "Harassment",
+  "reportReasonOther": "Other",
+  "reportSubmitButton": "Submit report",
+  "reportSuccess": "Report submitted. Thank you!",
+
+  "adminDashboardTitle": "Moderation",
+  "adminReportPending": "Pending",
+  "adminReportResolved": "Resolved",
+  "adminActionRemove": "Remove content",
+  "adminActionDismiss": "Dismiss",
+  "adminActionResolvedSuccess": "Report resolved"
 }
