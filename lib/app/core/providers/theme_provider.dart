@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -37,9 +39,10 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     final prefs = ref.read(sharedPreferencesProvider);
     final stored = prefs.getString(_kThemeModeKey);
     final mode = _fromString(stored);
-    // Nếu storage đang lưu "system" (từ version cũ), migrate sang dark
     if (mode == ThemeMode.system) {
-      prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
+      scheduleMicrotask(
+        () => prefs.setString(_kThemeModeKey, ThemeMode.dark.name),
+      );
       return ThemeMode.dark;
     }
     return mode;
