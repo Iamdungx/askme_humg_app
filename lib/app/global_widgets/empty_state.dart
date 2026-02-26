@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
 
@@ -21,6 +20,7 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -30,13 +30,13 @@ class EmptyState extends StatelessWidget {
             Icon(
               icon ?? Icons.inbox_outlined,
               size: 72,
-              color: AppColors.textDisabled,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               message,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
+                    color: cs.onSurface,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -45,7 +45,7 @@ class EmptyState extends StatelessWidget {
               Text(
                 description!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                 textAlign: TextAlign.center,
               ),
