@@ -1,6 +1,5 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:askme_humg/config/di.dart';
@@ -13,10 +12,6 @@ class AppBootstrap {
   static late SharedPreferences sharedPreferences;
 
   static Future<void> init() async {
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
-    };
-
     try {
       await dotenv.load(fileName: '.env');
     } catch (_) {

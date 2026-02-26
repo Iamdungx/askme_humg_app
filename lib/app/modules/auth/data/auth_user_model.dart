@@ -26,10 +26,18 @@ class AuthUserModel {
     );
   }
 
+  /// Fields updated on every login — intentionally excludes sensitive/immutable fields:
+  /// - `createdAt`: set only once at account creation via [toFirestoreCreate]
+  /// - `isBlocked`, `isHumgVerified`, `humgEmail`, `role`: managed server-side only
   static Map<String, dynamic> toFirestoreUpsert(User user) => {
         'name': user.displayName ?? '',
         'email': user.email ?? '',
         'avatar': user.photoURL ?? '',
+      };
+
+  /// Fields written only when creating a brand-new user document.
+  static Map<String, dynamic> toFirestoreCreate(User user) => {
+        ...toFirestoreUpsert(user),
         'role': 'user',
         'createdAt': FieldValue.serverTimestamp(),
         'isBlocked': false,

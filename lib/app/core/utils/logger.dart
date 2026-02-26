@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 /// Global logger instance. Use instead of `print()` everywhere.
@@ -16,5 +17,5 @@ final logger = Logger(
     printEmojis: true,
     dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
   ),
-  level: Level.debug,
+  level: kReleaseMode ? Level.warning : Level.debug,
 );

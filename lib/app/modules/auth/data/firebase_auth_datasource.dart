@@ -66,23 +66,33 @@ class FirebaseAuthDatasource {
   }
 
   Future<void> signOut() async {
+    // Chạy tuần tự và xử lý lỗi riêng để đảm bảo cả hai session đều được clear,
+    // ngay cả khi một trong hai thất bại.
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await _auth.signOut();
     } on FirebaseAuthException catch (e, s) {
       logger.e('FirebaseAuth sign-out failed', error: e, stackTrace: s);
       throw AuthException(e.message ?? 'Sign-out failed');
+    }
+
+    try {
+      await _googleSignIn.signOut();
+    } catch (e, s) {
+      logger.w('Google sign-out failed (non-fatal)', error: e, stackTrace: s);
     }
   }
 
   Future<void> _upsertUserDoc(User user) async {
     try {
-      await _firestore.collection('users').doc(user.uid).set(
-            AuthUserModel.toFirestoreUpsert(user),
-            SetOptions(merge: true),
-          );
+      final docRef = _firestore.collection('users').doc(user.uid);
+      final doc = await docRef.get();
+      if (doc.exists) {
+        // Chỉ cập nhật name/email/avatar — không ghi đè isBlocked/isHumgVerified/role/createdAt
+        await docRef.update(AuthUserModel.toFirestoreUpsert(user));
+      } else {
+        // Tạo document mới với đầy đủ fields mặc định
+        await docRef.set(AuthUserModel.toFirestoreCreate(user));
+      }
     } on FirebaseException catch (e, s) {
       logger.e('Failed to upsert users doc', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore write failed');
