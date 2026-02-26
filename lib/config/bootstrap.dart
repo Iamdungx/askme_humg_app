@@ -19,7 +19,9 @@ class AppBootstrap {
 
     try {
       await dotenv.load(fileName: '.env');
-    } catch (_) {}
+    } catch (_) {
+      dotenv.testLoad(mergeWith: {});
+    }
 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

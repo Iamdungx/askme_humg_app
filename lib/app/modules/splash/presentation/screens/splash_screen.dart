@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/app/core/values/app_assets.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _navigated = false;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 2800), () {
-      if (mounted) context.go('/');
-    });
+    // Hiển thị splash tối thiểu 2.8s, sau đó navigate dựa theo auth state
+    Future.delayed(const Duration(milliseconds: 2800), _navigate);
+  }
+
+  void _navigate() {
+    if (!mounted || _navigated) return;
+    final authState = ref.read(authStateProvider);
+    // Nếu auth vẫn đang loading, chờ thêm
+    if (authState.isLoading) {
+      Future.delayed(const Duration(milliseconds: 300), _navigate);
+      return;
+    }
+    _navigated = true;
+    final isLoggedIn = authState.valueOrNull != null;
+    context.go(isLoggedIn ? '/' : '/login');
   }
 
   @override
@@ -34,8 +50,8 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Image.asset(
               AppAssets.appIcon,
-              width: 96,
-              height: 96,
+              width: 120,
+              height: 120,
               fit: BoxFit.contain,
             )
                 .animate()

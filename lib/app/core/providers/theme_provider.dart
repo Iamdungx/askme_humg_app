@@ -36,7 +36,13 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   ThemeMode build() {
     final prefs = ref.read(sharedPreferencesProvider);
     final stored = prefs.getString(_kThemeModeKey);
-    return _fromString(stored);
+    final mode = _fromString(stored);
+    // Nếu storage đang lưu "system" (từ version cũ), migrate sang dark
+    if (mode == ThemeMode.system) {
+      prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
+      return ThemeMode.dark;
+    }
+    return mode;
   }
 
   Future<void> toggle() async {
@@ -51,10 +57,8 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   }
 
   static ThemeMode _fromString(String? value) {
-    if (value == null) return ThemeMode.system;
-    return ThemeMode.values.firstWhere(
-      (m) => m.name == value,
-      orElse: () => ThemeMode.system,
-    );
+    if (value == 'light') return ThemeMode.light;
+    if (value == 'dark') return ThemeMode.dark;
+    return ThemeMode.system; // sentinel: "chưa set hoặc giá trị lạ"
   }
 }

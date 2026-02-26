@@ -7,44 +7,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:375989370735:android:0c33ac6da47029b368329a",
-        "android_client_info": {
-          "package_name": "com.humg.askmehumg"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDTDnmMldYpzbY_rxIGcVuw_NsBYi_bXLA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:375989370735:android:a433daac79eba68a68329a",
-        "android_client_info": {
-          "package_name": "com.humg.askmehumg"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDTDnmMldYpzbY_rxIGcVuw_NsBYi_bXLA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:375989370735:android:d49b7888940083cc68329a",
         "android_client_info": {
           "package_name": "com.humg.askmehumg"
