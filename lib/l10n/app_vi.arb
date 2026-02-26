@@ -1,0 +1,7 @@
+{
+  "@@locale": "vi",
+  "appTitle": "Flutter App Base",
+  "hello": "Xin chào thế giới!",
+  "languageEnglish": "Tiếng Anh",
+  "languageVietnamese": "Tiếng Việt"
+}

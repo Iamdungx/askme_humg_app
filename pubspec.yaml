@@ -1,0 +1,138 @@
+name: askme_humg
+description: AskMe HUMG
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_gen: ^5.12.0
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  flutter_dotenv: ^5.1.0
+  dio: ^5.7.0
+  get_it: ^7.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  melos: ^7.1.1
+  flutter_native_splash: ^2.4.1
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/icon/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
+        - asset: assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf
+          style: italic
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/icon/app_icon.jpg
+  android: true
+  ios: true
+  android_gravity: center
+  fullscreen: true
+  # Optional dark mode
+  color_dark: "#121212"
+  image_dark: assets/icon/app_icon.jpg
+  android_12:
+    image: assets/icon/app_icon.jpg
+    icon_background_color: "#FFFFFF"
+    image_dark: assets/icon/app_icon.jpg
+    icon_background_color_dark: "#121212"
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/app_icon.jpg
+  # adaptive_icon_foreground: assets/icon/app_icon_fg.jpg
+  adaptive_icon_background: "#FFFFFF"
+  remove_alpha_ios: true
+
+# Melos RUNNER
+melos:
+  useRootAsPackage: true
+  scripts:
+    # Dependencies
+    get:
+      run: flutter pub get
+      description: Tải dependencies Dart & Flutter
+
+    # Codegen & Localization
+    gen:l10n:
+      run: flutter gen-l10n
+      description: Sinh file đa ngôn ngữ bằng flutter gen-l10n
+
+    # Assets
+    icons:
+      run: dart run flutter_launcher_icons
+      description: Sinh icon khởi chạy cho Android/iOS
+
+    splash:
+      run: dart run flutter_native_splash:create
+      description: Sinh màn hình splash cho Android/iOS
+
+    # Build targets
+    build:apk:
+      run: flutter build apk --release
+      description: Build APK Android (release)
+
+    build:appbundle:
+      run: flutter build appbundle --release
+      description: Build App Bundle Android (AAB)
+
+    build:ios:
+      run: flutter build ipa --release
+      description: Build iOS .ipa (cần macOS & codesign)
+
+    # Cleanups
+    clean:
+      run: flutter clean
+      description: Dọn dẹp build của Flutter
+
+    # Format & analyze
+    format:
+      run: dart format lib test
+      description: Định dạng mã Dart
+
+    analyze:
+      run: flutter analyze
+      description: Phân tích tĩnh
+
+    # Run (Android)
+    run:android:debug:
+      run: flutter run -d android --debug --dart-define=APP_ENV=debug
+      description: Chạy Android debug với APP_ENV=debug
+
+    run:android:stg:
+      run: flutter run -d android --debug --dart-define=APP_ENV=stg
+      description: Chạy Android debug với APP_ENV=stg (staging)
+
+    run:android:release:
+      run: flutter run -d android --release --dart-define=APP_ENV=release
+      description: Chạy Android release với APP_ENV=release
+
+    # Run (iOS)
+    run:ios:debug:
+      run: flutter run -d ios --debug --dart-define=APP_ENV=debug
+      description: Chạy iOS debug với APP_ENV=debug
+
+    run:ios:stg:
+      run: flutter run -d ios --debug --dart-define=APP_ENV=stg
+      description: Chạy iOS debug với APP_ENV=stg (staging)
+
+    run:ios:release:
+      run: flutter run -d ios --release --dart-define=APP_ENV=release
+      description: Chạy iOS release với APP_ENV=release
