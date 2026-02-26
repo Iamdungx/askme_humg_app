@@ -1,24 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/app/core/values/app_assets.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
+import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _navigated = false;
+  static const _minSplashMs = 2800;
+  static const _authTimeoutMs = 10000;
+  late final DateTime _startTime;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 2800), () {
-      if (mounted) context.go('/');
-    });
+    _startTime = DateTime.now();
+    // Hiển thị splash tối thiểu 2.8s, sau đó navigate dựa theo auth state
+    Future.delayed(const Duration(milliseconds: _minSplashMs), _navigate);
+  }
+
+  void _navigate() {
+    if (!mounted || _navigated) return;
+    final authState = ref.read(authStateProvider);
+    final elapsed = DateTime.now().difference(_startTime).inMilliseconds;
+
+    // Nếu auth vẫn đang loading và chưa quá timeout 10s, chờ thêm
+    if (authState.isLoading && elapsed < _authTimeoutMs) {
+      Future.delayed(const Duration(milliseconds: 300), _navigate);
+      return;
+    }
+
+    _navigated = true;
+    final isLoggedIn = authState.valueOrNull != null;
+    context.go(isLoggedIn ? '/' : '/login');
   }
 
   @override
@@ -32,12 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              AppAssets.appIcon,
-              width: 96,
-              height: 96,
-              fit: BoxFit.contain,
-            )
+            Image.asset(AppAssets.appIcon, width: 120, height: 120)
                 .animate()
                 .fadeIn(duration: 600.ms, curve: Curves.easeOut)
                 .scale(
@@ -49,32 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: AppSpacing.xl),
 
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Askme',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'HUMG',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: cs.primary,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-            )
+            const AppBrandWordmark()
                 .animate()
                 .fadeIn(delay: 400.ms, duration: 500.ms)
                 .slideY(

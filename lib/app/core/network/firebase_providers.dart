@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:askme_humg/app/services/api_client.dart';
 
 part 'firebase_providers.g.dart';
 
@@ -14,3 +15,6 @@ FirebaseFirestore firestore(Ref ref) => FirebaseFirestore.instance;
 
 @riverpod
 FirebaseStorage firebaseStorage(Ref ref) => FirebaseStorage.instance;
+
+@Riverpod(keepAlive: true)
+ApiClient apiClient(Ref ref) => ApiClient();

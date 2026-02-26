@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:askme_humg/app/core/utils/logger.dart';
 
 part 'theme_provider.g.dart';
 
@@ -36,7 +39,18 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   ThemeMode build() {
     final prefs = ref.read(sharedPreferencesProvider);
     final stored = prefs.getString(_kThemeModeKey);
-    return _fromString(stored);
+    final mode = _fromString(stored);
+    if (mode == ThemeMode.system) {
+      Future.microtask(() async {
+        try {
+          await prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
+        } catch (e, s) {
+          logger.e('Failed to migrate theme pref to dark', error: e, stackTrace: s);
+        }
+      });
+      return ThemeMode.dark;
+    }
+    return mode;
   }
 
   Future<void> toggle() async {
@@ -51,10 +65,8 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   }
 
   static ThemeMode _fromString(String? value) {
-    if (value == null) return ThemeMode.system;
-    return ThemeMode.values.firstWhere(
-      (m) => m.name == value,
-      orElse: () => ThemeMode.system,
-    );
+    if (value == 'light') return ThemeMode.light;
+    if (value == 'dark') return ThemeMode.dark;
+    return ThemeMode.system; // sentinel: "chưa set hoặc giá trị lạ"
   }
 }

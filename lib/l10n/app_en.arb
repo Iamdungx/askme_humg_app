@@ -2,6 +2,9 @@
   "@@locale": "en",
 
   "appTitle": "AskmeHUMG",
+
+  "appBrandName": "Askme",
+  "appBrandSuffix": "HUMG",
   "languageEnglish": "English",
   "languageVietnamese": "Vietnamese",
   "languageJapanese": "Japanese",
@@ -20,12 +23,36 @@
   "splashTagline": "Anonymous Q&A · HUMG",
 
   "authSignInWithGoogle": "Sign in with Google",
+  "authContinueAsGuest": "Continue as guest",
   "authSignOut": "Sign out",
   "authWelcome": "Welcome to AskmeHUMG",
-  "authSubtitle": "Sign in with your @humg.edu.vn email to get started",
-  "authErrorInvalidDomain": "Only @humg.edu.vn emails are accepted",
+  "authSubtitle": "Anonymous Q&A for HUMG students",
+  "authDomainNotice": "For HUMG students & lecturers",
   "authErrorSignInFailed": "Sign in failed. Please try again.",
   "authErrorSignOutFailed": "Sign out failed.",
+  "authErrorUserBlocked": "Your account has been blocked.",
+
+  "otpVerifyTitle": "Verify HUMG Email",
+  "otpVerifySubtitle": "Enter your @humg.edu.vn email to unlock Host features",
+  "otpEmailHint": "email@humg.edu.vn",
+  "otpSendButton": "Send OTP",
+  "otpResendButton": "Resend code",
+  "otpResendCountdown": "Resend ({seconds}s)",
+  "@otpResendCountdown": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "otpInputTitle": "Enter verification code",
+  "otpInputSubtitle": "6-digit code sent to",
+  "otpConfirmButton": "Confirm",
+  "otpSkipButton": "Skip, continue as guest",
+  "otpErrorInvalidEmail": "Only @humg.edu.vn emails are accepted",
+  "otpErrorInvalidCode": "Incorrect code. {remaining} attempts remaining.",
+  "@otpErrorInvalidCode": {
+    "placeholders": { "remaining": { "type": "int" } }
+  },
+  "otpErrorExpired": "Code has expired. Please resend.",
+  "otpErrorMaxAttempts": "Too many attempts. Please request a new code.",
+  "otpSuccessMessage": "HUMG email verified!",
 
   "profileAnswerCount": "{count} answers",
   "@profileAnswerCount": {

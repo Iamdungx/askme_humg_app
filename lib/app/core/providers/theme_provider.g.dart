@@ -27,7 +27,7 @@ final sharedPreferencesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SharedPreferencesRef = AutoDisposeProviderRef<SharedPreferences>;
-String _$themeModeNotifierHash() => r'97d5e127878a97f0c39d913c11626a9a2e103941';
+String _$themeModeNotifierHash() => r'd08693a9961a4486abcf2c33c475c347dddc73f0';
 
 /// Persists and exposes the current [ThemeMode].
 ///

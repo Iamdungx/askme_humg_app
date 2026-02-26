@@ -64,6 +64,7 @@ dependencies:
   url_launcher: ^6.3.1
   lucide_icons_flutter: ^3.1.10
   shared_preferences: ^2.5.4
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -86,8 +87,10 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - .env
     - assets/icon/
     - assets/images/
+    - assets/svgs/
   fonts:
     - family: Inter
       fonts:
@@ -115,9 +118,11 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/images/app_icon.png
-  # adaptive_icon_foreground: assets/icon/app_icon_fg.jpg
+  adaptive_icon_foreground: assets/images/app_icon.png
   adaptive_icon_background: "#FFFFFF"
   remove_alpha_ios: true
+  web:
+    generate: false
 
 # Melos RUNNER
 melos:

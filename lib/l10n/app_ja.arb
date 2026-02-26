@@ -2,6 +2,9 @@
   "@@locale": "ja",
 
   "appTitle": "AskmeHUMG",
+
+  "appBrandName": "Askme",
+  "appBrandSuffix": "HUMG",
   "languageEnglish": "英語",
   "languageVietnamese": "ベトナム語",
   "languageJapanese": "日本語",
@@ -20,12 +23,36 @@
   "splashTagline": "匿名Q&A · HUMG",
 
   "authSignInWithGoogle": "Googleでサインイン",
+  "authContinueAsGuest": "ゲストとして続ける",
   "authSignOut": "サインアウト",
   "authWelcome": "AskmeHUMGへようこそ",
-  "authSubtitle": "@humg.edu.vnのメールでサインインしてください",
-  "authErrorInvalidDomain": "@humg.edu.vnのメールのみ受け付けています",
+  "authSubtitle": "HUMG学生のための匿名Q&A",
+  "authDomainNotice": "HUMGの学生・講師向け",
   "authErrorSignInFailed": "サインインに失敗しました。もう一度お試しください。",
   "authErrorSignOutFailed": "サインアウトに失敗しました。",
+  "authErrorUserBlocked": "アカウントがブロックされています。",
+
+  "otpVerifyTitle": "HUMGメール認証",
+  "otpVerifySubtitle": "@humg.edu.vnのメールを入力してホスト機能を解放",
+  "otpEmailHint": "email@humg.edu.vn",
+  "otpSendButton": "OTPを送信",
+  "otpResendButton": "コードを再送信",
+  "otpResendCountdown": "再送信 ({seconds}s)",
+  "@otpResendCountdown": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "otpInputTitle": "確認コードを入力",
+  "otpInputSubtitle": "6桁のコードを送信しました",
+  "otpConfirmButton": "確認",
+  "otpSkipButton": "スキップしてゲストとして続ける",
+  "otpErrorInvalidEmail": "@humg.edu.vnのメールのみ受け付けています",
+  "otpErrorInvalidCode": "コードが正しくありません。残り{remaining}回。",
+  "@otpErrorInvalidCode": {
+    "placeholders": { "remaining": { "type": "int" } }
+  },
+  "otpErrorExpired": "コードの有効期限が切れました。再送信してください。",
+  "otpErrorMaxAttempts": "試行回数が超過しました。新しいコードをリクエストしてください。",
+  "otpSuccessMessage": "HUMGメールが認証されました！",
 
   "profileAnswerCount": "{count}件の回答",
   "@profileAnswerCount": {
