@@ -151,7 +151,7 @@ abstract final class AppTheme {
         // Bottom Navigation Bar
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.accent.withOpacity(0.15),
+          indicatorColor: AppColors.accent.withValues(alpha: 0.15),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
               return const IconThemeData(color: AppColors.accent);
@@ -190,7 +190,7 @@ abstract final class AppTheme {
           }),
           trackColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return AppColors.accent.withOpacity(0.3);
+              return AppColors.accent.withValues(alpha: 0.3);
             }
             return AppColors.border;
           }),
