@@ -29,13 +29,17 @@ class _PlaceholderScreen extends StatelessWidget {
 
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(this._ref) {
-    // Lắng nghe authStateProvider, notify router mỗi khi auth thay đổi
+    // Lắng nghe authStateProvider, notify router mỗi khi auth thay đổi.
+    // QUAN TRỌNG: _ref.listen() ở đây giữ authStateProvider luôn subscribed,
+    // đảm bảo _ref.read() trong redirect() luôn nhận được giá trị mới nhất
+    // thay vì AsyncLoading. Không được xóa listen này.
     _ref.listen<AsyncValue>(authStateProvider, (_, __) => notifyListeners());
   }
 
   final Ref _ref;
 
   String? redirect(BuildContext context, GoRouterState state) {
+    // ref.read hoạt động đúng ở đây vì listen() phía trên giữ stream luôn active.
     final authAsync = _ref.read(authStateProvider);
     final currentPath = state.matchedLocation;
 

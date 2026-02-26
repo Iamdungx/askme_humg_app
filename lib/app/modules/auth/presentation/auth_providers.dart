@@ -20,14 +20,14 @@ GoogleSignIn googleSignIn(Ref ref) => GoogleSignIn();
 @riverpod
 FirebaseAuthDatasource firebaseAuthDatasource(Ref ref) =>
     FirebaseAuthDatasource(
-      firebaseAuth: ref.read(firebaseAuthProvider),
-      firestore: ref.read(firestoreProvider),
-      googleSignIn: ref.read(googleSignInProvider),
+      firebaseAuth: ref.watch(firebaseAuthProvider),
+      firestore: ref.watch(firestoreProvider),
+      googleSignIn: ref.watch(googleSignInProvider),
     );
 
 @riverpod
 IAuthRepository authRepository(Ref ref) =>
-    AuthRepositoryImpl(ref.read(firebaseAuthDatasourceProvider));
+    AuthRepositoryImpl(ref.watch(firebaseAuthDatasourceProvider));
 
 // ---------------------------------------------------------------------------
 // Use case providers
@@ -35,10 +35,10 @@ IAuthRepository authRepository(Ref ref) =>
 
 @riverpod
 SignInWithGoogle signInWithGoogle(Ref ref) =>
-    SignInWithGoogle(ref.read(authRepositoryProvider));
+    SignInWithGoogle(ref.watch(authRepositoryProvider));
 
 @riverpod
-SignOut signOut(Ref ref) => SignOut(ref.read(authRepositoryProvider));
+SignOut signOut(Ref ref) => SignOut(ref.watch(authRepositoryProvider));
 
 // ---------------------------------------------------------------------------
 // Auth state stream — watched by router guard

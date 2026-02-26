@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/app/core/values/app_assets.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -160,30 +161,7 @@ class _BrandHeader extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
 
         // Wordmark: Askme HUMG
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'Askme',
-                style: tt.headlineMedium?.copyWith(
-                  color: cs.onSurface,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  height: 1,
-                ),
-              ),
-              TextSpan(
-                text: 'HUMG',
-                style: tt.headlineMedium?.copyWith(
-                  color: cs.secondary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  height: 1,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const AppBrandWordmark(fontSize: 28),
 
         const SizedBox(height: AppSpacing.sm),
 

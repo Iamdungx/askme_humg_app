@@ -2,7 +2,6 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:askme_humg/config/di.dart';
 import 'package:askme_humg/config/env_reader.dart';
 import 'package:askme_humg/firebase_options.dart';
 
@@ -32,7 +31,5 @@ class AppBootstrap {
     );
 
     sharedPreferences = await SharedPreferences.getInstance();
-
-    await setupDependencies();
   }
 }

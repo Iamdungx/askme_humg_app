@@ -4,6 +4,11 @@
   "appTitle": "AskmeHUMG",
   "@appTitle": { "description": "Tên ứng dụng" },
 
+  "appBrandName": "Askme",
+  "@appBrandName": { "description": "Phần đầu của wordmark thương hiệu (màu onSurface)" },
+  "appBrandSuffix": "HUMG",
+  "@appBrandSuffix": { "description": "Phần cuối của wordmark thương hiệu (màu primary/secondary)" },
+
   "languageEnglish": "Tiếng Anh",
   "@languageEnglish": { "description": "Tên ngôn ngữ Tiếng Anh" },
   "languageVietnamese": "Tiếng Việt",

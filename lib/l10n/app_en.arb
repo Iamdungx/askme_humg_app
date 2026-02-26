@@ -2,6 +2,9 @@
   "@@locale": "en",
 
   "appTitle": "AskmeHUMG",
+
+  "appBrandName": "Askme",
+  "appBrandSuffix": "HUMG",
   "languageEnglish": "English",
   "languageVietnamese": "Vietnamese",
   "languageJapanese": "Japanese",

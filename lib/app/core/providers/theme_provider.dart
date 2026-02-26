@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:askme_humg/app/core/utils/logger.dart';
 
 part 'theme_provider.g.dart';
 
@@ -40,9 +41,13 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     final stored = prefs.getString(_kThemeModeKey);
     final mode = _fromString(stored);
     if (mode == ThemeMode.system) {
-      scheduleMicrotask(
-        () => prefs.setString(_kThemeModeKey, ThemeMode.dark.name),
-      );
+      scheduleMicrotask(() async {
+        try {
+          await prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
+        } catch (e, s) {
+          logger.e('Failed to migrate theme pref to dark', error: e, stackTrace: s);
+        }
+      });
       return ThemeMode.dark;
     }
     return mode;
