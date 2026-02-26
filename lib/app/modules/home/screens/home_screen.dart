@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(child: Text(AppLocalizations.of(context).hello)),
+          Center(child: Text(AppLocalizations.of(context).appTitle)),
           const SizedBox(height: 16),
           LanguageSwitch(
             currentLocale: currentLocale,
