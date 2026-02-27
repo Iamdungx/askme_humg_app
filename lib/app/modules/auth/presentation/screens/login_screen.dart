@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -25,10 +27,15 @@ class LoginScreen extends ConsumerWidget {
       next.whenOrNull(
         error: (err, _) {
           if (!context.mounted) return;
+          final message = switch (err) {
+            UserBlockedFailure() => l10n.authErrorUserBlocked,
+            AuthFailure() => l10n.authErrorSignInFailed,
+            _ => l10n.commonError,
+          };
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(_buildErrorSnackBar(context, err.toString(), cs));
+          ).showSnackBar(_buildErrorSnackBar(context, message, cs));
         },
       );
     });
@@ -56,7 +63,7 @@ class LoginScreen extends ConsumerWidget {
                     guestLabel: l10n.authContinueAsGuest,
                     onGoogleSignIn: () =>
                         ref.read(authProvider.notifier).signIn(),
-                    onContinueAsGuest: () => context.go('/'),
+                    onContinueAsGuest: () => const FeedRoute().go(context),
                   )
                   .animate()
                   .fadeIn(duration: 600.ms, delay: 200.ms)
@@ -93,7 +100,7 @@ class LoginScreen extends ConsumerWidget {
       ),
       content: Row(
         children: [
-          Icon(Icons.error_rounded, color: cs.onError, size: 20),
+          Icon(LucideIcons.circleX, color: cs.onError, size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -230,7 +237,7 @@ class _AuthActions extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Icon(
-                    Icons.chevron_right_rounded,
+                    LucideIcons.chevronRight,
                     size: 18,
                     color: isLoading
                         ? cs.onSurfaceVariant.withValues(alpha: 0.4)

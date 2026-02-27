@@ -40,11 +40,19 @@ class FirebaseAuthDatasource {
 
   Future<void> signInWithGoogle() async {
     try {
-      // v7: signIn() → authenticate(); accessToken removed, idToken only
+      // v7: authenticate() throws on user cancellation (never returns null).
       final account = await _googleSignIn.authenticate();
       final auth = account.authentication;
-      final credential = GoogleAuthProvider.credential(idToken: auth.idToken);
 
+      // idToken is String? in google_sign_in v7; null means the platform did
+      // not return a token (should not happen on a successful flow, but guard
+      // defensively rather than letting Firebase reject an invalid credential).
+      final idToken = auth.idToken;
+      if (idToken == null) {
+        throw const AuthException('Google Sign-In did not return an ID token');
+      }
+
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
       final userCredential = await _auth.signInWithCredential(credential);
       final user = userCredential.user;
       if (user == null) throw const AuthException('Sign-in returned null user');

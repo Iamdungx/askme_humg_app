@@ -32,7 +32,9 @@ class _RouterNotifier extends ChangeNotifier {
     // Splash manages its own navigation; skip redirect entirely.
     if (path == const SplashRoute().location) return null;
 
-    final isLoggedIn = authAsync.value != null;
+    // asData?.value: returns null on both AsyncLoading and AsyncError,
+    // treating error state as logged-out (safe fallback).
+    final isLoggedIn = authAsync.asData?.value != null;
 
     // Unauthenticated → redirect to login for protected locations.
     final isProtected = protectedLocationPrefixes.any(
