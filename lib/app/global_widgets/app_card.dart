@@ -31,10 +31,7 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? cs.surface,
         borderRadius: radius,
-        border: Border.all(
-          color: borderColor ?? cs.outline,
-          width: 1,
-        ),
+        border: Border.all(color: borderColor ?? cs.outline, width: 1),
       ),
       child: ClipRRect(
         borderRadius: radius,

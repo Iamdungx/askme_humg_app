@@ -136,7 +136,11 @@ class ApiClient {
         handler.next(response);
       },
       onError: (e, handler) {
-        logger.e('[ERR] ${e.response?.statusCode} ${e.requestOptions.uri}', error: e, stackTrace: e.stackTrace);
+        logger.e(
+          '[ERR] ${e.response?.statusCode} ${e.requestOptions.uri}',
+          error: e,
+          stackTrace: e.stackTrace,
+        );
         handler.next(e);
       },
     );

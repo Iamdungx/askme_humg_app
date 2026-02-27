@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/core/network/firebase_providers.dart';
@@ -66,8 +65,6 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> signOut() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(signOutProvider).call(),
-    );
+    state = await AsyncValue.guard(() => ref.read(signOutProvider).call());
   }
 }

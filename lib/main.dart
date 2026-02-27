@@ -28,7 +28,9 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(AppBootstrap.sharedPreferences),
+        sharedPreferencesProvider.overrideWithValue(
+          AppBootstrap.sharedPreferences,
+        ),
       ],
       child: const MainApp(),
     ),

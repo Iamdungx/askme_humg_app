@@ -36,8 +36,9 @@ class _RouterNotifier extends ChangeNotifier {
     final isLoggedIn = authAsync.valueOrNull != null;
 
     // Unauthenticated → redirect to login for protected locations.
-    final isProtected =
-        protectedLocationPrefixes.any((prefix) => path.startsWith(prefix));
+    final isProtected = protectedLocationPrefixes.any(
+      (prefix) => path.startsWith(prefix),
+    );
     if (!isLoggedIn && isProtected) return const LoginRoute().location;
 
     // Authenticated → leave the login screen.
@@ -66,10 +67,7 @@ GoRouter appRouter(Ref ref) {
     // All routes are declared in app_routes.dart via @TypedGoRoute.
     // build_runner generates $appRoutes from those annotations.
     routes: $appRoutes,
-    errorBuilder: (_, state) => Scaffold(
-      body: Center(
-        child: Text('Page not found: ${state.error}'),
-      ),
-    ),
+    errorBuilder: (_, state) =>
+        Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
   );
 }

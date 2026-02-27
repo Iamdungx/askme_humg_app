@@ -49,9 +49,7 @@ class LoginRoute extends GoRouteData {
 
 @TypedGoRoute<InboxRoute>(
   path: '/inbox',
-  routes: [
-    TypedGoRoute<AnswerComposeRoute>(path: 'answer/:questionId'),
-  ],
+  routes: [TypedGoRoute<AnswerComposeRoute>(path: 'answer/:questionId')],
 )
 @immutable
 class InboxRoute extends GoRouteData {
@@ -108,10 +106,7 @@ class AdminRoute extends GoRouteData {
 
 /// Prefixes of routes that require authentication.
 /// Keep in sync with the @TypedGoRoute path above each class.
-const protectedLocationPrefixes = [
-  '/inbox',
-  '/admin',
-];
+const protectedLocationPrefixes = ['/inbox', '/admin'];
 
 // ---------------------------------------------------------------------------
 // Placeholder — remove when feature screens are implemented
@@ -124,7 +119,7 @@ class _PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: Center(child: Text(title)),
-      );
+    appBar: AppBar(title: Text(title)),
+    body: Center(child: Text(title)),
+  );
 }

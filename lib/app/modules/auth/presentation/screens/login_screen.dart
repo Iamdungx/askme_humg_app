@@ -25,9 +25,9 @@ class LoginScreen extends ConsumerWidget {
       next.whenOrNull(
         error: (err, _) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            _buildErrorSnackBar(context, err.toString(), cs),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(_buildErrorSnackBar(context, err.toString(), cs));
         },
       );
     });
@@ -48,23 +48,23 @@ class LoginScreen extends ConsumerWidget {
               const Spacer(flex: 2),
               // Auth actions
               _AuthActions(
-                isLoading: isLoading,
-                signInLabel: isLoading
-                    ? l10n.commonLoading
-                    : l10n.authSignInWithGoogle,
-                guestLabel: l10n.authContinueAsGuest,
-                onGoogleSignIn: () =>
-                    ref.read(authNotifierProvider.notifier).signIn(),
-                onContinueAsGuest: () => context.go('/'),
-              )
+                    isLoading: isLoading,
+                    signInLabel: isLoading
+                        ? l10n.commonLoading
+                        : l10n.authSignInWithGoogle,
+                    guestLabel: l10n.authContinueAsGuest,
+                    onGoogleSignIn: () =>
+                        ref.read(authNotifierProvider.notifier).signIn(),
+                    onContinueAsGuest: () => context.go('/'),
+                  )
                   .animate()
                   .fadeIn(duration: 600.ms, delay: 200.ms)
                   .slideY(begin: 0.15, end: 0, curve: Curves.easeOut),
               const SizedBox(height: AppSpacing.xl),
               // Security notice
-              _SecurityNotice(cs: cs)
-                  .animate()
-                  .fadeIn(duration: 600.ms, delay: 350.ms),
+              _SecurityNotice(
+                cs: cs,
+              ).animate().fadeIn(duration: 600.ms, delay: 350.ms),
               const Spacer(),
             ],
           ),
@@ -109,8 +109,7 @@ class LoginScreen extends ConsumerWidget {
       action: SnackBarAction(
         label: '✕',
         textColor: cs.onError,
-        onPressed: () =>
-            ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+        onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
       ),
     );
   }
@@ -143,9 +142,12 @@ class _BrandHeader extends StatelessWidget {
             color: cs.surfaceContainerHigh,
           ),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(AppAssets.appIcon, width: 120, height: 120,
+          child: Image.asset(
+            AppAssets.appIcon,
+            width: 120,
+            height: 120,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Center(
+            errorBuilder: (_, _, _) => Center(
               child: Text(
                 'A',
                 style: tt.displaySmall?.copyWith(

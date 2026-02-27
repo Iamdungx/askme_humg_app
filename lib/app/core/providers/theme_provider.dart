@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
@@ -14,7 +13,9 @@ const _kThemeModeKey = 'theme_mode';
 /// Initialized once in [AppBootstrap.init] via [ProviderContainer.read].
 @riverpod
 SharedPreferences sharedPreferences(Ref ref) {
-  throw UnimplementedError('Override sharedPreferencesProvider in ProviderScope');
+  throw UnimplementedError(
+    'Override sharedPreferencesProvider in ProviderScope',
+  );
 }
 
 /// Persists and exposes the current [ThemeMode].
@@ -45,7 +46,11 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
         try {
           await prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
         } catch (e, s) {
-          logger.e('Failed to migrate theme pref to dark', error: e, stackTrace: s);
+          logger.e(
+            'Failed to migrate theme pref to dark',
+            error: e,
+            stackTrace: s,
+          );
         }
       });
       return ThemeMode.dark;

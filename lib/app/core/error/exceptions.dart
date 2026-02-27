@@ -16,7 +16,7 @@ class AuthException extends AppException {
 
 class InvalidDomainException extends AuthException {
   const InvalidDomainException()
-      : super('Only @humg.edu.vn emails are accepted');
+    : super('Only @humg.edu.vn emails are accepted');
 }
 
 class UserBlockedException extends AuthException {
@@ -37,5 +37,5 @@ class NetworkException extends AppException {
 
 class RateLimitException extends AppException {
   const RateLimitException()
-      : super('Too many requests. Please try again later.');
+    : super('Too many requests. Please try again later.');
 }

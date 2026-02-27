@@ -11,27 +11,26 @@ class FirebaseAuthDatasource {
     required FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
     GoogleSignIn? googleSignIn,
-  })  : _auth = firebaseAuth,
-        _firestore = firestore,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+  }) : _auth = firebaseAuth,
+       _firestore = firestore,
+       _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
 
-  Stream<AuthUser?> get authStateChanges => _auth.authStateChanges().asyncMap(
-        (user) async {
-          if (user == null) return null;
-          try {
-            final doc = await _firestore.collection('users').doc(user.uid).get();
-            if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
-            return AuthUserModel.fromFirestore(user, doc);
-          } catch (e) {
-            logger.w('Failed to fetch user doc, falling back to Firebase user');
-            return AuthUserModel.fromFirebaseUser(user);
-          }
-        },
-      );
+  Stream<AuthUser?> get authStateChanges =>
+      _auth.authStateChanges().asyncMap((user) async {
+        if (user == null) return null;
+        try {
+          final doc = await _firestore.collection('users').doc(user.uid).get();
+          if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
+          return AuthUserModel.fromFirestore(user, doc);
+        } catch (e) {
+          logger.w('Failed to fetch user doc, falling back to Firebase user');
+          return AuthUserModel.fromFirebaseUser(user);
+        }
+      });
 
   AuthUser? get currentUser {
     final user = _auth.currentUser;

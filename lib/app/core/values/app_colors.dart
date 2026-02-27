@@ -107,8 +107,10 @@ abstract final class AppSemanticColors {
 // Convenience re-exports so existing call-sites using AppColors.* still work
 // during migration. Prefer Theme.of(context).colorScheme in widget code.
 // ---------------------------------------------------------------------------
-@Deprecated('Use Theme.of(context).colorScheme in widget code. '
-    'Use AppDarkColors / AppLightColors in theme definitions.')
+@Deprecated(
+  'Use Theme.of(context).colorScheme in widget code. '
+  'Use AppDarkColors / AppLightColors in theme definitions.',
+)
 abstract final class AppColors {
   // Dark surfaces
   static const Color background = AppDarkColors.background;
@@ -152,7 +154,8 @@ abstract final class AppColors {
   static const Color anonymousBadgeText = AppDarkColors.anonymousBadgeText;
 
   // Tab
-  static const Color tabInactiveBackground = AppDarkColors.tabInactiveBackground;
+  static const Color tabInactiveBackground =
+      AppDarkColors.tabInactiveBackground;
 
   // Semantic
   static const Color success = AppSemanticColors.success;

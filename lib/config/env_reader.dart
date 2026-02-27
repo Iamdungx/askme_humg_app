@@ -7,10 +7,10 @@ extension AppEnvX on AppEnv {
   String get label => name;
 
   String get defaultBaseUrl => switch (this) {
-        AppEnv.debug => 'https://api-dev.example.com',
-        AppEnv.stg => 'https://api-stg.example.com',
-        AppEnv.release => 'https://api.example.com',
-      };
+    AppEnv.debug => 'https://api-dev.example.com',
+    AppEnv.stg => 'https://api-stg.example.com',
+    AppEnv.release => 'https://api.example.com',
+  };
 }
 
 class _EnvKeys {
@@ -27,7 +27,9 @@ class EnvReader {
 
   static String _envOr(String key, String fallback) {
     final v = dotenv.maybeGet(key);
-    return (v != null && v.isNotEmpty) ? v : String.fromEnvironment(key, defaultValue: fallback);
+    return (v != null && v.isNotEmpty)
+        ? v
+        : String.fromEnvironment(key, defaultValue: fallback);
   }
 
   static AppEnv get appEnv {

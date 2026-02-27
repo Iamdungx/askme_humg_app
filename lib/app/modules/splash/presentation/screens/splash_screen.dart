@@ -35,15 +35,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       _maybeNavigate();
     });
 
-    _authSub = ref.listenManual<AsyncValue<dynamic>>(
-      authStateProvider,
-      (_, next) {
-        if (next.isLoading) return;
-        _authResolved = true;
-        _maybeNavigate();
-      },
-      fireImmediately: true,
-    );
+    _authSub = ref.listenManual<AsyncValue<dynamic>>(authStateProvider, (
+      _,
+      next,
+    ) {
+      if (next.isLoading) return;
+      _authResolved = true;
+      _maybeNavigate();
+    }, fireImmediately: true);
 
     Future.delayed(_authTimeout, () {
       if (!mounted || _navigated) return;
@@ -119,9 +118,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
             const SizedBox(height: 64),
 
-            _PulsingDots(color: cs.primary)
-                .animate()
-                .fadeIn(delay: 1000.ms, duration: 400.ms),
+            _PulsingDots(
+              color: cs.primary,
+            ).animate().fadeIn(delay: 1000.ms, duration: 400.ms),
           ],
         ),
       ),
@@ -140,13 +139,16 @@ class _PulsingDots extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (i) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        )
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            )
             .animate(onPlay: (c) => c.repeat())
-            .fadeIn(delay: Duration(milliseconds: i * 180), duration: 300.ms)
+            .fadeIn(
+              delay: Duration(milliseconds: i * 180),
+              duration: 300.ms,
+            )
             .then()
             .fadeOut(duration: 300.ms)
             .then(delay: Duration(milliseconds: (2 - i) * 180));

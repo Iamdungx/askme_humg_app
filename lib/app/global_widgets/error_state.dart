@@ -35,18 +35,18 @@ class ErrorState extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             Text(
               message ?? 'Something went wrong',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: cs.onSurface,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: cs.onSurface),
               textAlign: TextAlign.center,
             ),
             if (description != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(
                 description!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
             ],
