@@ -1,134 +1,257 @@
-# FLUTTER MOBILE APP BASEBASE
+# AskMe HUMG — Flutter App
+
+Q&A community platform for HUMG students & lecturers.
+
+---
+
+## Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Flutter | ≥ 3.29 (Dart ≥ 3.3) |
+| Android Studio / Xcode | latest stable |
+
+---
 
 ## Quick Start
+
 ```bash
-dart pub global activate melos
-melos run get
+# 1. Get dependencies
+flutter pub get
+
+# 2. Copy env template
+cp .env.example .env          # fill in API_BASE_URL if needed
+
+# 3. Codegen — REQUIRED after every clone (Riverpod, Freezed, flutter_gen, go_router)
+dart run build_runner build --delete-conflicting-outputs
+
+# 4. Localization
+flutter gen-l10n
+
+# 5. Run on device
+flutter run --dart-define=APP_ENV=debug
 ```
 
-If "melos: command not found":
-```bash
-# Use without PATH change
-dart pub global run melos run get
+> **Note:** `.g.dart`, `.freezed.dart`, and `lib/generated/` are gitignored.
+> Step 3 must be run before the project will compile.
 
-# Or add to PATH (Windows - Git Bash, current session)
-export PATH="$PATH:/c/Users/admin/AppData/Local/Pub/Cache/bin"
-melos run get
-
-# Or PowerShell (current session)
-$env:Path += ";C:\Users\admin\AppData\Local\Pub\Cache\bin"
-melos run get
-```
-
-## Environment
-```bash
-cp .env.example .env
-```
-Run with predefined env (via Melos, uses dart-define under the hood):
-```bash
-melos run run:android:debug   # APP_ENV=debug
-melos run run:android:stg     # APP_ENV=stg
-melos run run:android:release # APP_ENV=release
-
-melos run run:ios:debug
-melos run run:ios:stg
-melos run run:ios:release
-```
-
-## Dev Commands
-```bash
-# Localization
-melos run gen:l10n
-
-# Launcher icons (Android/iOS)
-melos run icons
-
-# Native splash (Android/iOS)
-melos run splash
-
-# Android builds
-melos run build:apk
-melos run build:appbundle
-
-# iOS build (on macOS)
-melos run build:ios
-
-# Utilities
-melos run clean
-melos run format
-melos run analyze
-```
-
-Notes:
-- Icon/Splash assets: `assets/icon/` (paths configured in `pubspec.yaml`).
-- ARB l10n files: `lib/l10n/*.arb` (configured in `l10n.yaml`).
-- Fonts: put files in `assets/fonts/` and use family `Inter`.
+---
 
 ## Environment (APP_ENV)
-Copy file `.env` mẫu và cập nhật giá trị theo môi trường của bạn:
+
+The app reads `APP_ENV` from `.env` first, then from `--dart-define`.
+
+| Value | Backend |
+|-------|---------|
+| `debug` (default) | `https://api-dev.example.com` |
+| `stg` | `https://api-stg.example.com` |
+| `release` | `https://api.example.com` |
+
+Override the base URL at runtime by setting `API_BASE_URL` in `.env`.
+
 ```bash
-cp .env.example .env
+# Android
+flutter run -d android --debug   --dart-define=APP_ENV=debug
+flutter run -d android --debug   --dart-define=APP_ENV=stg
+flutter run -d android --release --dart-define=APP_ENV=release
+
+# iOS
+flutter run -d ios --debug   --dart-define=APP_ENV=debug
+flutter run -d ios --debug   --dart-define=APP_ENV=stg
+flutter run -d ios --release --dart-define=APP_ENV=release
 ```
 
-Chạy bằng Melos (đã cấu hình sẵn APP_ENV bằng dart-define):
-```bash
-melos run run:android:debug   # APP_ENV=debug
-melos run run:android:stg     # APP_ENV=stg
-melos run run:android:release # APP_ENV=release
+---
 
-melos run run:ios:debug
-melos run run:ios:stg
-melos run run:ios:release
+## Common Commands
+
+```bash
+# Dependencies
+flutter pub get
+
+# Codegen — run after changing @riverpod providers, Freezed classes, or assets
+dart run build_runner build --delete-conflicting-outputs
+
+# Localization
+flutter gen-l10n
+
+# Launcher icons
+dart run flutter_launcher_icons
+
+# Native splash
+dart run flutter_native_splash:create
+
+# Android builds
+flutter build apk --release
+flutter build appbundle --release
+
+# iOS build (macOS + codesign required)
+flutter build ipa --release
+
+# Utilities
+flutter clean
+dart format lib test
+flutter analyze
 ```
 
-## Folder Structure
+---
+
+## Project Structure
+
 ```
 lib/
- ├─ main.dart                    # Điểm vào ứng dụng
- ├─ app/                         # Mã ứng dụng theo kiến trúc/layers
- │  ├─ bindings/                 # Định nghĩa DI/bindings cho module
- │  ├─ core/                     # Nền tảng dùng chung (theme/values/...)
- │  │  ├─ theme/                 # Chủ đề, màu sắc, typography, spacing
- │  │  └─ values/                # Hằng số, enums, keys
- │  ├─ data/                     # Tầng dữ liệu (model/providers/repositories)
- │  │  ├─ model/                 # Models/DTOs
- │  │  ├─ providers/             # Data sources (API, local,...)
- │  │  └─ repositories/          # Implement repositories
- │  ├─ global_widgets/           # Widget dùng chung
- │  ├─ modules/                  # Tổ chức theo tính năng (auth, home,...)
- │  │  ├─ auth/
- │  │  └─ home/
- │  ├─ routes/                   # Điều hướng, router
- │  └─ services/                 # Services (logging, analytics, notification,...)
- ├─ config/
- │  └─ languages.dart            # Danh sách supportedLocales
- ├─ l10n/                        # Localization (ARB + generated)
- │  ├─ *.arb                     # Chuỗi đa ngôn ngữ
- │  └─ app_localizations*.dart   # File sinh từ gen_l10n
- └─ generated/                   # Mã sinh tự động khác (nếu có)
+├── main.dart                   # ProviderScope, MaterialApp.router
+├── firebase_options.dart       # Auto-generated by FlutterFire CLI
+├── config/
+│   ├── app_routes.dart         # Typed route definitions (@TypedGoRoute)
+│   ├── bootstrap.dart          # Firebase + AppCheck + SharedPreferences init
+│   ├── env_reader.dart         # .env / --dart-define reader
+│   ├── languages.dart          # supportedLocales
+│   └── router.dart             # GoRouter + Riverpod auth guard
+├── l10n/                       # ARB files + generated AppLocalizations
+│   ├── app_vi.arb              # Vietnamese (template)
+│   ├── app_en.arb
+│   └── app_ja.arb
+├── generated/                  # ← DO NOT EDIT — output of build_runner
+│   └── assets.gen.dart         # Type-safe asset accessors (flutter_gen)
+└── app/
+    ├── core/
+    │   ├── error/              # AppException (data) + Failure sealed (domain)
+    │   ├── network/            # Firebase + ApiClient Riverpod providers
+    │   ├── providers/          # ThemeModeNotifier, sharedPreferencesProvider
+    │   ├── utils/              # logger (package:logger), Validators
+    │   └── values/             # AppColors, AppTheme, AppSpacing, AppTypography
+    ├── global_widgets/         # AppButton, AppAvatar, EmptyState, ErrorState …
+    ├── modules/
+    │   ├── auth/               # Google Sign-In → Firebase Auth → Firestore
+    │   │   ├── domain/         # AuthUser (Freezed), IAuthRepository, use cases
+    │   │   ├── data/           # FirebaseAuthDatasource, AuthRepositoryImpl
+    │   │   └── presentation/   # AuthNotifier, LoginScreen
+    │   └── splash/
+    │       └── presentation/   # SplashScreen
+    └── services/
+        └── api_client.dart     # Dio wrapper (REST, not yet used)
 ```
 
-## Modules (MVC)
-Ví dụ cấu trúc 1 module theo MVC (có thể nhân bản cho các feature khác):
+Each feature module follows **Clean Architecture**:
 ```
-lib/app/modules/<feature>/
- ├─ models/          # Model/Entity, mapper
- ├─ views/           # Widgets/Màn hình (UI)
- ├─ controllers/     # State/controller (Bloc/Notifier/ChangeNotifier)
- ├─ services/        # Logic riêng của module (tùy chọn)
- └─ repository/      # Giao tiếp dữ liệu của module (tùy chọn)
+modules/<feature>/
+├── domain/        # entities (Freezed), repository interface, use cases
+├── data/          # datasource, repository implementation, DTOs
+└── presentation/  # Riverpod providers (@riverpod), screens/, widgets/
 ```
-Gợi ý: nếu module có nhiều màn hình, tạo `views/pages/` và `views/widgets/` để tách rõ.
 
-## Coding Tips
-- Env: `cp .env.example .env` rồi chỉnh giá trị cần thiết.
-- L10n: viết chuỗi trong `lib/l10n/*.arb`, chạy `melos run gen:l10n` (hoặc hot-restart).
-- API client: lấy `dio` từ DI
+---
+
+## State Management
+
+**Riverpod with code generation** — all providers use `@riverpod` / `@Riverpod(keepAlive: true)`.
+
 ```dart
-import 'package:askme_humg/config/di.dart';
-import 'package:askme_humg/app/services/api_client.dart';
+// Reading a provider in a ConsumerWidget
+final user = ref.watch(authStateProvider);
 
-final dio = di<ApiClient>().dio;
+// One-shot action in a ConsumerState
+await ref.read(authNotifierProvider.notifier).signIn();
 ```
-- Logger: `AppLogger.d('message', tag: 'HOME')` (tự tắt ở release).
-- Validator: dùng từ `Validators` (nonEmpty, email, combine, ...).
+
+Run `dart run build_runner build --delete-conflicting-outputs` after adding/changing any `@riverpod` provider or Freezed class.
+
+---
+
+## Type-safe Assets (flutter_gen)
+
+After running `build_runner`, use generated accessors instead of raw strings:
+
+```dart
+// ✗ before
+Image.asset('assets/images/app_icon.png')
+SvgPicture.asset('assets/svgs/google_logo.svg')
+
+// ✓ after
+Assets.images.appIcon.image(width: 120)
+Assets.svgs.googleLogo.svg()
+```
+
+> `lib/generated/assets.gen.dart` is committed to git so the app compiles
+> without running codegen first.
+
+---
+
+## Type-safe Routes (go_router)
+
+Routes are defined as classes in `config/app_routes.dart`. Never use raw strings for navigation:
+
+```dart
+// ✗ before
+context.go('/login');
+context.go('/u/$userId');
+
+// ✓ after
+const LoginRoute().go(context);
+ProfileRoute(userId: userId).go(context);
+```
+
+---
+
+## Localization
+
+Strings live in `lib/l10n/*.arb`. Vietnamese (`app_vi.arb`) is the template.
+
+```bash
+flutter gen-l10n   # regenerates lib/l10n/app_localizations*.dart
+```
+
+Usage:
+```dart
+final l10n = AppLocalizations.of(context);
+Text(l10n.splashTagline)
+```
+
+---
+
+## Networking
+
+### Firebase (primary)
+Firebase Auth, Cloud Firestore, Storage, Messaging, AppCheck are injected via Riverpod providers in `app/core/network/firebase_providers.dart`.
+
+### REST / Dio (secondary — not yet active)
+`ApiClient` in `app/services/api_client.dart` wraps Dio with logging interceptors.
+Inject it via Riverpod:
+```dart
+final client = ref.read(apiClientProvider);
+final response = await client.get('/questions');
+```
+Set the auth token after sign-in:
+```dart
+ref.read(apiClientProvider).setAuthToken(token);
+```
+
+---
+
+## Logging
+
+Uses `package:logger` with `PrettyPrinter`. The global instance lives in
+`app/core/utils/logger.dart`:
+
+```dart
+import 'package:askme_humg/app/core/utils/logger.dart';
+
+logger.d('debug message');
+logger.i('info');
+logger.w('warning');
+logger.e('error', error: e, stackTrace: s);
+```
+
+Level is `Level.debug` in debug/stg, `Level.warning` in release.
+
+---
+
+## Coding Guidelines
+
+- **No magic strings for assets** — use `Assets.*` from `lib/generated/assets.gen.dart`.
+- **No magic strings for routes** — use typed route classes from `config/app_routes.dart`.
+- **l10n required** — never hardcode user-facing strings; use ARB keys.
+- **Immutable models** — use Freezed for all domain entities and DTOs.
+- **Error propagation** — data layer throws `AppException`, domain layer catches and rethrows as `Failure`.
+- **Dart 3 style** — prefer switch expressions, pattern matching, and `enum.name` over old `switch` statements and `describeEnum`.

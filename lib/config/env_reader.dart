@@ -1,23 +1,16 @@
-// ignore_for_file: deprecated_member_use
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum AppEnv { debug, stg, release }
 
 extension AppEnvX on AppEnv {
-  String get label => describeEnum(this);
+  /// Dart 3: enum.name replaces the deprecated describeEnum()
+  String get label => name;
 
-  String get defaultBaseUrl {
-    switch (this) {
-      case AppEnv.debug:
-        return 'https://api-dev.example.com';
-      case AppEnv.stg:
-        return 'https://api-stg.example.com';
-      case AppEnv.release:
-        return 'https://api.example.com';
-    }
-  }
+  String get defaultBaseUrl => switch (this) {
+        AppEnv.debug => 'https://api-dev.example.com',
+        AppEnv.stg => 'https://api-stg.example.com',
+        AppEnv.release => 'https://api.example.com',
+      };
 }
 
 class _EnvKeys {
@@ -26,34 +19,24 @@ class _EnvKeys {
 }
 
 class EnvReader {
-  // Low-level getters (prefer .env if loaded, else dart-define)
-  static String _envOrEmpty(String key) {
-    final fromDotEnv = dotenv.maybeGet(key);
-    if (fromDotEnv != null) return fromDotEnv;
-    return String.fromEnvironment(key, defaultValue: '');
+  const EnvReader._();
+
+  // Prefer .env if loaded, fall back to --dart-define
+  static String _envOrEmpty(String key) =>
+      dotenv.maybeGet(key) ?? String.fromEnvironment(key);
+
+  static String _envOr(String key, String fallback) {
+    final v = dotenv.maybeGet(key);
+    return (v != null && v.isNotEmpty) ? v : String.fromEnvironment(key, defaultValue: fallback);
   }
 
-  static String _envOr(String key, String def) {
-    final fromDotEnv = dotenv.maybeGet(key);
-    if (fromDotEnv != null && fromDotEnv.isNotEmpty) return fromDotEnv;
-    return String.fromEnvironment(key, defaultValue: def);
-  }
-
-  // Environment selection
   static AppEnv get appEnv {
     final value = _envOr(_EnvKeys.appEnv, 'debug').toLowerCase();
-    switch (value) {
-      case 'stg':
-      case 'staging':
-        return AppEnv.stg;
-      case 'release':
-      case 'prod':
-      case 'production':
-        return AppEnv.release;
-      case 'debug':
-      default:
-        return AppEnv.debug;
-    }
+    return switch (value) {
+      'stg' || 'staging' => AppEnv.stg,
+      'release' || 'prod' || 'production' => AppEnv.release,
+      _ => AppEnv.debug,
+    };
   }
 
   static bool get isDebug => appEnv == AppEnv.debug;
@@ -62,14 +45,12 @@ class EnvReader {
 
   static String get appEnvLabel => appEnv.label;
 
-  // API base URL with optional override
   static String get apiBaseUrl {
     final override = _envOrEmpty(_EnvKeys.apiBaseUrl);
-    if (override.isNotEmpty) return override;
-    return appEnv.defaultBaseUrl;
+    return override.isNotEmpty ? override : appEnv.defaultBaseUrl;
   }
 
-  // Generic boolean flag reader: true/1/yes (case-insensitive) => true
+  /// Reads a boolean flag: "true" / "1" / "yes" → true (case-insensitive).
   static bool flag(String key, {bool defaultValue = false}) {
     final v = _envOrEmpty(key).toLowerCase();
     if (v.isEmpty) return defaultValue;
