@@ -26,8 +26,15 @@ make setup
 make run
 ```
 
-> **Note:** `.g.dart`, `.freezed.dart`, and `lib/generated/` are gitignored.
-> `make setup` must be run before the project will compile.
+> **Note:** Generated files are **not** committed. `make setup` must be run once after cloning before the project will compile.
+>
+> | File / folder | In git? | How to regenerate |
+> |---|---|---|
+> | `*.g.dart`, `*.freezed.dart` | ✗ gitignored | `make gen` |
+> | `lib/generated/` (flutter_gen) | ✗ gitignored | `make gen` |
+> | `lib/l10n/app_localizations*.dart` | ✗ gitignored | `make l10n` |
+> | `lib/firebase_options.dart` | ✓ committed | FlutterFire CLI (one-time) |
+> | `google-services.json` / `GoogleService-Info.plist` | ✓ committed | Download from Firebase Console nếu mất |
 
 ---
 
@@ -171,7 +178,7 @@ modules/<feature>/
 final user = ref.watch(authStateProvider);
 
 // One-shot action in a ConsumerState
-await ref.read(authNotifierProvider.notifier).signIn();
+await ref.read(authProvider.notifier).signIn();
 ```
 
 Run `dart run build_runner build --delete-conflicting-outputs` after adding/changing any `@riverpod` provider or Freezed class.

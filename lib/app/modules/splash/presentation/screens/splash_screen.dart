@@ -55,7 +55,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!_minDelayDone || !_authResolved || _navigated) return;
     _navigated = true;
     _authSub?.close();
-    final isLoggedIn = ref.read(authStateProvider).valueOrNull != null;
+    final isLoggedIn = ref.read(authStateProvider).value != null;
     if (isLoggedIn) {
       const FeedRoute().go(context);
     } else {

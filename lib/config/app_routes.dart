@@ -5,21 +5,9 @@ import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen
 
 part 'app_routes.g.dart';
 
-// ---------------------------------------------------------------------------
-// Route tree — single source of truth for all paths and parameters.
-//
-// Build-runner generates:
-//   • SplashRoute().go(context)  → navigates to /splash
-//   • FeedRoute().go(context)    → navigates to /
-//   • ProfileRoute(userId: id).go(context) → navigates to /u/:userId
-//   etc.
-//
-// After editing, run:  melos run gen:assets
-// ---------------------------------------------------------------------------
-
 @TypedGoRoute<SplashRoute>(path: '/splash')
 @immutable
-class SplashRoute extends GoRouteData {
+class SplashRoute extends GoRouteData with $SplashRoute {
   const SplashRoute();
 
   @override
@@ -29,7 +17,7 @@ class SplashRoute extends GoRouteData {
 
 @TypedGoRoute<FeedRoute>(path: '/')
 @immutable
-class FeedRoute extends GoRouteData {
+class FeedRoute extends GoRouteData with $FeedRoute {
   const FeedRoute();
 
   @override
@@ -39,7 +27,7 @@ class FeedRoute extends GoRouteData {
 
 @TypedGoRoute<LoginRoute>(path: '/login')
 @immutable
-class LoginRoute extends GoRouteData {
+class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
 
   @override
@@ -52,11 +40,8 @@ class LoginRoute extends GoRouteData {
   routes: [TypedGoRoute<AnswerComposeRoute>(path: 'answer/:questionId')],
 )
 @immutable
-class InboxRoute extends GoRouteData {
+class InboxRoute extends GoRouteData with $InboxRoute {
   const InboxRoute();
-
-  /// Protected: requires authentication.
-  static const requiresAuth = true;
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
@@ -64,7 +49,7 @@ class InboxRoute extends GoRouteData {
 }
 
 @immutable
-class AnswerComposeRoute extends GoRouteData {
+class AnswerComposeRoute extends GoRouteData with $AnswerComposeRoute {
   const AnswerComposeRoute({required this.questionId});
 
   final String questionId;
@@ -76,7 +61,7 @@ class AnswerComposeRoute extends GoRouteData {
 
 @TypedGoRoute<ProfileRoute>(path: '/u/:userId')
 @immutable
-class ProfileRoute extends GoRouteData {
+class ProfileRoute extends GoRouteData with $ProfileRoute {
   const ProfileRoute({required this.userId});
 
   final String userId;
@@ -88,30 +73,18 @@ class ProfileRoute extends GoRouteData {
 
 @TypedGoRoute<AdminRoute>(path: '/admin')
 @immutable
-class AdminRoute extends GoRouteData {
+class AdminRoute extends GoRouteData with $AdminRoute {
   const AdminRoute();
-
-  /// Protected: requires authentication.
-  static const requiresAuth = true;
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const _PlaceholderScreen(title: 'Admin Dashboard');
 }
 
-// ---------------------------------------------------------------------------
-// Centralised list of routes that require a logged-in user.
-// Add a route class here instead of sprinkling strings in redirect().
-// ---------------------------------------------------------------------------
-
 /// Prefixes of routes that require authentication.
-/// Keep in sync with the @TypedGoRoute path above each class.
 const protectedLocationPrefixes = ['/inbox', '/admin'];
 
-// ---------------------------------------------------------------------------
 // Placeholder — remove when feature screens are implemented
-// ---------------------------------------------------------------------------
-
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen({required this.title});
 

@@ -14,16 +14,17 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final isLoading = authState.isLoading;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
 
     // Show error snackbar on failure
-    ref.listen(authNotifierProvider, (_, next) {
+    ref.listen<AsyncValue<void>>(authProvider, (_, next) {
       next.whenOrNull(
         error: (err, _) {
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(
             context,
@@ -54,7 +55,7 @@ class LoginScreen extends ConsumerWidget {
                         : l10n.authSignInWithGoogle,
                     guestLabel: l10n.authContinueAsGuest,
                     onGoogleSignIn: () =>
-                        ref.read(authNotifierProvider.notifier).signIn(),
+                        ref.read(authProvider.notifier).signIn(),
                     onContinueAsGuest: () => context.go('/'),
                   )
                   .animate()

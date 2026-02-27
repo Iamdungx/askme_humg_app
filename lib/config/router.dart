@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
@@ -33,7 +32,7 @@ class _RouterNotifier extends ChangeNotifier {
     // Splash manages its own navigation; skip redirect entirely.
     if (path == const SplashRoute().location) return null;
 
-    final isLoggedIn = authAsync.valueOrNull != null;
+    final isLoggedIn = authAsync.value != null;
 
     // Unauthenticated → redirect to login for protected locations.
     final isProtected = protectedLocationPrefixes.any(
