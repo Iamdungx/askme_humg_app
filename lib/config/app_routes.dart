@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:askme_humg/app/core/widgets/dev_drawer.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
+import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 
 part 'app_routes.g.dart';
@@ -21,6 +24,7 @@ class FeedRoute extends GoRouteData with $FeedRoute {
   const FeedRoute();
 
   @override
+  // TODO(phase-4): replace with FeedScreen — UC-4.1 public feed
   Widget build(BuildContext context, GoRouterState state) =>
       const _PlaceholderScreen(title: 'Feed');
 }
@@ -44,6 +48,7 @@ class InboxRoute extends GoRouteData with $InboxRoute {
   const InboxRoute();
 
   @override
+  // TODO(phase-3): replace with InboxScreen — UC-3.2 manage inbox (2 tabs: unanswered / answered)
   Widget build(BuildContext context, GoRouterState state) =>
       const _PlaceholderScreen(title: 'Inbox');
 }
@@ -55,6 +60,7 @@ class AnswerComposeRoute extends GoRouteData with $AnswerComposeRoute {
   final String questionId;
 
   @override
+  // TODO(phase-3): replace with AnswerComposeScreen — UC-3.3 answer & publish (WriteBatch required)
   Widget build(BuildContext context, GoRouterState state) =>
       _PlaceholderScreen(title: 'Answer: $questionId');
 }
@@ -68,7 +74,7 @@ class ProfileRoute extends GoRouteData with $ProfileRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      _PlaceholderScreen(title: 'Profile: $userId');
+      ProfileScreen(userId: userId);
 }
 
 @TypedGoRoute<AdminRoute>(path: '/admin')
@@ -77,6 +83,7 @@ class AdminRoute extends GoRouteData with $AdminRoute {
   const AdminRoute();
 
   @override
+  // TODO(phase-5): replace with AdminDashboardScreen — UC-5.2 admin moderate (requires admin claim)
   Widget build(BuildContext context, GoRouterState state) =>
       const _PlaceholderScreen(title: 'Admin Dashboard');
 }
@@ -92,7 +99,20 @@ class _PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title)),
+    appBar: AppBar(
+      title: Text(title),
+      actions: [
+        if (kDebugMode)
+          Builder(
+            builder: (ctx) => IconButton(
+              icon: const Icon(Icons.bug_report_outlined),
+              tooltip: 'Dev nav',
+              onPressed: () => Scaffold.of(ctx).openDrawer(),
+            ),
+          ),
+      ],
+    ),
+    drawer: kDebugMode ? const DevDrawer() : null,
     body: Center(child: Text(title)),
   );
 }
