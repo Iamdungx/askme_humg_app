@@ -28,8 +28,13 @@ class AppBootstrap {
           : const AppleDebugProvider(),
     );
 
-    // google_sign_in v7: must call initialize() once before any usage
-    await GoogleSignIn.instance.initialize();
+    // google_sign_in v7: serverClientId (Web Client ID) is required on Android.
+    // Get from: Firebase Console → Project Settings → General → Web app → Client ID
+    await GoogleSignIn.instance.initialize(
+      serverClientId: EnvReader.googleServerClientId.isNotEmpty
+          ? EnvReader.googleServerClientId
+          : null,
+    );
 
     sharedPreferences = await SharedPreferences.getInstance();
   }

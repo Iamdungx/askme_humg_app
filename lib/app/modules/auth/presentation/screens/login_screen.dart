@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/app/core/values/app_assets.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
@@ -131,30 +132,16 @@ class _BrandHeader extends StatelessWidget {
     return Column(
       children: [
         // Logo
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(
-              color: cs.secondary.withValues(alpha: 0.4),
-              width: 2,
-            ),
-            color: cs.surfaceContainerHigh,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            AppAssets.appIcon,
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Center(
-              child: Text(
-                'A',
-                style: tt.displaySmall?.copyWith(
-                  color: cs.secondary,
-                  fontWeight: FontWeight.w800,
-                ),
+        Image.asset(
+          AppAssets.appIcon,
+          width: 160,
+          height: 160,
+          errorBuilder: (_, _, _) => Center(
+            child: Text(
+              'A',
+              style: tt.displaySmall?.copyWith(
+                color: cs.secondary,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -214,7 +201,7 @@ class _AuthActions extends StatelessWidget {
           label: signInLabel,
           onPressed: onGoogleSignIn,
           variant: AppButtonVariant.secondary,
-          leading: Image.asset(AppAssets.googleLogo, width: 20, height: 20),
+          leading: SvgPicture.asset(AppAssets.googleLogo, width: 20, height: 20),
           isLoading: isLoading,
           minimumHeight: 56,
         ),

@@ -16,6 +16,7 @@ extension AppEnvX on AppEnv {
 class _EnvKeys {
   static const appEnv = 'APP_ENV';
   static const apiBaseUrl = 'API_BASE_URL';
+  static const googleServerClientId = 'GOOGLE_SERVER_CLIENT_ID';
 }
 
 class EnvReader {
@@ -51,6 +52,11 @@ class EnvReader {
     final override = _envOrEmpty(_EnvKeys.apiBaseUrl);
     return override.isNotEmpty ? override : appEnv.defaultBaseUrl;
   }
+
+  /// Web Client ID for Google Sign-In v7 (required on Android).
+  /// Get from: Firebase Console → Project Settings → General → Web app → Client ID
+  static String get googleServerClientId =>
+      _envOrEmpty(_EnvKeys.googleServerClientId);
 
   /// Reads a boolean flag: "true" / "1" / "yes" → true (case-insensitive).
   static bool flag(String key, {bool defaultValue = false}) {

@@ -80,7 +80,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(AppAssets.appIcon, width: 120, height: 120)
+            Image.asset(AppAssets.appIcon, width: 180, height: 180)
                 .animate()
                 .fadeIn(duration: 600.ms, curve: Curves.easeOut)
                 .scale(
