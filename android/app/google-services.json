@@ -12,7 +12,20 @@
           "package_name": "com.humg.askmehumg"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "375989370735-fqfv97e77vsoloophh6vso9grmttt7iv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.humg.askmehumg",
+            "certificate_hash": "922b1fdaa8179308fdb3650be8b7d89c8a4b2b7b"
+          }
+        },
+        {
+          "client_id": "375989370735-mfqbpp49l3vh6f4ipoii4nqven6i4o1j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDTDnmMldYpzbY_rxIGcVuw_NsBYi_bXLA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375989370735-mfqbpp49l3vh6f4ipoii4nqven6i4o1j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.humg.askmehumg"
+              }
+            }
+          ]
         }
       }
     }

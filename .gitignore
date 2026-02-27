@@ -61,12 +61,15 @@ ios/ServiceDefinitions.json
 .gradle/
 android/.gradle/
 
-# Generated localization (if committed by mistake)
-lib/**/app_localizations*.dart
+# Dart code generation output — run `dart run build_runner build` after clone
+*.g.dart
+*.freezed.dart
+lib/l10n/app_localizations*.dart
 
 # OS junk
 Thumbs.db
 *.orig
 
-.docs
-.cursor
+.docs/screens
+.cursor/ignore_asset
+.cursor/plans

@@ -10,28 +10,27 @@ class FirebaseAuthDatasource {
   FirebaseAuthDatasource({
     required FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
-    GoogleSignIn? googleSignIn,
-  })  : _auth = firebaseAuth,
-        _firestore = firestore,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+  }) : _auth = firebaseAuth,
+       _firestore = firestore;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final GoogleSignIn _googleSignIn;
 
-  Stream<AuthUser?> get authStateChanges => _auth.authStateChanges().asyncMap(
-        (user) async {
-          if (user == null) return null;
-          try {
-            final doc = await _firestore.collection('users').doc(user.uid).get();
-            if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
-            return AuthUserModel.fromFirestore(user, doc);
-          } catch (e) {
-            logger.w('Failed to fetch user doc, falling back to Firebase user');
-            return AuthUserModel.fromFirebaseUser(user);
-          }
-        },
-      );
+  // google_sign_in v7 uses a singleton — no need to inject
+  GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
+
+  Stream<AuthUser?> get authStateChanges =>
+      _auth.authStateChanges().asyncMap((user) async {
+        if (user == null) return null;
+        try {
+          final doc = await _firestore.collection('users').doc(user.uid).get();
+          if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
+          return AuthUserModel.fromFirestore(user, doc);
+        } catch (e) {
+          logger.w('Failed to fetch user doc, falling back to Firebase user');
+          return AuthUserModel.fromFirebaseUser(user);
+        }
+      });
 
   AuthUser? get currentUser {
     final user = _auth.currentUser;
@@ -41,15 +40,19 @@ class FirebaseAuthDatasource {
 
   Future<void> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
+      // v7: authenticate() throws on user cancellation (never returns null).
+      final account = await _googleSignIn.authenticate();
+      final auth = account.authentication;
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      // idToken is String? in google_sign_in v7; null means the platform did
+      // not return a token (should not happen on a successful flow, but guard
+      // defensively rather than letting Firebase reject an invalid credential).
+      final idToken = auth.idToken;
+      if (idToken == null) {
+        throw const AuthException('Google Sign-In did not return an ID token');
+      }
 
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
       final userCredential = await _auth.signInWithCredential(credential);
       final user = userCredential.user;
       if (user == null) throw const AuthException('Sign-in returned null user');
@@ -66,8 +69,6 @@ class FirebaseAuthDatasource {
   }
 
   Future<void> signOut() async {
-    // Chạy tuần tự và xử lý lỗi riêng để đảm bảo cả hai session đều được clear,
-    // ngay cả khi một trong hai thất bại.
     try {
       await _auth.signOut();
     } on FirebaseAuthException catch (e, s) {
@@ -76,9 +77,10 @@ class FirebaseAuthDatasource {
     }
 
     try {
-      await _googleSignIn.signOut();
+      // v7: signOut() still exists but disconnect() revokes token entirely
+      await _googleSignIn.disconnect();
     } catch (e, s) {
-      logger.w('Google sign-out failed (non-fatal)', error: e, stackTrace: s);
+      logger.w('Google disconnect failed (non-fatal)', error: e, stackTrace: s);
     }
   }
 
@@ -87,10 +89,8 @@ class FirebaseAuthDatasource {
       final docRef = _firestore.collection('users').doc(user.uid);
       final doc = await docRef.get();
       if (doc.exists) {
-        // Chỉ cập nhật name/email/avatar — không ghi đè isBlocked/isHumgVerified/role/createdAt
         await docRef.update(AuthUserModel.toFirestoreUpsert(user));
       } else {
-        // Tạo document mới với đầy đủ fields mặc định
         await docRef.set(AuthUserModel.toFirestoreCreate(user));
       }
     } on FirebaseException catch (e, s) {

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:askme_humg/app/core/values/app_assets.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -14,20 +16,26 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final isLoading = authState.isLoading;
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
 
     // Show error snackbar on failure
-    ref.listen(authNotifierProvider, (_, next) {
+    ref.listen<AsyncValue<void>>(authProvider, (_, next) {
       next.whenOrNull(
         error: (err, _) {
+          if (!context.mounted) return;
+          final message = switch (err) {
+            UserBlockedFailure() => l10n.authErrorUserBlocked,
+            AuthFailure() => l10n.authErrorSignInFailed,
+            _ => l10n.commonError,
+          };
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            _buildErrorSnackBar(context, err.toString(), cs),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(_buildErrorSnackBar(context, message, cs));
         },
       );
     });
@@ -48,23 +56,23 @@ class LoginScreen extends ConsumerWidget {
               const Spacer(flex: 2),
               // Auth actions
               _AuthActions(
-                isLoading: isLoading,
-                signInLabel: isLoading
-                    ? l10n.commonLoading
-                    : l10n.authSignInWithGoogle,
-                guestLabel: l10n.authContinueAsGuest,
-                onGoogleSignIn: () =>
-                    ref.read(authNotifierProvider.notifier).signIn(),
-                onContinueAsGuest: () => context.go('/'),
-              )
+                    isLoading: isLoading,
+                    signInLabel: isLoading
+                        ? l10n.commonLoading
+                        : l10n.authSignInWithGoogle,
+                    guestLabel: l10n.authContinueAsGuest,
+                    onGoogleSignIn: () =>
+                        ref.read(authProvider.notifier).signIn(),
+                    onContinueAsGuest: () => const FeedRoute().go(context),
+                  )
                   .animate()
                   .fadeIn(duration: 600.ms, delay: 200.ms)
                   .slideY(begin: 0.15, end: 0, curve: Curves.easeOut),
               const SizedBox(height: AppSpacing.xl),
               // Security notice
-              _SecurityNotice(cs: cs)
-                  .animate()
-                  .fadeIn(duration: 600.ms, delay: 350.ms),
+              _SecurityNotice(
+                cs: cs,
+              ).animate().fadeIn(duration: 600.ms, delay: 350.ms),
               const Spacer(),
             ],
           ),
@@ -92,7 +100,7 @@ class LoginScreen extends ConsumerWidget {
       ),
       content: Row(
         children: [
-          Icon(Icons.error_rounded, color: cs.onError, size: 20),
+          Icon(LucideIcons.circleX, color: cs.onError, size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -109,8 +117,7 @@ class LoginScreen extends ConsumerWidget {
       action: SnackBarAction(
         label: '✕',
         textColor: cs.onError,
-        onPressed: () =>
-            ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+        onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
       ),
     );
   }
@@ -131,27 +138,15 @@ class _BrandHeader extends StatelessWidget {
     return Column(
       children: [
         // Logo
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(
-              color: cs.secondary.withValues(alpha: 0.4),
-              width: 2,
-            ),
-            color: cs.surfaceContainerHigh,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Image.asset(AppAssets.appIcon, width: 120, height: 120,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Center(
-              child: Text(
-                'A',
-                style: tt.displaySmall?.copyWith(
-                  color: cs.secondary,
-                  fontWeight: FontWeight.w800,
-                ),
+        Assets.imagesAppIcon.image(
+          width: 160,
+          height: 160,
+          errorBuilder: (_, _, _) => Center(
+            child: Text(
+              'A',
+              style: tt.displaySmall?.copyWith(
+                color: cs.secondary,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -211,7 +206,7 @@ class _AuthActions extends StatelessWidget {
           label: signInLabel,
           onPressed: onGoogleSignIn,
           variant: AppButtonVariant.secondary,
-          leading: Image.asset(AppAssets.googleLogo, width: 20, height: 20),
+          leading: Assets.svgsGoogleLogo.svg(width: 20, height: 20),
           isLoading: isLoading,
           minimumHeight: 56,
         ),
@@ -242,7 +237,7 @@ class _AuthActions extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Icon(
-                    Icons.chevron_right_rounded,
+                    LucideIcons.chevronRight,
                     size: 18,
                     color: isLoading
                         ? cs.onSurfaceVariant.withValues(alpha: 0.4)

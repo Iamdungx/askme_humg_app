@@ -1,0 +1,41 @@
+---
+description: AskmeHUMG project overview, tech stack, and business context
+alwaysApply: true
+---
+
+# AskmeHUMG – Project Context
+
+## What is this app?
+Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous questions to a registered student (Host). Hosts answer and optionally publish replies to a public Feed.
+
+## Tech Stack
+- **Flutter** (Dart) – UI framework
+- **Riverpod** (`flutter_riverpod`) – State management
+- **Firebase Auth** – Google Sign-In (any Google account); HUMG email verified separately via OTP (UC-1.3)
+- **Cloud Firestore** – NoSQL database
+- **Firebase Storage** – Avatar and media storage
+- **Cloud Functions** – Rate limiting, OTP generation/verification (Resend), server-side moderation
+- **Firebase App Check** – Bot protection for anonymous question submission
+- **`app_links`** – Deep links (`askme.humg.edu.vn/u/{userId}`)
+
+## User Roles
+- **Anonymous Sender** – No login required, sends questions via deep link
+- **Host** – Logged-in user with verified `@humg.edu.vn` email (`isHumgVerified: true`)
+- **Viewer** – Browses public Feed (guest or logged-in)
+- **Admin** – Firebase Custom Claim `admin: true`
+
+## Key Business Rules
+1. Any Google account can sign in; Host features unlock only after OTP-verifying a `@humg.edu.vn` email
+2. Anonymous questions: max 300 chars, rate-limited at 5/device/hour via App Check + Cloud Functions
+3. Likes: one per user per answer (enforced via `likedBy` array + `FieldValue.increment`)
+4. Answers → Batch Write updating both `answers` and `questions` (UC-3.3)
+5. Comments → Batch Write updating both `comments` and `answers.commentCount` (UC-4.3)
+6. No direct messaging or real-time chat
+
+## Firestore Collections
+- `users`: uid, name, avatar, email, role, createdAt, isBlocked, isHumgVerified, humgEmail
+- `questions`: questionId, toUserId, content, createdAt, status (`unanswered`|`answered`)
+- `answers`: answerId, questionId, userId, content, createdAt, likeCount, likedBy[], isPublished, commentCount
+- `comments`: commentId, answerId, userId (nullable), content, isAnonymous, createdAt
+- `reports`: reportId, targetId, targetType, reportedBy, reason, status, createdAt, resolvedAt
+- `otpRequests`: email, otpHash, expiresAt, attempts

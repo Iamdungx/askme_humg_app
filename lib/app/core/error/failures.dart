@@ -11,8 +11,7 @@ final class AuthFailure extends Failure {
 }
 
 final class InvalidDomainFailure extends AuthFailure {
-  const InvalidDomainFailure()
-      : super('Only @humg.edu.vn emails are accepted');
+  const InvalidDomainFailure() : super('Only @humg.edu.vn emails are accepted');
 }
 
 final class UserBlockedFailure extends AuthFailure {
@@ -36,7 +35,8 @@ final class ValidationFailure extends Failure {
 }
 
 final class RateLimitFailure extends Failure {
-  const RateLimitFailure() : super('Too many requests. Please try again later.');
+  const RateLimitFailure()
+    : super('Too many requests. Please try again later.');
 }
 
 final class UnknownFailure extends Failure {

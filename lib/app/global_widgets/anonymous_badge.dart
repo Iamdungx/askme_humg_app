@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 
 class AnonymousBadge extends StatelessWidget {
@@ -34,7 +35,7 @@ class AnonymousBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_outline, size: 12, color: cs.onSurfaceVariant),
+          Icon(LucideIcons.lock, size: 12, color: cs.onSurfaceVariant),
           const SizedBox(width: AppSpacing.xs),
           Text(
             label,
@@ -60,7 +61,7 @@ class AnonymousBadge extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: cs.outline, width: 1),
       ),
-      child: Icon(Icons.lock_outline, size: 16, color: cs.onSurfaceVariant),
+      child: Icon(LucideIcons.lock, size: 16, color: cs.onSurfaceVariant),
     );
   }
 }

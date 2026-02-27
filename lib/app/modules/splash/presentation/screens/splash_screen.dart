@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:askme_humg/app/core/values/app_assets.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -16,33 +16,57 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  static const _minSplashDuration = Duration(milliseconds: 2800);
+  static const _authTimeout = Duration(seconds: 10);
+
+  // Both conditions must be true before navigating
+  bool _minDelayDone = false;
+  bool _authResolved = false;
   bool _navigated = false;
-  static const _minSplashMs = 2800;
-  static const _authTimeoutMs = 10000;
-  late final DateTime _startTime;
+
+  ProviderSubscription<AsyncValue<dynamic>>? _authSub;
 
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now();
-    // Hiển thị splash tối thiểu 2.8s, sau đó navigate dựa theo auth state
-    Future.delayed(const Duration(milliseconds: _minSplashMs), _navigate);
+    Future.delayed(_minSplashDuration, () {
+      if (!mounted) return;
+      _minDelayDone = true;
+      _maybeNavigate();
+    });
+
+    _authSub = ref.listenManual<AsyncValue<dynamic>>(authStateProvider, (
+      _,
+      next,
+    ) {
+      if (next.isLoading) return;
+      _authResolved = true;
+      _maybeNavigate();
+    }, fireImmediately: true);
+
+    Future.delayed(_authTimeout, () {
+      if (!mounted || _navigated) return;
+      _authResolved = true;
+      _maybeNavigate();
+    });
   }
 
-  void _navigate() {
-    if (!mounted || _navigated) return;
-    final authState = ref.read(authStateProvider);
-    final elapsed = DateTime.now().difference(_startTime).inMilliseconds;
-
-    // Nếu auth vẫn đang loading và chưa quá timeout 10s, chờ thêm
-    if (authState.isLoading && elapsed < _authTimeoutMs) {
-      Future.delayed(const Duration(milliseconds: 300), _navigate);
-      return;
-    }
-
+  void _maybeNavigate() {
+    if (!_minDelayDone || !_authResolved || _navigated) return;
     _navigated = true;
-    final isLoggedIn = authState.valueOrNull != null;
-    context.go(isLoggedIn ? '/' : '/login');
+    _authSub?.close();
+    final isLoggedIn = ref.read(authStateProvider).asData?.value != null;
+    if (isLoggedIn) {
+      const FeedRoute().go(context);
+    } else {
+      const LoginRoute().go(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _authSub?.close();
+    super.dispose();
   }
 
   @override
@@ -56,7 +80,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(AppAssets.appIcon, width: 120, height: 120)
+            Assets.imagesAppIcon.image(width: 180, height: 180)
                 .animate()
                 .fadeIn(duration: 600.ms, curve: Curves.easeOut)
                 .scale(
@@ -94,9 +118,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
             const SizedBox(height: 64),
 
-            _PulsingDots(color: cs.primary)
-                .animate()
-                .fadeIn(delay: 1000.ms, duration: 400.ms),
+            _PulsingDots(
+              color: cs.primary,
+            ).animate().fadeIn(delay: 1000.ms, duration: 400.ms),
           ],
         ),
       ),
@@ -115,13 +139,16 @@ class _PulsingDots extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (i) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        )
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            )
             .animate(onPlay: (c) => c.repeat())
-            .fadeIn(delay: Duration(milliseconds: i * 180), duration: 300.ms)
+            .fadeIn(
+              delay: Duration(milliseconds: i * 180),
+              duration: 300.ms,
+            )
             .then()
             .fadeOut(duration: 300.ms)
             .then(delay: Duration(milliseconds: (2 - i) * 180));

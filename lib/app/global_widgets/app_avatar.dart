@@ -16,6 +16,7 @@ class AppAvatar extends StatelessWidget {
   final String? name;
   final double size;
   final bool showRing;
+
   /// Defaults to colorScheme.primary when null.
   final Color? ringColor;
   final double ringWidth;
@@ -47,8 +48,8 @@ class AppAvatar extends StatelessWidget {
         width: size,
         height: size,
         fit: BoxFit.cover,
-        placeholder: (_, __) => _buildFallback(context),
-        errorWidget: (_, __, ___) => _buildFallback(context),
+        placeholder: (_, _) => _buildFallback(context),
+        errorWidget: (_, _, _) => _buildFallback(context),
       );
     }
     return _buildFallback(context);
@@ -56,8 +57,9 @@ class AppAvatar extends StatelessWidget {
 
   Widget _buildFallback(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final initial =
-        (name != null && name!.isNotEmpty) ? name![0].toUpperCase() : '?';
+    final initial = (name != null && name!.isNotEmpty)
+        ? name![0].toUpperCase()
+        : '?';
     return Container(
       color: cs.surfaceContainerHigh,
       alignment: Alignment.center,

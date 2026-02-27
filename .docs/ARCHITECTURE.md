@@ -1,0 +1,272 @@
+# AskmeHUMG – Architecture Guide
+
+> **Pattern:** Feature-First Clean Architecture
+> **State Management:** Riverpod (`riverpod_annotation` codegen)
+> **Routing:** GoRouter (Riverpod provider, `keepAlive: true`)
+> **Updated:** 27-02-2026
+
+---
+
+## Guiding Principles
+
+1. **Feature-first, not layer-first.** Each feature is a self-contained vertical slice under `lib/app/modules/<feature>/`.
+2. **Dependency rule.** `domain` knows nothing about Flutter or Firebase. `data` depends on `domain`. `presentation` depends on `domain` via providers — never on `data` directly.
+3. **One direction.** `presentation → domain ← data`.
+4. **Riverpod as glue.** Providers wire `data` implementations into `domain` interfaces. Screens only interact with providers.
+5. **Flat layers.** Each layer (`domain/`, `data/`, `presentation/`) contains files directly — no sub-folders.
+
+---
+
+## Actual Folder Tree (as implemented)
+
+```
+lib/
+├── main.dart                            # ProviderScope + MaterialApp.router + error handlers
+│
+├── config/
+│   ├── bootstrap.dart                   # Firebase init, AppCheck, dotenv, SharedPreferences
+│   ├── di.dart                          # GetIt service locator
+│   ├── env_reader.dart                  # dart-define & .env reader
+│   ├── languages.dart                   # Supported locales + defaultLocale
+│   ├── router.dart                      # appRouterProvider (keepAlive) + _RouterNotifier
+│   └── app_routes.dart                  # Route name constants
+│
+├── l10n/                                # ARB files + generated (do not edit generated)
+│   ├── app_vi.arb
+│   ├── app_en.arb
+│   ├── app_ja.arb
+│   └── app_localizations*.dart
+│
+├── generated/                           # flutter_gen output (type-safe assets)
+│   ├── assets.gen.dart
+│   └── fonts.gen.dart
+│
+└── app/
+    ├── core/
+    │   ├── error/
+    │   │   ├── failures.dart            # sealed class Failure hierarchy
+    │   │   └── exceptions.dart          # Raw exceptions thrown in data layer
+    │   ├── network/
+    │   │   └── firebase_providers.dart  # @riverpod FirebaseAuth, Firestore, Storage
+    │   ├── providers/
+    │   │   └── theme_provider.dart      # ThemeModeNotifier + sharedPreferencesProvider
+    │   ├── utils/
+    │   │   ├── logger.dart              # Global logger instance (logger package)
+    │   │   └── validator.dart           # Input validation helpers
+    │   └── values/
+    │       ├── app_colors.dart          # AppDarkColors, AppLightColors, AppSemanticColors
+    │       ├── app_theme.dart           # AppTheme.light / AppTheme.dark (Material 3)
+    │       ├── app_typography.dart      # Inter TextTheme
+    │       ├── app_spacing.dart         # AppSpacing + AppRadius constants
+    │       └── app_fontsize.dart        # Font size constants
+    │
+    ├── global_widgets/                  # Reusable across all features
+    │   ├── app_button.dart              # AppButton – 5 variants: primary/secondary/ghost/danger/google
+    │   ├── app_card.dart
+    │   ├── app_avatar.dart
+    │   ├── app_brand_wordmark.dart      # "AskmeHUMG" branded text
+    │   ├── anonymous_badge.dart
+    │   ├── empty_state.dart
+    │   ├── error_state.dart
+    │   ├── language_switch.dart
+    │   └── loading_shimmer.dart
+    │
+    ├── services/
+    │   └── api_client.dart              # Dio + interceptors for Cloud Functions
+    │
+    └── modules/
+        │
+        ├── splash/
+        │   └── presentation/
+        │       └── screens/
+        │           └── splash_screen.dart   # ConsumerStatefulWidget, navigates by auth state
+        │
+        ├── auth/                            # UC-1.1, UC-1.2, UC-1.3
+        │   ├── domain/                      # ← flat, no sub-folders
+        │   │   ├── auth_user.dart           # @freezed entity
+        │   │   ├── i_auth_repository.dart   # abstract interface
+        │   │   └── auth_use_cases.dart      # SignInWithGoogle, SignOut
+        │   ├── data/                        # ← flat
+        │   │   ├── auth_user_model.dart     # fromFirebaseUser(), fromFirestore(), toFirestoreUpsert()
+        │   │   ├── firebase_auth_datasource.dart
+        │   │   └── auth_repository_impl.dart
+        │   └── presentation/
+        │       ├── auth_providers.dart      # all providers in one file
+        │       └── screens/
+        │           └── login_screen.dart
+        │
+        ├── profile/                         # UC-2.1, UC-2.2 (pending)
+        │   ├── domain/
+        │   │   ├── user_profile.dart
+        │   │   ├── i_profile_repository.dart
+        │   │   └── profile_use_cases.dart   # GetUserProfile, GenerateDeepLink
+        │   ├── data/
+        │   │   ├── user_profile_model.dart
+        │   │   ├── profile_datasource.dart
+        │   │   └── profile_repository_impl.dart
+        │   └── presentation/
+        │       ├── profile_providers.dart
+        │       └── screens/
+        │           └── profile_screen.dart
+        │
+        ├── qna_core/                        # UC-3.1, UC-3.2, UC-3.3 (pending)
+        │   ├── domain/
+        │   │   ├── question.dart
+        │   │   ├── answer.dart
+        │   │   ├── i_qna_repository.dart
+        │   │   └── qna_use_cases.dart       # SubmitQuestion, GetInboxQuestions, AnswerQuestion
+        │   ├── data/
+        │   │   ├── question_model.dart
+        │   │   ├── answer_model.dart
+        │   │   ├── qna_datasource.dart
+        │   │   └── qna_repository_impl.dart
+        │   └── presentation/
+        │       ├── qna_providers.dart
+        │       └── screens/
+        │           ├── inbox_screen.dart
+        │           └── answer_compose_screen.dart
+        │
+        ├── feed/                            # UC-4.1, UC-4.2, UC-4.3 (pending)
+        │   ├── domain/
+        │   │   ├── feed_item.dart
+        │   │   ├── comment.dart
+        │   │   ├── i_feed_repository.dart
+        │   │   └── feed_use_cases.dart      # GetPublicFeed, ToggleLike, PostComment
+        │   ├── data/
+        │   │   ├── feed_item_model.dart
+        │   │   ├── comment_model.dart
+        │   │   ├── feed_datasource.dart
+        │   │   └── feed_repository_impl.dart
+        │   └── presentation/
+        │       ├── feed_providers.dart
+        │       └── screens/
+        │           └── feed_screen.dart
+        │
+        └── moderation/                      # UC-5.1, UC-5.2 (pending)
+            ├── domain/
+            │   ├── report.dart
+            │   ├── i_moderation_repository.dart
+            │   └── moderation_use_cases.dart  # SubmitReport, ResolveReport
+            ├── data/
+            │   ├── report_model.dart
+            │   ├── moderation_datasource.dart
+            │   └── moderation_repository_impl.dart
+            └── presentation/
+                ├── moderation_providers.dart
+                └── screens/
+                    └── admin_dashboard_screen.dart
+```
+
+---
+
+## Layer Responsibilities
+
+### `domain/` — Business Contract Layer
+- **Pure Dart only.** Zero Flutter or Firebase imports.
+- Entity: `@freezed abstract class` (freezed v3 requirement)
+- Repository interface: `abstract interface class I*Repository`
+- Use cases: consolidated in one file `*_use_cases.dart`, each class has a `call()` method
+
+```dart
+// Entity (freezed v3)
+@freezed
+abstract class AuthUser with _$AuthUser {
+  const factory AuthUser({
+    required String uid,
+    required String email,
+    @Default(false) bool isHumgVerified,
+  }) = _AuthUser;
+}
+
+// Use case
+class SignInWithGoogle {
+  const SignInWithGoogle(this._repo);
+  final IAuthRepository _repo;
+  Future<void> call() => _repo.signInWithGoogle();
+}
+```
+
+### `data/` — Firebase Implementation Layer
+- Implements domain repository interfaces
+- Datasource: raw Firebase calls, returns domain entities
+- Model: mapper between Firestore `Map` ↔ domain entity (no `@freezed` required for mappers)
+- Repository: catches `FirebaseException`/`AuthException`, maps to `Failure`
+
+```dart
+class AuthRepositoryImpl implements IAuthRepository {
+  @override
+  Future<void> signInWithGoogle() async {
+    try {
+      await _datasource.signInWithGoogle();
+    } on AuthException catch (e) {
+      throw AuthFailure(e.message);
+    }
+  }
+}
+```
+
+### `presentation/` — UI Layer
+- Screens: `ConsumerWidget` or `ConsumerStatefulWidget`
+- All providers in one file: `<feature>_providers.dart`
+- No direct Firestore/Firebase calls
+- Use `AppButton` variants instead of creating new button widgets
+
+```dart
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> signIn() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(signInWithGoogleProvider).call(),
+    );
+  }
+}
+```
+
+---
+
+## Routing (GoRouter)
+
+```dart
+// config/router.dart
+@Riverpod(keepAlive: true)
+GoRouter appRouter(Ref ref) {
+  final notifier = _RouterNotifier(ref);
+  return GoRouter(
+    initialLocation: '/splash',
+    refreshListenable: notifier,   // reactive to auth state changes
+    redirect: notifier.redirect,
+    routes: [
+      GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
+      GoRoute(path: '/',       builder: (_, __) => const FeedScreen()),
+      GoRoute(path: '/login',  builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/inbox',  builder: (_, __) => const InboxScreen()),
+      GoRoute(path: '/u/:userId', builder: (ctx, state) =>
+          ProfileScreen(userId: state.pathParameters['userId']!)),
+      GoRoute(path: '/admin',  builder: (_, __) => const AdminDashboardScreen()),
+    ],
+  );
+}
+```
+
+Auth guard: `/inbox` and `/admin` redirect to `/login` if unauthenticated. `/login` redirects to `/` if already authenticated.
+
+---
+
+## Key Conventions
+
+| What | Convention |
+|---|---|
+| State management | `AsyncNotifier` for async, `Notifier` for sync |
+| Watching state | `ref.watch` in `build()`, `ref.read` in callbacks |
+| Multi-collection writes | Always `WriteBatch` (UC-3.3, UC-4.3, UC-5.2) |
+| Atomic counters | `FieldValue.increment()` only |
+| Error handling | Map `FirebaseException` → `Failure`, never swallow |
+| Strings | `AppLocalizations.of(context).*` — no hardcoded strings |
+| Logging | `logger.d/e/w` — never `print()` |
+| Theme colors | `Theme.of(context).colorScheme.*` — never hardcode colors |
+| Dark mode | Default `ThemeMode.dark`, persisted via `SharedPreferences` |
+| Global widgets | Use `AppButton(variant: ...)` — never create one-off button widgets |

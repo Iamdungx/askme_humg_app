@@ -28,7 +28,9 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(AppBootstrap.sharedPreferences),
+        sharedPreferencesProvider.overrideWithValue(
+          AppBootstrap.sharedPreferences,
+        ),
       ],
       child: const MainApp(),
     ),
@@ -40,7 +42,7 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeNotifierProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

@@ -1,0 +1,86 @@
+---
+description: Firebase Firestore, Auth, and Cloud Functions patterns for AskmeHUMG
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Firebase Patterns – AskmeHUMG
+
+## Authentication (UC-1.1)
+
+Google Sign-In accepts any Google account. After sign-in, upsert `users/{uid}` then check `isHumgVerified`:
+- `isHumgVerified == false` → redirect to `/verify-humg-email` (OTP flow via Cloud Function + Resend)
+- `isHumgVerified == true` → proceed to `/`
+
+```dart
+// Upsert users/{uid} with merge: true
+await firestore.collection('users').doc(uid).set({
+  'name': user.displayName ?? '',
+  'email': user.email ?? '',
+  'avatar': user.photoURL ?? '',
+  'role': 'user',
+  'createdAt': FieldValue.serverTimestamp(),
+  'isBlocked': false,
+  'isHumgVerified': false,
+  'humgEmail': null,
+}, SetOptions(merge: true));
+```
+
+## Firestore Write Patterns
+
+### Batch Write — required for multi-collection writes
+
+```dart
+// UC-3.3: Answer a question
+final batch = firestore.batch();
+batch.set(answersCol.doc(), answerData);
+batch.update(questionsCol.doc(questionId), {'status': 'answered'});
+await batch.commit();
+
+// UC-4.3: Comment
+batch.set(commentsCol.doc(), commentData);
+batch.update(answersCol.doc(answerId), {'commentCount': FieldValue.increment(1)});
+await batch.commit();
+```
+
+### Like Toggle (UC-4.2)
+
+```dart
+await answersCol.doc(answerId).update({
+  'likedBy': isLiked ? FieldValue.arrayRemove([userId]) : FieldValue.arrayUnion([userId]),
+  'likeCount': FieldValue.increment(isLiked ? -1 : 1),
+});
+```
+
+### Cursor Pagination (UC-4.1)
+
+```dart
+Query query = firestore
+    .collection('answers')
+    .where('isPublished', isEqualTo: true)
+    .orderBy('createdAt', descending: true)
+    .limit(20);
+if (lastDoc != null) query = query.startAfterDocument(lastDoc);
+```
+
+## Anonymous Question (UC-3.1)
+
+Always attach App Check token before calling Cloud Function:
+
+```dart
+final token = await FirebaseAppCheck.instance.getToken(false);
+await dio.post('/submitQuestion',
+  data: {'toUserId': toUserId, 'content': content},
+  options: Options(headers: {'X-Firebase-AppCheck': token}),
+);
+```
+
+Client validates: `content.length ∈ [1, 300]` before sending.
+
+## Admin Check
+
+```dart
+// Via Custom Claims (preferred)
+final claims = (await user.getIdTokenResult()).claims;
+final isAdmin = claims?['admin'] == true;
+```

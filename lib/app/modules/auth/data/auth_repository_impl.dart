@@ -24,7 +24,11 @@ class AuthRepositoryImpl implements IAuthRepository {
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } catch (e, s) {
-      logger.e('AuthRepository.signInWithGoogle unexpected error', error: e, stackTrace: s);
+      logger.e(
+        'AuthRepository.signInWithGoogle unexpected error',
+        error: e,
+        stackTrace: s,
+      );
       throw UnknownFailure(e.toString());
     }
   }
@@ -36,7 +40,11 @@ class AuthRepositoryImpl implements IAuthRepository {
     } on AuthException catch (e) {
       throw AuthFailure(e.message);
     } catch (e, s) {
-      logger.e('AuthRepository.signOut unexpected error', error: e, stackTrace: s);
+      logger.e(
+        'AuthRepository.signOut unexpected error',
+        error: e,
+        stackTrace: s,
+      );
       throw UnknownFailure(e.toString());
     }
   }

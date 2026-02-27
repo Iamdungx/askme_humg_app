@@ -1,0 +1,107 @@
+---
+description: Flutter architecture conventions, folder structure, and patterns for AskmeHUMG
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Flutter Architecture – AskmeHUMG
+
+## Folder Structure
+
+```
+lib/
+├── app/
+│   ├── core/
+│   │   ├── error/          # failures.dart, exceptions.dart
+│   │   ├── network/        # firebase_providers.dart
+│   │   ├── providers/      # theme_provider.dart
+│   │   └── values/         # colors, spacing, theme, typography, assets
+│   ├── global_widgets/     # AppButton, AppCard, AppAvatar, etc.
+│   ├── services/           # api_client.dart
+│   └── modules/
+│       └── <feature>/
+│           ├── domain/     # entity, i_repository, use_cases  ← flat, no sub-folders
+│           ├── data/       # model, datasource, repository_impl  ← flat, no sub-folders
+│           └── presentation/
+│               ├── <feature>_providers.dart  ← all providers in one file
+│               └── screens/
+├── config/                 # bootstrap, di, router, languages, app_routes
+├── generated/              # flutter_gen output (do not edit)
+└── l10n/                   # ARB files + generated localizations
+```
+
+Each layer has files directly — no sub-folders inside `domain/`, `data/`.
+
+## Layer Rules
+- `domain/` — pure Dart only, no Flutter/Firebase imports
+- `data/` — all Firebase calls live here
+- `presentation/` — no direct Firestore calls; use providers
+
+## State Management – Riverpod 3.x
+
+```dart
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> signIn() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(signInWithGoogleProvider).call(),
+    );
+  }
+}
+
+// In widget
+ref.watch(authNotifierProvider);     // watch in build()
+ref.read(authNotifierProvider.notifier).signIn();  // read in callbacks
+```
+
+## Freezed 3.x — always `abstract class`
+
+```dart
+@freezed
+abstract class AuthUser with _$AuthUser {
+  const factory AuthUser({required String uid}) = _AuthUser;
+}
+```
+
+## Global Widgets — AppButton
+
+Always use `AppButton` with a variant instead of creating a new button widget:
+
+```dart
+AppButton(label: l10n.authSignInWithGoogle, variant: AppButtonVariant.google, onPressed: ...)
+```
+
+Current variants: `primary`, `secondary`, `ghost`, `danger`, `google`.
+
+## Type-safe assets (flutter_gen)
+
+```dart
+// ✅ Use generated Assets.* — never hardcode asset paths
+Assets.imagesAppIcon.image(width: 180, height: 180)
+Assets.svgsGoogleLogo.svg(width: 20, height: 20)
+
+// ❌ Never hardcode
+// Image.asset('assets/images/app_icon.png')
+// SvgPicture.asset('assets/svgs/google_logo.svg')
+```
+
+## Naming Conventions
+
+| Type | Pattern | Example |
+|---|---|---|
+| Screen | `*Screen` | `LoginScreen` |
+| Providers file | `<feature>_providers.dart` | `auth_providers.dart` |
+| Notifier | `*Notifier` | `AuthNotifier` |
+| Repository interface | `I*Repository` | `IAuthRepository` |
+| Repository impl | `*RepositoryImpl` | `AuthRepositoryImpl` |
+| Use cases file | `<feature>_use_cases.dart` | `auth_use_cases.dart` |
+
+## Localization
+All user-facing strings must use `AppLocalizations.of(context).*` — never hardcode display strings.
+
+## Theme Colors
+Always use `Theme.of(context).colorScheme.*` — never hardcode colors directly.
