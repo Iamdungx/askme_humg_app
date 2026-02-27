@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:askme_humg/app/core/values/app_assets.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
@@ -132,8 +131,7 @@ class _BrandHeader extends StatelessWidget {
     return Column(
       children: [
         // Logo
-        Image.asset(
-          AppAssets.appIcon,
+        Assets.imagesAppIcon.image(
           width: 160,
           height: 160,
           errorBuilder: (_, _, _) => Center(
@@ -201,11 +199,7 @@ class _AuthActions extends StatelessWidget {
           label: signInLabel,
           onPressed: onGoogleSignIn,
           variant: AppButtonVariant.secondary,
-          leading: SvgPicture.asset(
-            AppAssets.googleLogo,
-            width: 20,
-            height: 20,
-          ),
+          leading: Assets.svgsGoogleLogo.svg(width: 20, height: 20),
           isLoading: isLoading,
           minimumHeight: 56,
         ),

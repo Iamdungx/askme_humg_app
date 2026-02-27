@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:askme_humg/app/core/values/app_assets.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
@@ -80,7 +80,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(AppAssets.appIcon, width: 180, height: 180)
+            Assets.imagesAppIcon.image(width: 180, height: 180)
                 .animate()
                 .fadeIn(duration: 600.ms, curve: Curves.easeOut)
                 .scale(
