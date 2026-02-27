@@ -201,7 +201,11 @@ class _AuthActions extends StatelessWidget {
           label: signInLabel,
           onPressed: onGoogleSignIn,
           variant: AppButtonVariant.secondary,
-          leading: SvgPicture.asset(AppAssets.googleLogo, width: 20, height: 20),
+          leading: SvgPicture.asset(
+            AppAssets.googleLogo,
+            width: 20,
+            height: 20,
+          ),
           isLoading: isLoading,
           minimumHeight: 56,
         ),
