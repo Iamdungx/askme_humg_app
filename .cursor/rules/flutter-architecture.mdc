@@ -80,9 +80,13 @@ Current variants: `primary`, `secondary`, `ghost`, `danger`, `google`.
 ## Type-safe assets (flutter_gen)
 
 ```dart
-// Use generated Assets.* — never hardcode asset paths
-Image.asset(Assets.images.appIcon.path)
-SvgPicture.asset(Assets.svgs.googleLogo)
+// ✅ Use generated Assets.* — never hardcode asset paths
+Assets.imagesAppIcon.image(width: 180, height: 180)
+Assets.svgsGoogleLogo.svg(width: 20, height: 20)
+
+// ❌ Never hardcode
+// Image.asset('assets/images/app_icon.png')
+// SvgPicture.asset('assets/svgs/google_logo.svg')
 ```
 
 ## Naming Conventions

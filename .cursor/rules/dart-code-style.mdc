@@ -60,14 +60,31 @@ logger.e('error occurred', error: e, stackTrace: s);
 ```
 Never use `print()`.
 
+## Icons — always use LucideIcons
+```dart
+// ✅ Use lucide_icons_flutter
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+Icon(LucideIcons.circleAlert)   // error
+Icon(LucideIcons.inbox)         // empty state
+Icon(LucideIcons.lock)          // anonymous/locked
+Icon(LucideIcons.chevronRight)  // navigation cue
+Icon(LucideIcons.circleX)       // dismiss/error action
+
+// ❌ Never use Material Icons
+// Icons.error_outline_rounded
+// Icons.inbox_outlined
+```
+
 ## Type-safe assets
 ```dart
 // ✅ Use flutter_gen generated accessors
-Assets.images.appIcon.path
-Assets.svgs.googleLogo
+Assets.imagesAppIcon.image(width: 180, height: 180)
+Assets.svgsGoogleLogo.svg(width: 20, height: 20)
 
-// ❌ Never hardcode
-'assets/images/app_icon.png'
+// ❌ Never hardcode asset paths
+// 'assets/images/app_icon.png'
+// Image.asset('assets/...')
 ```
 
 ## Import Order (enforced by dart format)

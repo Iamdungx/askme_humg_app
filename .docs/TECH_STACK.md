@@ -171,6 +171,20 @@ Query query = firestore
 if (lastDoc != null) query = query.startAfterDocument(lastDoc);
 ```
 
+### Icons — always LucideIcons
+
+```dart
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+Icon(LucideIcons.circleAlert)  // error state
+Icon(LucideIcons.inbox)        // empty state
+Icon(LucideIcons.lock)         // anonymous/locked
+Icon(LucideIcons.chevronRight) // navigation
+Icon(LucideIcons.circleX)      // dismiss/error action
+```
+
+Never use `Icons.*` from Flutter Material — always use `LucideIcons.*`.
+
 ### AppButton variants
 
 ```dart
@@ -182,9 +196,9 @@ Current variants: `primary`, `secondary`, `ghost`, `danger`, `google`.
 ### Type-safe assets (flutter_gen)
 
 ```dart
-// Generated — use Assets.* instead of hardcoded strings
-Image.asset(Assets.images.appIcon.path)
-SvgPicture.asset(Assets.svgs.googleLogo)
+// ✅ Use generated accessors — never hardcode asset paths
+Assets.imagesAppIcon.image(width: 180, height: 180)  // PNG/JPG
+Assets.svgsGoogleLogo.svg(width: 20, height: 20)     // SVG
 ```
 
 ### Logger
