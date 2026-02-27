@@ -128,28 +128,19 @@ class ApiClient {
   Interceptor _buildLoggingInterceptor() {
     return InterceptorsWrapper(
       onRequest: (options, handler) {
-        if (EnvReader.isDebug || EnvReader.isStg) {
-          AppLogger.d('${options.method} ${options.uri}', tag: 'REQ');
-        }
+        logger.d('[REQ] ${options.method} ${options.uri}');
         handler.next(options);
       },
       onResponse: (response, handler) {
-        if (EnvReader.isDebug || EnvReader.isStg) {
-          AppLogger.i(
-            '${response.statusCode} ${response.requestOptions.uri}',
-            tag: 'RES',
-          );
-        }
+        logger.i('[RES] ${response.statusCode} ${response.requestOptions.uri}');
         handler.next(response);
       },
       onError: (e, handler) {
-        if (EnvReader.isDebug || EnvReader.isStg) {
-          AppLogger.e(
-            '${e.response?.statusCode} ${e.requestOptions.uri}',
-            tag: 'ERR',
-            stackTrace: e.stackTrace,
-          );
-        }
+        logger.e(
+          '[ERR] ${e.response?.statusCode} ${e.requestOptions.uri}',
+          error: e,
+          stackTrace: e.stackTrace,
+        );
         handler.next(e);
       },
     );

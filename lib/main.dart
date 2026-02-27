@@ -1,34 +1,63 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 import 'package:askme_humg/config/languages.dart';
 import 'package:askme_humg/config/bootstrap.dart';
-import 'package:askme_humg/app/modules/home/screens/home_screen.dart';
-import 'package:askme_humg/app/core/values/app_fontsize.dart';
+import 'package:askme_humg/config/router.dart';
+import 'package:askme_humg/app/core/values/app_theme.dart';
+import 'package:askme_humg/app/core/providers/theme_provider.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Bắt Flutter framework errors
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('FlutterError: ${details.exception}\n${details.stack}');
+  };
+
+  // Bắt async errors ngoài Flutter zone
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('PlatformDispatcher error: $error\n$stack');
+    return false;
+  };
+
   await AppBootstrap.init();
-  runApp(const MainApp());
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(
+          AppBootstrap.sharedPreferences,
+        ),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
-class MainApp extends StatefulWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
 
-class _MainAppState extends State<MainApp> {
-  final LocaleController _localeController = LocaleController();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        textTheme: AppTextTheme.applyTo(Theme.of(context).textTheme),
-      ),
-      locale: _localeController.locale, // default + runtime switch
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
+      routerConfig: ref.watch(appRouterProvider),
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: supportedLanguages,
       localeResolutionCallback: (deviceLocale, supported) {
         if (deviceLocale == null) return defaultLocale;
         for (final l in supported) {
@@ -36,21 +65,6 @@ class _MainAppState extends State<MainApp> {
         }
         return defaultLocale;
       },
-      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-      localizationsDelegates: localizationDelegateConst,
-      supportedLocales: supportedLanguages,
-      home: HomePage(
-        currentLocale: _localeController.locale,
-        onLocaleChanged: (l) => setState(() => _localeController.setLocale(l)),
-      ),
     );
   }
-
-  // Constant delegate cho localizations
-  static const localizationDelegateConst = [
-    AppLocalizations.delegate, // Thêm delegate của app
-    GlobalMaterialLocalizations.delegate, // Thêm delegate của material
-    GlobalCupertinoLocalizations.delegate, // Thêm delegate của cupertino
-    GlobalWidgetsLocalizations.delegate, // Thêm delegate của widgets
-  ];
 }

@@ -1,0 +1,31 @@
+---
+description: Use case reference for AI – maps UC codes to implementation requirements
+alwaysApply: true
+---
+
+# Use Case Quick Reference
+
+When implementing a feature, find the UC code and follow its Database Impact exactly.
+
+| UC Code | Feature | Key Constraint |
+|---------|---------|---------------|
+| UC-1.1 | Google Sign-In | Reject if email ≠ `@humg.edu.vn`. Create `users` doc on first login. |
+| UC-1.2 | Logout | Clear Firebase Auth session. |
+| UC-2.1 | Generate Deep Link | URL format: `askme.humg.edu.vn/u/{userId}`. Export shareable card image. |
+| UC-2.2 | View Profile | Show: name, avatar, answer count, total likes. |
+| UC-3.1 | Submit Anonymous Question | App Check required. 300 char max. Rate limit via Cloud Function. |
+| UC-3.2 | Manage Inbox | Query `questions` where `toUserId == currentUser.uid`. Two tabs: unanswered / answered. |
+| UC-3.3 | Answer & Publish | **Batch Write** `answers` (new doc) + `questions` (set `status: 'answered'`). |
+| UC-4.1 | View Feed | `isPublished == true`, `orderBy createdAt desc`, cursor pagination, limit 20. |
+| UC-4.2 | Like/Unlike | `arrayUnion/arrayRemove` on `likedBy` + `FieldValue.increment(±1)` on `likeCount`. |
+| UC-4.3 | Comment | **Batch Write** `comments` (new doc) + `answers` (`commentCount` increment). |
+| UC-5.1 | Report Content | Create `reports` doc with `status: 'pending'`. |
+| UC-5.2 | Admin Moderate | Update `reports.status` + delete or set `isPublished: false` on content. |
+
+## Implementation Checklist for Any Feature
+- [ ] Reference the UC code in your implementation
+- [ ] Use Batch Write wherever UC says "Batch Write"
+- [ ] Use Riverpod `AsyncNotifier` for the feature's state
+- [ ] Handle loading, error, and success states in the UI
+- [ ] Add input validation (client-side) before any Firebase call
+- [ ] Add proper error handling – never swallow exceptions silently

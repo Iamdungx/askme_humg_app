@@ -1,0 +1,94 @@
+---
+description: Dart/Flutter code style standards for AskmeHUMG
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Dart Code Style – AskmeHUMG
+
+## General Rules
+- Follow `flutter_lints` and `analysis_options.yaml`
+- Prefer `final` over `var` whenever the value is not reassigned
+- Use `const` constructors for widgets that don't change
+- Never suppress analyzer warnings with `// ignore:` unless truly unavoidable
+
+## Null Safety
+```dart
+// ✅ GOOD
+final email = user.email ?? '';
+final name = user.displayName ?? 'Anonymous';
+```
+
+## Async / Future
+```dart
+// ✅ Always await, always handle error
+try {
+  await someFirebaseCall();
+} on FirebaseException catch (e, s) {
+  logger.e('Firebase error', error: e, stackTrace: s);
+  throw SomeFailure(e.message ?? 'error');
+}
+```
+
+## Widget Best Practices
+```dart
+// ✅ Extract sub-widgets, use const
+class QuestionCard extends StatelessWidget {
+  const QuestionCard({super.key, required this.question});
+  final Question question;
+}
+```
+
+## Riverpod
+- One feature = one `<feature>_providers.dart` file
+- Co-locate providers with the feature: `lib/app/modules/feed/presentation/feed_providers.dart`
+- `ref.watch` in `build()`, `ref.read` in callbacks/handlers
+
+## Localization
+- All user-facing strings: `AppLocalizations.of(context).*`
+- Never hardcode display strings in widget code
+- ARB files: `lib/l10n/app_vi.arb`, `app_en.arb`, `app_ja.arb`
+
+## Logging
+```dart
+import 'package:askme_humg/app/core/utils/logger.dart';
+
+logger.d('debug message');
+logger.i('info');
+logger.w('warning');
+logger.e('error occurred', error: e, stackTrace: s);
+```
+Never use `print()`.
+
+## Icons — always use LucideIcons
+```dart
+// ✅ Use lucide_icons_flutter
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+Icon(LucideIcons.circleAlert)   // error
+Icon(LucideIcons.inbox)         // empty state
+Icon(LucideIcons.lock)          // anonymous/locked
+Icon(LucideIcons.chevronRight)  // navigation cue
+Icon(LucideIcons.circleX)       // dismiss/error action
+
+// ❌ Never use Material Icons
+// Icons.error_outline_rounded
+// Icons.inbox_outlined
+```
+
+## Type-safe assets
+```dart
+// ✅ Use flutter_gen generated accessors
+Assets.imagesAppIcon.image(width: 180, height: 180)
+Assets.svgsGoogleLogo.svg(width: 20, height: 20)
+
+// ❌ Never hardcode asset paths
+// 'assets/images/app_icon.png'
+// Image.asset('assets/...')
+```
+
+## Import Order (enforced by dart format)
+1. `dart:` packages
+2. `package:flutter/`
+3. Third-party packages
+4. Internal `package:askme_humg/` imports
