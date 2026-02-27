@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~30% ███░░░░░░░
+Tổng tiến độ: ~50% █████░░░░░
 ```
 
 | Hạng mục | Trạng thái |
@@ -34,7 +34,7 @@ Tổng tiến độ: ~30% ███░░░░░░░
 | Đăng nhập Google — UI + domain check + upsert Firestore | ✅ Xong |
 | Đăng xuất | ✅ Xong |
 | Router guard (auth redirect `/inbox`, `/admin`) | ✅ Xong |
-| Trang cá nhân + deep link | ❌ Chưa làm |
+| Trang cá nhân + deep link | ✅ Xong |
 | Hộp thư câu hỏi (Inbox) | ❌ Chưa làm |
 | Gửi câu hỏi ẩn danh (App Check) | ❌ Chưa làm |
 | Feed công khai | ❌ Chưa làm |
@@ -54,8 +54,8 @@ Firebase init, `firebase_options.dart`, error/failure classes, Riverpod provider
 ### Phase 1 — Đăng nhập (UC-1.1, UC-1.2) ✅ XONG
 Google Sign-In, chặn email không phải `@humg.edu.vn`, upsert document `users` trên Firestore, đăng xuất, auth guard router, Splash screen.
 
-### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2)
-Hiển thị profile (tên, avatar, số câu trả lời, tổng likes), tạo deep link `askme.humg.edu.vn/u/{userId}`, xuất ảnh card để share.
+### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2) ✅ XONG
+ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme.humg.edu.vn/u/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
 
 ### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3)
 Gửi câu hỏi ẩn danh (tối đa 300 ký tự, có App Check chống bot), xem hộp thư 2 tab (chưa trả lời / đã trả lời), viết và đăng câu trả lời.
@@ -169,14 +169,14 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ## Bước tiếp theo ngay bây giờ
 
 ```
-Bắt đầu Phase 2: Profile & Deep Link
+Bắt đầu Phase 3: Core Q&A
 
-1. Đọc .docs/use_case/UC-2.2_view_profile.md
-2. Domain layer: UserProfile entity + IProfileRepository
-3. Data layer: UserProfileModel (Freezed) + ProfileDatasource + ProfileRepositoryImpl
-4. Presentation: ProfileScreen (/u/:userId) + profileProvider
-5. Đọc .docs/use_case/UC-2.1_generate_deep_link.md
-6. Cấu hình app_links (AndroidManifest + Info.plist)
-7. ShareCardWidget (qr_flutter + share_plus)
-8. Kết nối ProfileRoute trong app_routes.dart
+1. Đọc .docs/use_case/UC-3.1_submit_anonymous_question.md
+2. Đọc .docs/use_case/UC-3.2_manage_inbox.md
+3. Đọc .docs/use_case/UC-3.3_answer_question.md
+4. Domain layer: Question + Answer entities + IQnaRepository + use cases
+5. Data layer: QuestionModel + AnswerModel + QnaDatasource + QnaRepositoryImpl
+6. Presentation: InboxScreen (TabBar: Unanswered | Answered) + qnaProviders
+7. AnswerComposeScreen (/inbox/answer/:questionId) + WriteBatch
+8. AskQuestionSheet trong ProfileScreen (kết nối App Check + Cloud Function)
 ```

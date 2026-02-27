@@ -74,7 +74,10 @@ GoRouter appRouter(Ref ref) {
         Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
   );
 
-  // UC-2.1: Deep link handling via app_links
+  // UC-2.1: Deep link handling via app_links.
+  // The warm-start subscription is registered synchronously so that:
+  //   1. No warm-start links are missed during the cold-start await gap.
+  //   2. ref.onDispose is always called even if the provider is disposed early.
   _initDeepLinks(router, ref);
 
   return router;
@@ -84,21 +87,11 @@ GoRouter appRouter(Ref ref) {
 // Deep link initializer — cold-start + warm-start (UC-2.1)
 // ---------------------------------------------------------------------------
 
-Future<void> _initDeepLinks(GoRouter router, Ref ref) async {
+void _initDeepLinks(GoRouter router, Ref ref) {
   final appLinks = AppLinks();
 
-  try {
-    // Cold-start: app opened from scratch via deep link
-    final initialUri = await appLinks.getInitialLink();
-    if (initialUri != null) {
-      logger.i('Deep link cold-start: $initialUri');
-      router.go(initialUri.path);
-    }
-  } catch (e, s) {
-    logger.w('Failed to get initial deep link', error: e, stackTrace: s);
-  }
-
-  // Warm-start: app already running, receives a new deep link
+  // Warm-start: subscribe synchronously before any await so that no links
+  // are missed and the dispose callback is always registered.
   final sub = appLinks.uriLinkStream.listen(
     (uri) {
       logger.i('Deep link warm-start: $uri');
@@ -108,6 +101,16 @@ Future<void> _initDeepLinks(GoRouter router, Ref ref) async {
       logger.w('Deep link stream error', error: e, stackTrace: s);
     },
   );
-
   ref.onDispose(sub.cancel);
+
+  // Cold-start: app opened from scratch via deep link (async, safe to fire-and-forget
+  // because warm-start subscription above is already active).
+  appLinks.getInitialLink().then((initialUri) {
+    if (initialUri != null) {
+      logger.i('Deep link cold-start: $initialUri');
+      router.go(initialUri.path);
+    }
+  }).catchError((Object e, StackTrace s) {
+    logger.w('Failed to get initial deep link', error: e, stackTrace: s);
+  });
 }
