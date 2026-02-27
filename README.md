@@ -16,24 +16,43 @@ Q&A community platform for HUMG students & lecturers.
 ## Quick Start
 
 ```bash
-# 1. Get dependencies
-flutter pub get
+# 1. Copy env template
+cp .env.example .env    # fill in API_BASE_URL if needed
 
-# 2. Copy env template
-cp .env.example .env          # fill in API_BASE_URL if needed
+# 2. One-shot setup (get + codegen + l10n)
+make setup
 
-# 3. Codegen — REQUIRED after every clone (Riverpod, Freezed, flutter_gen, go_router)
-dart run build_runner build --delete-conflicting-outputs
-
-# 4. Localization
-flutter gen-l10n
-
-# 5. Run on device
-flutter run --dart-define=APP_ENV=debug
+# 3. Run on device
+make run
 ```
 
 > **Note:** `.g.dart`, `.freezed.dart`, and `lib/generated/` are gitignored.
-> Step 3 must be run before the project will compile.
+> `make setup` must be run before the project will compile.
+
+---
+
+## Make Commands
+
+```bash
+make setup       # clone xong chạy cái này — get + gen + l10n
+
+make run         # Android debug  (APP_ENV=debug)
+make run-stg     # Android debug  (APP_ENV=stg)
+make run-ios     # iOS debug      (APP_ENV=debug)
+
+make gen         # build_runner — sau khi sửa @riverpod / Freezed / assets / routes
+make l10n        # flutter gen-l10n — sau khi sửa .arb files
+
+make build-apk   # Android APK release
+make build-aab   # Android AAB release
+make build-ios   # iOS IPA release (macOS only)
+
+make icons       # flutter_launcher_icons
+make splash      # flutter_native_splash
+
+make check       # dart format + flutter analyze
+make clean       # flutter clean
+```
 
 ---
 
