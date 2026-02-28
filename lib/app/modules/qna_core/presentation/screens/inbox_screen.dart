@@ -43,12 +43,12 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
       appBar: AppBar(
         title: Text(l10n.inboxTitle),
         bottom: inboxAsync.when(
-          loading: () => _buildTabBar(context, l10n, 0, 0),
-          error: (e, s) => _buildTabBar(context, l10n, 0, 0),
+          loading: () => _buildTabBar(context, l10n, 0),
+          error: (e, s) => _buildTabBar(context, l10n, 0),
           data: (questions) {
             final unansweredCount =
                 questions.where((q) => q.status == 'unanswered').length;
-            return _buildTabBar(context, l10n, unansweredCount, 0);
+            return _buildTabBar(context, l10n, unansweredCount);
           },
         ),
       ),
@@ -92,7 +92,6 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
     BuildContext context,
     AppLocalizations l10n,
     int unansweredCount,
-    int answeredCount,
   ) {
     final cs = Theme.of(context).colorScheme;
     return PreferredSize(

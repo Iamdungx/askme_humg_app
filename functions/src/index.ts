@@ -50,31 +50,36 @@ export const submitQuestion = onRequest(
       return;
     }
 
-    // Verify App Check token
-    const appCheckToken = req.headers["x-app-check-token"] as string | undefined;
+    // Verify App Check token (client sends X-Firebase-AppCheck)
+    const appCheckToken = req.headers["x-firebase-appcheck"] as string | undefined;
     if (!appCheckToken) {
       res.status(401).json({ error: "Missing App Check token" });
       return;
     }
 
-    let tokenSub: string;
+    // Parse body early so fid is available for rate limiting
+    const body = req.body as { toUserId?: unknown; content?: unknown; fid?: unknown };
+
+    let appId: string;
     try {
       const decoded = await admin.appCheck().verifyToken(appCheckToken);
-      tokenSub = decoded.appId; // use appId as rate limit key
+      appId = decoded.appId;
     } catch {
       res.status(401).json({ error: "Invalid App Check token" });
       return;
     }
 
-    // Rate limiting
-    const allowed = await checkRateLimit(tokenSub);
+    // Rate limiting keyed by appId + Firebase Installations ID (per-device).
+    // Falls back to appId alone if client omits fid.
+    const fid = typeof body.fid === "string" ? body.fid.trim() : "";
+    const rateLimitKey = fid ? `${appId}:${fid}` : appId;
+    const allowed = await checkRateLimit(rateLimitKey);
     if (!allowed) {
       res.status(429).json({ error: "rate_limit_exceeded" });
       return;
     }
 
     // Validate body
-    const body = req.body as { toUserId?: unknown; content?: unknown };
     const toUserId = typeof body.toUserId === "string" ? body.toUserId.trim() : "";
     const content = typeof body.content === "string" ? body.content.trim() : "";
 

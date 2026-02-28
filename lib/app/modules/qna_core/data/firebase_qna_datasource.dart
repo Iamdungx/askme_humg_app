@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_installations/firebase_installations.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/qna_core/data/question_model.dart';
@@ -27,11 +28,19 @@ class FirebaseQnaDatasource {
         throw const NetworkException('App Check token unavailable');
       }
 
+      // fid (Firebase Installations ID) is a stable per-install identifier
+      // used as the per-device rate limit key on the Cloud Function side.
+      final fid = await FirebaseInstallations.id;
+
       await _dio.post<void>(
         '/submitQuestion',
-        data: {'toUserId': toUserId, 'content': content},
+        data: {
+          'toUserId': toUserId,
+          'content': content,
+          'fid': fid,
+        },
         options: Options(
-          headers: {'X-Firebase-AppCheck': appCheckToken},
+          headers: {'x-firebase-appcheck': appCheckToken},
         ),
       );
     } on DioException catch (e, s) {

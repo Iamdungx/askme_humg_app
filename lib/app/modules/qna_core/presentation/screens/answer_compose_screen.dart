@@ -233,7 +233,12 @@ class _QuestionCard extends StatelessWidget {
               Icon(LucideIcons.clock, size: 12, color: cs.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                l10n.answerReceivedTimeAgo(timeago.format(question.createdAt)),
+                l10n.answerReceivedTimeAgo(
+                  timeago.format(
+                    question.createdAt,
+                    locale: Localizations.localeOf(context).languageCode,
+                  ),
+                ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),

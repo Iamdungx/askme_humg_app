@@ -26,7 +26,9 @@ class QuestionCard extends StatelessWidget {
 
     return Dismissible(
       key: Key(question.questionId),
-      direction: DismissDirection.endToStart,
+      direction: onDelete != null
+          ? DismissDirection.endToStart
+          : DismissDirection.none,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
@@ -62,7 +64,10 @@ class QuestionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    timeago.format(question.createdAt),
+                    timeago.format(
+                      question.createdAt,
+                      locale: Localizations.localeOf(context).languageCode,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
