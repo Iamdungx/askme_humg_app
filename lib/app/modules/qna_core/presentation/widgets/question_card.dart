@@ -29,19 +29,21 @@ class QuestionCard extends StatelessWidget {
       direction: onDelete != null
           ? DismissDirection.endToStart
           : DismissDirection.none,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.error.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Icon(LucideIcons.trash2, color: cs.error),
-      ),
-      confirmDismiss: (_) async {
-        return await _confirmDelete(context, l10n);
-      },
-      onDismissed: (_) => onDelete?.call(),
+      background: onDelete != null
+          ? Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: cs.error.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Icon(LucideIcons.trash2, color: cs.error),
+            )
+          : null,
+      confirmDismiss: onDelete != null
+          ? (_) => _confirmDelete(context, l10n)
+          : null,
+      onDismissed: onDelete != null ? (_) => onDelete!() : null,
       child: Card(
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
