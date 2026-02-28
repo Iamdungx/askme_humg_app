@@ -149,6 +149,8 @@
   "@inboxDeleteQuestion": { "description": "Nút xóa câu hỏi trong hộp thư" },
   "inboxDeleteConfirm": "Bạn có chắc muốn xóa câu hỏi này không?",
   "@inboxDeleteConfirm": { "description": "Xác nhận xóa câu hỏi" },
+  "inboxReplyButton": "Trả lời",
+  "@inboxReplyButton": { "description": "Nhãn nút trả lời trên thẻ câu hỏi" },
 
   "questionSubmitTitle": "Gửi câu hỏi ẩn danh",
   "@questionSubmitTitle": { "description": "Tiêu đề form gửi câu hỏi" },
@@ -164,6 +166,8 @@
   "@questionSubmitErrorEmpty": { "description": "Lỗi câu hỏi trống" },
   "questionSubmitErrorRateLimit": "Bạn đã gửi quá nhiều câu hỏi. Vui lòng thử lại sau.",
   "@questionSubmitErrorRateLimit": { "description": "Lỗi vượt giới hạn gửi câu hỏi" },
+  "questionSubmitErrorAppCheck": "Xác minh ứng dụng thất bại. Vui lòng khởi động lại ứng dụng và thử lại.",
+  "@questionSubmitErrorAppCheck": { "description": "Lỗi khi App Check token bị từ chối (401/403)" },
   "questionCharCount": "{current}/300",
   "@questionCharCount": {
     "description": "Đếm ký tự input câu hỏi",

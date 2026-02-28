@@ -99,7 +99,6 @@ export const submitQuestion = onRequest(
     // Write to Firestore
     const docRef = db.collection("questions").doc();
     await docRef.set({
-      questionId: docRef.id,
       toUserId,
       content,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),

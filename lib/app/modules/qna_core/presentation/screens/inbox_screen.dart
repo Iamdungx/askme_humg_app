@@ -81,6 +81,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
                 emptyIcon: LucideIcons.circleCheck,
                 onDelete: (q) => _deleteQuestion(q),
               ),
+
             ],
           );
         },
@@ -139,15 +140,16 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
         .read(deleteQuestionProvider.notifier)
         .delete(question.questionId);
 
-    if (!mounted) return;
     final state = ref.read(deleteQuestionProvider);
     if (state.hasError) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(state.error.toString()),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
+      throw state.error!;
     }
   }
 }
@@ -167,7 +169,7 @@ class _QuestionList extends StatelessWidget {
   final String emptyMessage;
   final IconData? emptyIcon;
   final void Function(Question)? onReply;
-  final void Function(Question)? onDelete;
+  final Future<void> Function(Question)? onDelete;
 
   @override
   Widget build(BuildContext context) {

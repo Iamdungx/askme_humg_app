@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~65% ██████░░░░
+Tổng tiến độ: ~70% ███████░░░
 ```
 
 | Hạng mục | Trạng thái |

@@ -1,7 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_installations/firebase_installations.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/qna_core/data/question_model.dart';
@@ -10,52 +7,32 @@ import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 class FirebaseQnaDatasource {
   FirebaseQnaDatasource({
     required FirebaseFirestore firestore,
-    required Dio dio,
-  }) : _firestore = firestore,
-       _dio = dio;
+  }) : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
-  final Dio _dio;
 
-  /// UC-3.1: Requires App Check token before calling Cloud Function
+  // UC-3.1: Direct Firestore write (temporary — Blaze plan required to restore
+  // Cloud Function with App Check verification + per-device rate limiting).
+  // TODO(blaze): Replace with Cloud Function call once Blaze plan is enabled.
+  //   Cloud Function: functions/src/index.ts → submitQuestion
+  //   Flow: App Check token → POST /submitQuestion → rate limit check → Firestore write
   Future<void> submitAnonymousQuestion({
     required String toUserId,
     required String content,
   }) async {
     try {
-      final appCheckToken = await FirebaseAppCheck.instance.getToken(false);
-      if (appCheckToken == null) {
-        throw const NetworkException('App Check token unavailable');
-      }
-
-      // fid (Firebase Installations ID) is a stable per-install identifier
-      // used as the per-device rate limit key on the Cloud Function side.
-      final fid = await FirebaseInstallations.id;
-
-      await _dio.post<void>(
-        '/submitQuestion',
-        data: {
-          'toUserId': toUserId,
-          'content': content,
-          'fid': fid,
-        },
-        options: Options(
-          headers: {'x-firebase-appcheck': appCheckToken},
-        ),
-      );
-    } on DioException catch (e, s) {
-      logger.e('submitAnonymousQuestion Dio error', error: e, stackTrace: s);
-      if (e.response?.statusCode == 429) throw const RateLimitException();
-      throw NetworkException(
-        e.response?.data?.toString() ?? e.message ?? 'Network error',
-      );
-    } on NetworkException {
-      rethrow;
-    } on RateLimitException {
-      rethrow;
+      await _firestore.collection('questions').add({
+        'toUserId': toUserId,
+        'content': content,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'unanswered',
+      });
+    } on FirebaseException catch (e, s) {
+      logger.e('submitAnonymousQuestion failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore write failed');
     } catch (e, s) {
       logger.e('submitAnonymousQuestion unexpected error', error: e, stackTrace: s);
-      throw NetworkException(e.toString());
+      throw FirestoreException(e.toString());
     }
   }
 

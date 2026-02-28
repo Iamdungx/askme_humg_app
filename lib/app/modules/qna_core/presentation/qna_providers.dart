@@ -16,7 +16,6 @@ part 'qna_providers.g.dart';
 @riverpod
 FirebaseQnaDatasource qnaDatasource(Ref ref) => FirebaseQnaDatasource(
   firestore: ref.watch(firestoreProvider),
-  dio: ref.watch(apiClientProvider).dio,
 );
 
 @riverpod

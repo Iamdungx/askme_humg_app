@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/validator.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
@@ -56,14 +57,15 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
         );
       }
       if (next.hasError) {
-        final err = next.error.toString();
+        final err = next.error;
+        final message = switch (err) {
+          RateLimitException() => l10n.questionSubmitErrorRateLimit,
+          AppCheckException() => l10n.questionSubmitErrorAppCheck,
+          _ => l10n.commonError,
+        };
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              err.contains('429') || err.toLowerCase().contains('ratelimit')
-                  ? l10n.questionSubmitErrorRateLimit
-                  : l10n.commonError,
-            ),
+            content: Text(message),
             backgroundColor: cs.error,
           ),
         );
@@ -156,7 +158,7 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
   }
 
   Future<void> _submit() async {
-    final content = _controller.text;
+    final content = _controller.text.trim();
     final l10n = AppLocalizations.of(context);
 
     final error = Validators.validateQuestion(content);

@@ -16,7 +16,7 @@ class QuestionCard extends StatelessWidget {
 
   final Question question;
   final VoidCallback? onReply;
-  final VoidCallback? onDelete;
+  final Future<void> Function()? onDelete;
   final bool showReply;
 
   @override
@@ -41,9 +41,18 @@ class QuestionCard extends StatelessWidget {
             )
           : null,
       confirmDismiss: onDelete != null
-          ? (_) => _confirmDelete(context, l10n)
+          ? (_) async {
+              final confirmed = await _confirmDelete(context, l10n);
+              if (!confirmed) return false;
+              try {
+                await onDelete!();
+                return true;
+              } catch (_) {
+                return false;
+              }
+            }
           : null,
-      onDismissed: onDelete != null ? (_) => onDelete!() : null,
+      onDismissed: null,
       child: Card(
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -103,7 +112,7 @@ class QuestionCard extends StatelessWidget {
                     _DeleteButton(
                       onPressed: () async {
                         final confirmed = await _confirmDelete(context, l10n);
-                        if (confirmed) onDelete!();
+                        if (confirmed) await onDelete!();
                       },
                       cs: cs,
                     ),
@@ -163,7 +172,7 @@ class _ReplyButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(LucideIcons.reply, size: 16, color: cs.primary),
       label: Text(
-        l10n.answerComposeTitle,
+        l10n.inboxReplyButton,
         style: TextStyle(color: cs.primary, fontWeight: FontWeight.bold),
       ),
       style: OutlinedButton.styleFrom(

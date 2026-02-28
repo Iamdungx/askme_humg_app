@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 
 part 'question_model.freezed.dart';
@@ -22,11 +23,15 @@ abstract class QuestionModel with _$QuestionModel {
     QueryDocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data();
+    final createdAtTs = data['createdAt'] as Timestamp?;
+    if (createdAtTs == null) {
+      throw const FirestoreException('questions: missing required field createdAt');
+    }
     return QuestionModel(
       questionId: doc.id,
       toUserId: data['toUserId'] as String? ?? '',
       content: data['content'] as String? ?? '',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: createdAtTs.toDate(),
       status: data['status'] as String? ?? 'unanswered',
     );
   }
