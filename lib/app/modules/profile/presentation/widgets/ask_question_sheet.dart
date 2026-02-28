@@ -49,20 +49,19 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
     final l10n = AppLocalizations.of(context);
     final submitState = ref.watch(submitQuestionProvider);
 
-    ref.listen(submitQuestionProvider, (_, next) {
+    ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.questionSubmitSuccess)),
         );
-      }
-      if (next.hasError) {
+      } else if (next.hasError) {
         final err = next.error;
-        final message = switch (err) {
-          RateLimitException() => l10n.questionSubmitErrorRateLimit,
-          AppCheckException() => l10n.questionSubmitErrorAppCheck,
-          _ => l10n.commonError,
-        };
+        final message = err is RateLimitException
+            ? l10n.questionSubmitErrorRateLimit
+            : err is AppCheckException
+                ? l10n.questionSubmitErrorAppCheck
+                : l10n.commonError;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
