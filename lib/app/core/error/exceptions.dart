@@ -43,3 +43,7 @@ class RateLimitException extends AppException {
   const RateLimitException()
     : super('Too many requests. Please try again later.');
 }
+
+class AppCheckException extends AppException {
+  const AppCheckException() : super('App verification failed.');
+}

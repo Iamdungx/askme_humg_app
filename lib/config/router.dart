@@ -95,7 +95,8 @@ void _initDeepLinks(GoRouter router, Ref ref) {
   final sub = appLinks.uriLinkStream.listen(
     (uri) {
       logger.i('Deep link warm-start: $uri');
-      router.go(uri.path);
+      final path = uri.path;
+      if (path.isNotEmpty && path != '/') router.go(path);
     },
     onError: (Object e, StackTrace s) {
       logger.w('Deep link stream error', error: e, stackTrace: s);
@@ -107,8 +108,9 @@ void _initDeepLinks(GoRouter router, Ref ref) {
   // because warm-start subscription above is already active).
   appLinks.getInitialLink().then((initialUri) {
     if (initialUri != null) {
+      final path = initialUri.path;
       logger.i('Deep link cold-start: $initialUri');
-      router.go(initialUri.path);
+      if (path.isNotEmpty && path != '/') router.go(path);
     }
   }).catchError((Object e, StackTrace s) {
     logger.w('Failed to get initial deep link', error: e, stackTrace: s);

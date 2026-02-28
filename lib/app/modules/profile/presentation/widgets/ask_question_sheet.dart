@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/utils/validator.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
-/// UC-3.1 placeholder — submit logic implemented in a later phase.
-class AskQuestionSheet extends StatefulWidget {
+/// UC-3.1 — Anonymous question submission with App Check + Cloud Function.
+class AskQuestionSheet extends ConsumerStatefulWidget {
   const AskQuestionSheet({super.key, required this.toUserId});
 
   final String toUserId;
 
   @override
-  State<AskQuestionSheet> createState() => _AskQuestionSheetState();
+  ConsumerState<AskQuestionSheet> createState() => _AskQuestionSheetState();
 }
 
-class _AskQuestionSheetState extends State<AskQuestionSheet> {
+class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
   final _controller = TextEditingController();
   int _charCount = 0;
+  String? _validationError;
 
   static const int _maxChars = 300;
 
@@ -25,7 +30,10 @@ class _AskQuestionSheetState extends State<AskQuestionSheet> {
   void initState() {
     super.initState();
     _controller.addListener(() {
-      setState(() => _charCount = _controller.text.length);
+      setState(() {
+        _charCount = _controller.text.length;
+        if (_validationError != null) _validationError = null;
+      });
     });
   }
 
@@ -39,6 +47,32 @@ class _AskQuestionSheetState extends State<AskQuestionSheet> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
+    final submitState = ref.watch(submitQuestionProvider);
+
+    ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
+      if (!next.isLoading && !next.hasError && next.hasValue) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.questionSubmitSuccess)),
+        );
+      } else if (next.hasError) {
+        final err = next.error;
+        final message = err is RateLimitException
+            ? l10n.questionSubmitErrorRateLimit
+            : err is AppCheckException
+                ? l10n.questionSubmitErrorAppCheck
+                : l10n.commonError;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: cs.error,
+          ),
+        );
+      }
+    });
+
+    final bool isOverLimit = _charCount > _maxChars;
+    final bool canSubmit = !submitState.isLoading && !isOverLimit;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,6 +104,7 @@ class _AskQuestionSheetState extends State<AskQuestionSheet> {
                 hintStyle: TextStyle(
                   color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
+                errorText: _validationError,
                 filled: true,
                 fillColor: cs.surfaceContainerHigh,
                 contentPadding: const EdgeInsets.fromLTRB(
@@ -96,11 +131,10 @@ class _AskQuestionSheetState extends State<AskQuestionSheet> {
               bottom: AppSpacing.sm,
               right: AppSpacing.lg,
               child: Text(
-                '$_charCount/$_maxChars',
+                l10n.questionCharCount(_charCount),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: _charCount >= _maxChars
-                      ? cs.error
-                      : cs.onSurfaceVariant,
+                  color: isOverLimit ? cs.error : cs.onSurfaceVariant,
+                  fontWeight: isOverLimit ? FontWeight.bold : null,
                 ),
               ),
             ),
@@ -110,14 +144,38 @@ class _AskQuestionSheetState extends State<AskQuestionSheet> {
         AppButton(
           label: l10n.profileAskAnonymously,
           variant: AppButtonVariant.primary,
-          leading: Icon(LucideIcons.lock, size: 18, color: cs.onPrimary),
-          // TODO(phase-3): implement UC-3.1 — validate input (1–300 chars),
-          //   call Cloud Function with App Check token, show success/rate-limit feedback
-          onPressed: () {},
+          leading: submitState.isLoading
+              ? null
+              : Icon(LucideIcons.lock, size: 18, color: cs.onPrimary),
+          isLoading: submitState.isLoading,
+          onPressed: canSubmit ? _submit : null,
         ),
         const SizedBox(height: AppSpacing.md),
         Center(child: const AnonymousBadge()),
       ],
+    );
+  }
+
+  Future<void> _submit() async {
+    final content = _controller.text.trim();
+    final l10n = AppLocalizations.of(context);
+
+    final error = Validators.validateQuestion(content);
+    if (error != null) {
+      setState(() {
+        _validationError = switch (error) {
+          QuestionValidationError.empty => l10n.questionSubmitErrorEmpty,
+          QuestionValidationError.tooLong => l10n.questionSubmitErrorTooLong,
+          QuestionValidationError.inappropriate =>
+            l10n.questionErrorInappropriate,
+        };
+      });
+      return;
+    }
+
+    await ref.read(submitQuestionProvider.notifier).submit(
+      toUserId: widget.toUserId,
+      content: content,
     );
   }
 }

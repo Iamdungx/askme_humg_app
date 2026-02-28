@@ -86,6 +86,8 @@
   "inboxQuestionFrom": "Anonymous question",
   "inboxDeleteQuestion": "Delete question",
   "inboxDeleteConfirm": "Are you sure you want to delete this question?",
+  "inboxReplyButton": "Reply",
+  "@inboxReplyButton": { "description": "Label for the reply button on a question card" },
 
   "questionSubmitTitle": "Ask anonymously",
   "questionSubmitHint": "Type your question (max 300 characters)...",
@@ -94,6 +96,8 @@
   "questionSubmitErrorTooLong": "Question must not exceed 300 characters",
   "questionSubmitErrorEmpty": "Please enter a question",
   "questionSubmitErrorRateLimit": "Too many questions sent. Please try again later.",
+  "questionSubmitErrorAppCheck": "App verification failed. Please restart the app and try again.",
+  "@questionSubmitErrorAppCheck": { "description": "Error shown when App Check token is rejected (401/403)" },
   "questionCharCount": "{current}/300",
   "@questionCharCount": {
     "placeholders": { "current": { "type": "int" } }
@@ -102,9 +106,19 @@
   "answerComposeTitle": "Write an answer",
   "answerComposeHint": "Type your answer...",
   "answerPublishToggle": "Publish to Feed",
+  "answerPublishToggleSubtitle": "Others can see your answer",
+  "@answerPublishToggleSubtitle": { "description": "Subtitle under the publish-to-feed toggle" },
   "answerPublishButton": "Post answer",
   "answerPublishSuccess": "Answer posted!",
+  "answerSaved": "Answer saved (not published).",
+  "@answerSaved": { "description": "Snackbar when answer is saved but not published to feed" },
   "answerErrorEmpty": "Please enter an answer",
+  "answerReceivedTimeAgo": "Received {timeAgo}",
+  "@answerReceivedTimeAgo": {
+    "placeholders": { "timeAgo": { "type": "String" } }
+  },
+  "questionErrorInappropriate": "Inappropriate content detected",
+  "@questionErrorInappropriate": { "description": "Validation error when question contains profanity" },
 
   "feedTitle": "Feed",
   "feedEmpty": "No posts yet. Be the first!",

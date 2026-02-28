@@ -149,6 +149,8 @@
   "@inboxDeleteQuestion": { "description": "Nút xóa câu hỏi trong hộp thư" },
   "inboxDeleteConfirm": "Bạn có chắc muốn xóa câu hỏi này không?",
   "@inboxDeleteConfirm": { "description": "Xác nhận xóa câu hỏi" },
+  "inboxReplyButton": "Trả lời",
+  "@inboxReplyButton": { "description": "Nhãn nút trả lời trên thẻ câu hỏi" },
 
   "questionSubmitTitle": "Gửi câu hỏi ẩn danh",
   "@questionSubmitTitle": { "description": "Tiêu đề form gửi câu hỏi" },
@@ -164,6 +166,8 @@
   "@questionSubmitErrorEmpty": { "description": "Lỗi câu hỏi trống" },
   "questionSubmitErrorRateLimit": "Bạn đã gửi quá nhiều câu hỏi. Vui lòng thử lại sau.",
   "@questionSubmitErrorRateLimit": { "description": "Lỗi vượt giới hạn gửi câu hỏi" },
+  "questionSubmitErrorAppCheck": "Xác minh ứng dụng thất bại. Vui lòng khởi động lại ứng dụng và thử lại.",
+  "@questionSubmitErrorAppCheck": { "description": "Lỗi khi App Check token bị từ chối (401/403)" },
   "questionCharCount": "{current}/300",
   "@questionCharCount": {
     "description": "Đếm ký tự input câu hỏi",
@@ -176,12 +180,23 @@
   "@answerComposeHint": { "description": "Placeholder input câu trả lời" },
   "answerPublishToggle": "Đăng công khai lên Feed",
   "@answerPublishToggle": { "description": "Toggle đăng công khai câu trả lời" },
+  "answerPublishToggleSubtitle": "Mọi người có thể xem câu trả lời của bạn",
+  "@answerPublishToggleSubtitle": { "description": "Mô tả phụ toggle đăng công khai" },
   "answerPublishButton": "Đăng câu trả lời",
   "@answerPublishButton": { "description": "Nút đăng câu trả lời" },
   "answerPublishSuccess": "Câu trả lời đã được đăng!",
   "@answerPublishSuccess": { "description": "Thông báo đăng câu trả lời thành công" },
+  "answerSaved": "Câu trả lời đã được lưu (chưa đăng công khai).",
+  "@answerSaved": { "description": "Thông báo lưu câu trả lời không đăng" },
   "answerErrorEmpty": "Vui lòng nhập câu trả lời",
   "@answerErrorEmpty": { "description": "Lỗi câu trả lời trống" },
+  "answerReceivedTimeAgo": "Nhận được {timeAgo}",
+  "@answerReceivedTimeAgo": {
+    "description": "Thời gian nhận câu hỏi",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  },
+  "questionErrorInappropriate": "Nội dung không phù hợp",
+  "@questionErrorInappropriate": { "description": "Lỗi nội dung không phù hợp" },
 
   "feedTitle": "Feed",
   "@feedTitle": { "description": "Tiêu đề màn feed công khai" },

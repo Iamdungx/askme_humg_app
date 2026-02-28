@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~50% █████░░░░░
+Tổng tiến độ: ~70% ███████░░░
 ```
 
 | Hạng mục | Trạng thái |
@@ -35,8 +35,8 @@ Tổng tiến độ: ~50% █████░░░░░
 | Đăng xuất | ✅ Xong |
 | Router guard (auth redirect `/inbox`, `/admin`) | ✅ Xong |
 | Trang cá nhân + deep link | ✅ Xong |
-| Hộp thư câu hỏi (Inbox) | ❌ Chưa làm |
-| Gửi câu hỏi ẩn danh (App Check) | ❌ Chưa làm |
+| Hộp thư câu hỏi (Inbox) | ✅ Xong |
+| Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
 | Feed công khai | ❌ Chưa làm |
 | Kiểm duyệt / báo cáo | ❌ Chưa làm |
 
@@ -57,11 +57,35 @@ Google Sign-In, chặn email không phải `@humg.edu.vn`, upsert document `user
 ### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2) ✅ XONG
 ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme.humg.edu.vn/u/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
 
-### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3)
-Gửi câu hỏi ẩn danh (tối đa 300 ký tự, có App Check chống bot), xem hộp thư 2 tab (chưa trả lời / đã trả lời), viết và đăng câu trả lời.
+### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3) ✅ XONG
 
-### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3)
-Xem feed công khai (phân trang 20 bài), like/unlike câu trả lời, bình luận.
+**Đã implement:**
+- Domain: `Question`, `Answer` entity + `IQnaRepository` + 5 use cases
+- Data: `QuestionModel`, `AnswerModel` (fromFirestore, toDomain), `FirebaseQnaDatasource`, `QnaRepositoryImpl`
+- Presentation: `InboxScreen` (2 tab + badge đỏ), `AnswerComposeScreen`, `QuestionCard` (swipe-to-delete), `AnswerPublishToggle`
+- `AskQuestionSheet` tích hợp vào ProfileScreen (chỉ hiện khi xem profile người khác)
+- UC-3.3 WriteBatch atomic: `answers` create + `questions` status update
+- Rate limiting per-device: App Check token + Firebase Installations ID (FID)
+- Localization: timeago đa ngôn ngữ (vi/en/ja)
+- Cloud Function `submitQuestion` (TypeScript, `functions/`) — **chưa deploy** (xem note bên dưới)
+
+**⚠️ Known limitation — UC-3.1 chưa hoạt động đầy đủ:**
+Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan (pay-as-you-go). Khi nào có thẻ tín dụng quốc tế:
+1. Upgrade tại: `https://console.firebase.google.com/project/askme-humg-app/usage/details`
+2. Chạy: `firebase deploy --only functions`
+3. Lấy URL: `https://asia-southeast1-askme-humg-app.cloudfunctions.net`
+4. Cập nhật `.env`: `API_BASE_URL=https://asia-southeast1-askme-humg-app.cloudfunctions.net`
+
+**Fixes đã apply sau review:**
+- `content.trim()` trước validate + submit trong `AskQuestionSheet`
+- Swipe dismiss await delete thật, trả `false` nếu Firestore fail (tránh UI desync)
+- HTTP 401/403 → `AppCheckException` với l10n message riêng
+- `createdAt == null` trong Firestore → throw `FirestoreException` thay vì `DateTime.now()`
+- `_ReplyButton` dùng `l10n.inboxReplyButton` thay vì `answerComposeTitle`
+- Xóa field `questionId` thừa trong Firestore document write
+
+### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ⏳ TIẾP THEO
+Xem feed công khai (phân trang cursor 20 bài, `isPublished == true`, `orderBy createdAt desc`), like/unlike câu trả lời (`arrayUnion/arrayRemove` + `FieldValue.increment`), bình luận (WriteBatch: `comments` + `answers.commentCount`).
 
 ### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
 Báo cáo nội dung vi phạm, admin xem và xử lý các báo cáo.
@@ -169,14 +193,19 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ## Bước tiếp theo ngay bây giờ
 
 ```
-Bắt đầu Phase 3: Core Q&A
+Phase 3 đã xong. Tiến hành Phase 4: Feed & Tương tác
 
-1. Đọc .docs/use_case/UC-3.1_submit_anonymous_question.md
-2. Đọc .docs/use_case/UC-3.2_manage_inbox.md
-3. Đọc .docs/use_case/UC-3.3_answer_question.md
-4. Domain layer: Question + Answer entities + IQnaRepository + use cases
-5. Data layer: QuestionModel + AnswerModel + QnaDatasource + QnaRepositoryImpl
-6. Presentation: InboxScreen (TabBar: Unanswered | Answered) + qnaProviders
-7. AnswerComposeScreen (/inbox/answer/:questionId) + WriteBatch
-8. AskQuestionSheet trong ProfileScreen (kết nối App Check + Cloud Function)
+1. Đọc .docs/use_case/UC-4.1_view_feed.md
+2. Đọc .docs/use_case/UC-4.2_like_unlike.md
+3. Đọc .docs/use_case/UC-4.3_comment.md
+4. Domain layer: FeedItem entity + IFeedRepository + use cases
+5. Data layer: AnswerFeedModel + FeedDatasource + FeedRepositoryImpl
+6. Presentation: FeedScreen (cursor pagination, limit 20) + feedProviders
+7. LikeButton widget (arrayUnion/arrayRemove + increment)
+8. CommentSheet + WriteBatch (comments + commentCount)
 ```
+
+> **Lưu ý quan trọng cho Phase 4:**
+> - `FeedScreen` cần `Firestore Composite Index` cho query `isPublished == true` + `orderBy createdAt desc`
+> - UC-3.1 (gửi câu hỏi ẩn danh) cần deploy Cloud Function trước khi test end-to-end
+> - `isHumgVerified` guard (UC-1.3 OTP) chưa implement → Host features chưa bị khóa

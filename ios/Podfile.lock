@@ -1218,6 +1218,9 @@ PODS:
   - Firebase/Firestore (12.8.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 12.8.0)
+  - Firebase/Installations (12.8.0):
+    - Firebase/CoreOnly
+    - FirebaseInstallations (~> 12.8.0)
   - Firebase/Messaging (12.8.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 12.8.0)
@@ -1235,6 +1238,10 @@ PODS:
     - Flutter
   - firebase_core (4.4.0):
     - Firebase/CoreOnly (= 12.8.0)
+    - Flutter
+  - firebase_installations (16.3.6):
+    - Firebase/Installations (= 12.8.0)
+    - firebase_core
     - Flutter
   - firebase_messaging (16.1.1):
     - Firebase/Messaging (= 12.8.0)
@@ -1476,6 +1483,7 @@ DEPENDENCIES:
   - firebase_app_check (from `.symlinks/plugins/firebase_app_check/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
+  - firebase_installations (from `.symlinks/plugins/firebase_installations/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
@@ -1529,6 +1537,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
+  firebase_installations:
+    :path: ".symlinks/plugins/firebase_installations/ios"
   firebase_messaging:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   firebase_storage:
@@ -1559,6 +1569,7 @@ SPEC CHECKSUMS:
   firebase_app_check: 21e404a225ce29ae2ec6dbad503e83fd1c4ac1fb
   firebase_auth: e9031a1dbe04a90d98e8d11ff2302352a1c6d9e8
   firebase_core: ee30637e6744af8e0c12a6a1e8a9718506ec2398
+  firebase_installations: 8b39e056d9b6a01cb3f72eb1318431521f667ac1
   firebase_messaging: 343de01a8d3e18b60df0c6d37f7174c44ae38e02
   firebase_storage: 74ebe330dac8084b22991cd1e1abd4a49bc14daf
   FirebaseAppCheck: 11da425929a45c677d537adfff3520ccd57c1690

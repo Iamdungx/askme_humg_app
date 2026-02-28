@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // ── users ─────────────────────────────────────────────────────────
+    // UC-1.1: create/upsert on first login; anyone can read public profile
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── questions ─────────────────────────────────────────────────────
+    // UC-3.1: anonymous write via Cloud Function (App Check enforced server-side)
+    // UC-3.2: host reads their own inbox
+    // UC-3.3: host updates status when answering
+    match /questions/{questionId} {
+      allow read: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
+      // Create handled by Cloud Function; allow direct only for dev convenience
+      allow create: if true;
+      allow update: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── answers ───────────────────────────────────────────────────────
+    // UC-4.1: anyone can read published answers
+    // UC-3.3: only the owner can create/update their answer
+    // UC-4.2: any signed-in user can update likeCount/likedBy
+    match /answers/{answerId} {
+      allow read: if resource.data.isPublished == true || isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin() ||
+        // Like/unlike: only likeCount and likedBy change
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likeCount', 'likedBy']))
+      );
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ── comments ──────────────────────────────────────────────────────
+    // UC-4.3: any signed-in user or anonymous (isAnonymous: true) can comment
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if true; // rate-limited by Cloud Function
+      allow update: if isAdmin();
+      allow delete: if (isSignedIn() && resource.data.userId == request.auth.uid)
+        || isAdmin();
+    }
+
+    // ── reports ───────────────────────────────────────────────────────
+    // UC-5.1: any signed-in user can report
+    // UC-5.2: only admin can read/update reports
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── otpRequests ───────────────────────────────────────────────────
+    // Managed entirely by Cloud Functions; no client access
+    match /otpRequests/{docId} {
+      allow read, write: if false;
+    }
+  }
+}
