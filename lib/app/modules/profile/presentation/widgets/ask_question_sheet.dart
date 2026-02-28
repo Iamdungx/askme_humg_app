@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/utils/validator.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
@@ -51,15 +51,15 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
 
     ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
+        final messenger = ScaffoldMessenger.of(context);
+        final successMessage = l10n.questionSubmitSuccess;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.questionSubmitSuccess)),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(successMessage)));
       } else if (next.hasError) {
         final err = next.error;
-        final message = err is RateLimitException
+        final message = err is RateLimitFailure
             ? l10n.questionSubmitErrorRateLimit
-            : err is AppCheckException
+            : err is NetworkFailure
                 ? l10n.questionSubmitErrorAppCheck
                 : l10n.commonError;
         ScaffoldMessenger.of(context).showSnackBar(

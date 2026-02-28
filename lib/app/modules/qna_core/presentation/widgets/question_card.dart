@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/global_widgets/app_button.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -109,12 +110,20 @@ class QuestionCard extends StatelessWidget {
                     const SizedBox(width: AppSpacing.md),
                   ],
                   if (onDelete != null)
-                    _DeleteButton(
+                    AppButton(
+                      label: l10n.commonDelete,
+                      variant: AppButtonVariant.danger,
+                      leading: Icon(
+                        LucideIcons.trash2,
+                        size: 16,
+                        color: cs.onError,
+                      ),
+                      isFullWidth: false,
+                      minimumHeight: 40,
                       onPressed: () async {
                         final confirmed = await _confirmDelete(context, l10n);
                         if (confirmed) await onDelete!();
                       },
-                      cs: cs,
                     ),
                 ],
               ),
@@ -190,26 +199,3 @@ class _ReplyButton extends StatelessWidget {
   }
 }
 
-class _DeleteButton extends StatelessWidget {
-  const _DeleteButton({required this.onPressed, required this.cs});
-
-  final VoidCallback onPressed;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: Material(
-        color: cs.error.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          onTap: onPressed,
-          child: Icon(LucideIcons.trash2, size: 18, color: cs.error),
-        ),
-      ),
-    );
-  }
-}
