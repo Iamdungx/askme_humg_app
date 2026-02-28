@@ -77,4 +77,31 @@ class Validators {
       return null;
     };
   }
+
+  /// UC-3.1 — Validates question content before submitting.
+  /// Returns null if valid, [QuestionValidationError] code if invalid.
+  /// Caller is responsible for mapping the code to a localized string.
+  static QuestionValidationError? validateQuestion(String content) {
+    final trimmed = content.trim();
+    if (trimmed.isEmpty) return QuestionValidationError.empty;
+    if (content.length > 300) return QuestionValidationError.tooLong;
+    if (_containsProfanity(trimmed)) return QuestionValidationError.inappropriate;
+    return null;
+  }
+
+  static bool _containsProfanity(String text) {
+    const blocked = [
+      'fuck',
+      'shit',
+      'bitch',
+      'asshole',
+      'dick',
+      'pussy',
+      'cunt',
+    ];
+    final lower = text.toLowerCase();
+    return blocked.any((word) => lower.contains(word));
+  }
 }
+
+enum QuestionValidationError { empty, tooLong, inappropriate }

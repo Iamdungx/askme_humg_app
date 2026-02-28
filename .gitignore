@@ -73,3 +73,8 @@ Thumbs.db
 .docs/screens
 .cursor/ignore_asset
 .cursor/plans
+
+# Cloud Functions
+functions/node_modules/
+functions/lib/
+firepit-log.txt

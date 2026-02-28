@@ -5,6 +5,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/widgets/dev_drawer.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
+import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
+import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 
 part 'app_routes.g.dart';
@@ -49,9 +51,8 @@ class InboxRoute extends GoRouteData with $InboxRoute {
   const InboxRoute();
 
   @override
-  // TODO(phase-3): replace with InboxScreen — UC-3.2 manage inbox (2 tabs: unanswered / answered)
   Widget build(BuildContext context, GoRouterState state) =>
-      const _PlaceholderScreen(title: 'Inbox');
+      const InboxScreen();
 }
 
 @immutable
@@ -61,9 +62,8 @@ class AnswerComposeRoute extends GoRouteData with $AnswerComposeRoute {
   final String questionId;
 
   @override
-  // TODO(phase-3): replace with AnswerComposeScreen — UC-3.3 answer & publish (WriteBatch required)
   Widget build(BuildContext context, GoRouterState state) =>
-      _PlaceholderScreen(title: 'Answer: $questionId');
+      AnswerComposeScreen(questionId: questionId);
 }
 
 @TypedGoRoute<ProfileRoute>(path: '/u/:userId')

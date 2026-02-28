@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~50% █████░░░░░
+Tổng tiến độ: ~65% ██████░░░░
 ```
 
 | Hạng mục | Trạng thái |
@@ -35,8 +35,8 @@ Tổng tiến độ: ~50% █████░░░░░
 | Đăng xuất | ✅ Xong |
 | Router guard (auth redirect `/inbox`, `/admin`) | ✅ Xong |
 | Trang cá nhân + deep link | ✅ Xong |
-| Hộp thư câu hỏi (Inbox) | ❌ Chưa làm |
-| Gửi câu hỏi ẩn danh (App Check) | ❌ Chưa làm |
+| Hộp thư câu hỏi (Inbox) | ✅ Xong |
+| Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
 | Feed công khai | ❌ Chưa làm |
 | Kiểm duyệt / báo cáo | ❌ Chưa làm |
 
@@ -57,7 +57,7 @@ Google Sign-In, chặn email không phải `@humg.edu.vn`, upsert document `user
 ### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2) ✅ XONG
 ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme.humg.edu.vn/u/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
 
-### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3)
+### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3) ✅ XONG
 Gửi câu hỏi ẩn danh (tối đa 300 ký tự, có App Check chống bot), xem hộp thư 2 tab (chưa trả lời / đã trả lời), viết và đăng câu trả lời.
 
 ### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3)
@@ -169,14 +169,14 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ## Bước tiếp theo ngay bây giờ
 
 ```
-Bắt đầu Phase 3: Core Q&A
+Bắt đầu Phase 4: Feed & Tương tác
 
-1. Đọc .docs/use_case/UC-3.1_submit_anonymous_question.md
-2. Đọc .docs/use_case/UC-3.2_manage_inbox.md
-3. Đọc .docs/use_case/UC-3.3_answer_question.md
-4. Domain layer: Question + Answer entities + IQnaRepository + use cases
-5. Data layer: QuestionModel + AnswerModel + QnaDatasource + QnaRepositoryImpl
-6. Presentation: InboxScreen (TabBar: Unanswered | Answered) + qnaProviders
-7. AnswerComposeScreen (/inbox/answer/:questionId) + WriteBatch
-8. AskQuestionSheet trong ProfileScreen (kết nối App Check + Cloud Function)
+1. Đọc .docs/use_case/UC-4.1_view_feed.md
+2. Đọc .docs/use_case/UC-4.2_like_unlike.md
+3. Đọc .docs/use_case/UC-4.3_comment.md
+4. Domain layer: FeedItem entity + IFeedRepository + use cases
+5. Data layer: AnswerFeedModel + FeedDatasource + FeedRepositoryImpl
+6. Presentation: FeedScreen (cursor pagination, limit 20) + feedProviders
+7. LikeButton widget (arrayUnion/arrayRemove + increment)
+8. CommentSheet + WriteBatch (comments + commentCount)
 ```

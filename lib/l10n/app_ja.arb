@@ -102,9 +102,16 @@
   "answerComposeTitle": "回答を書く",
   "answerComposeHint": "回答を入力してください...",
   "answerPublishToggle": "フィードに公開する",
+  "answerPublishToggleSubtitle": "他のユーザーがあなたの回答を見ることができます",
   "answerPublishButton": "回答を投稿",
   "answerPublishSuccess": "回答が投稿されました！",
+  "answerSaved": "回答が保存されました（非公開）。",
   "answerErrorEmpty": "回答を入力してください",
+  "answerReceivedTimeAgo": "{timeAgo}に受信",
+  "@answerReceivedTimeAgo": {
+    "placeholders": { "timeAgo": { "type": "String" } }
+  },
+  "questionErrorInappropriate": "不適切なコンテンツが検出されました",
 
   "feedTitle": "フィード",
   "feedEmpty": "まだ投稿がありません。最初に投稿しましょう！",
