@@ -38,7 +38,7 @@ class DevDrawer extends ConsumerWidget {
             if (user != null) ...[
               _NavTile(
                 icon: LucideIcons.inbox,
-                label: 'Inbox  /inbox  (placeholder)',
+                label: 'Inbox  /inbox',
                 onTap: () => _go(context, const InboxRoute().location),
               ),
               _NavTile(
@@ -46,6 +46,11 @@ class DevDrawer extends ConsumerWidget {
                 label: 'My Profile  /u/:uid',
                 onTap: () =>
                     _go(context, ProfileRoute(userId: user.uid).location),
+              ),
+              _NavTile(
+                icon: LucideIcons.userSearch,
+                label: 'Visit Profile by UID…',
+                onTap: () => _showVisitProfileDialog(context, user.uid),
               ),
               _NavTile(
                 icon: LucideIcons.shieldCheck,
@@ -95,8 +100,42 @@ class DevDrawer extends ConsumerWidget {
   }
 
   void _go(BuildContext context, String location) {
-    Navigator.pop(context); // close drawer first
+    Navigator.pop(context);
     context.go(location);
+  }
+
+  void _showVisitProfileDialog(BuildContext context, String myUid) {
+    final controller = TextEditingController(text: myUid);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Visit Profile by UID'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'User ID',
+            hintText: 'Paste any Firebase UID',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final uid = controller.text.trim();
+              if (uid.isEmpty) return;
+              Navigator.pop(ctx);
+              Navigator.pop(context); // close drawer
+              context.go(ProfileRoute(userId: uid).location);
+            },
+            child: const Text('Go'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
