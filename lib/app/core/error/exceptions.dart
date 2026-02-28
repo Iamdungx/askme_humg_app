@@ -14,6 +14,10 @@ class AuthException extends AppException {
   const AuthException(super.message);
 }
 
+class AuthCanceledException extends AuthException {
+  const AuthCanceledException() : super('Sign-in canceled by user');
+}
+
 class InvalidDomainException extends AuthException {
   const InvalidDomainException()
     : super('Only @humg.edu.vn emails are accepted');

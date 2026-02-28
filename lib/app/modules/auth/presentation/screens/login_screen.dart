@@ -27,6 +27,7 @@ class LoginScreen extends ConsumerWidget {
       next.whenOrNull(
         error: (err, _) {
           if (!context.mounted) return;
+          if (err is AuthCanceledFailure) return;
           final message = switch (err) {
             UserBlockedFailure() => l10n.authErrorUserBlocked,
             AuthFailure() => l10n.authErrorSignInFailed,

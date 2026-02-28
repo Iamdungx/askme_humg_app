@@ -4,8 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
+import 'package:askme_humg/config/languages.dart';
 
 part 'theme_provider.g.dart';
+
+const _kLocaleKey = 'locale';
+
+/// Persists and exposes the current [Locale].
+@riverpod
+class LocaleNotifier extends _$LocaleNotifier {
+  @override
+  Locale build() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    final stored = prefs.getString(_kLocaleKey);
+    if (stored != null) {
+      final match = supportedLanguages.where((l) => l.languageCode == stored);
+      if (match.isNotEmpty) return match.first;
+    }
+    return defaultLocale;
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    if (!supportedLanguages.contains(locale)) return;
+    state = locale;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(_kLocaleKey, locale.languageCode);
+  }
+}
 
 const _kThemeModeKey = 'theme_mode';
 

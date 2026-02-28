@@ -10,6 +10,10 @@ final class AuthFailure extends Failure {
   const AuthFailure(super.message);
 }
 
+final class AuthCanceledFailure extends AuthFailure {
+  const AuthCanceledFailure() : super('Sign-in canceled by user');
+}
+
 final class InvalidDomainFailure extends AuthFailure {
   const InvalidDomainFailure() : super('Only @humg.edu.vn emails are accepted');
 }

@@ -68,6 +68,15 @@
   "profileShareLink": "Share link",
   "profileEmptyAnswers": "No answers yet",
   "profileBlockedUser": "This account has been blocked",
+  "profileUserNotFound": "User not found",
+  "profileLinkCopied": "Link copied to clipboard",
+  "profileShareCardTitle": "Ask me anything!",
+  "profileTitle": "Profile",
+  "profileYourLink": "Your profile link",
+  "profileRecentAnswers": "Recent Answers",
+  "profileViewAll": "View all",
+  "profileAskSomething": "Ask me something",
+  "profileGoToInbox": "Go to Inbox",
 
   "inboxTitle": "Inbox",
   "inboxTabUnanswered": "Unanswered",
@@ -131,5 +140,8 @@
   "adminReportResolved": "Resolved",
   "adminActionRemove": "Remove content",
   "adminActionDismiss": "Dismiss",
-  "adminActionResolvedSuccess": "Report resolved"
+  "adminActionResolvedSuccess": "Report resolved",
+  "profileHumgStudent": "HUMG Student",
+  "profileStatAnswers": "Answers",
+  "profileStatLikes": "Likes"
 }
