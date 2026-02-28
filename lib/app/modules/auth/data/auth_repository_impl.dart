@@ -19,6 +19,8 @@ class AuthRepositoryImpl implements IAuthRepository {
   Future<void> signInWithGoogle() async {
     try {
       await _datasource.signInWithGoogle();
+    } on AuthCanceledException {
+      throw const AuthCanceledFailure();
     } on AuthException catch (e) {
       throw AuthFailure(e.message);
     } on FirestoreException catch (e) {

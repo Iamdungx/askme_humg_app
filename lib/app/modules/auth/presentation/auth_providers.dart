@@ -53,13 +53,17 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> signIn() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(signInWithGoogleProvider).call(),
-    );
+    final useCase = ref.read(signInWithGoogleProvider);
+    final next = await AsyncValue.guard(() => useCase.call());
+    if (!ref.mounted) return;
+    state = next;
   }
 
   Future<void> signOut() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => ref.read(signOutProvider).call());
+    final useCase = ref.read(signOutProvider);
+    final next = await AsyncValue.guard(() => useCase.call());
+    if (!ref.mounted) return;
+    state = next;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/widgets/dev_drawer.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
@@ -105,7 +106,7 @@ class _PlaceholderScreen extends StatelessWidget {
         if (kDebugMode)
           Builder(
             builder: (ctx) => IconButton(
-              icon: const Icon(Icons.bug_report_outlined),
+              icon: const Icon(LucideIcons.bug),
               tooltip: 'Dev nav',
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),

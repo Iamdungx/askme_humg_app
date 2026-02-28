@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
@@ -24,7 +25,7 @@ class FirebaseAuthDatasource {
         if (user == null) return null;
         try {
           final doc = await _firestore.collection('users').doc(user.uid).get();
-          if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
+          if (!doc.exists) return AuthUserModel.fromFirebaseUserWithClaims(user);
           return AuthUserModel.fromFirestore(user, doc);
         } catch (e) {
           logger.w('Failed to fetch user doc, falling back to Firebase user');
@@ -57,14 +58,34 @@ class FirebaseAuthDatasource {
       final user = userCredential.user;
       if (user == null) throw const AuthException('Sign-in returned null user');
 
-      await _upsertUserDoc(user);
+      try {
+        await _upsertUserDoc(user);
+      } on FirestoreException catch (e, s) {
+        logger.w(
+          'Firestore upsert failed (non-fatal, will retry on reconnect)',
+          error: e,
+          stackTrace: s,
+        );
+      }
     } on FirebaseAuthException catch (e, s) {
       logger.e('FirebaseAuth sign-in failed', error: e, stackTrace: s);
       throw AuthException(e.message ?? 'Sign-in failed');
+    } on PlatformException catch (e, s) {
+      if (e.code == 'canceled' || e.code == 'sign_in_canceled') {
+        logger.i('Google Sign-In canceled by user');
+        throw const AuthCanceledException();
+      }
+      logger.e('Google Sign-In platform error', error: e, stackTrace: s);
+      throw AuthException(e.message ?? 'Sign-in failed');
     } catch (e, s) {
       if (e is AuthException) rethrow;
+      final msg = e.toString();
+      if (msg.contains('canceled') || msg.contains('cancelled')) {
+        logger.i('Google Sign-In canceled by user');
+        throw const AuthCanceledException();
+      }
       logger.e('Unexpected sign-in error', error: e, stackTrace: s);
-      throw AuthException(e.toString());
+      throw AuthException(msg);
     }
   }
 

@@ -140,5 +140,8 @@
   "adminReportResolved": "Resolved",
   "adminActionRemove": "Remove content",
   "adminActionDismiss": "Dismiss",
-  "adminActionResolvedSuccess": "Report resolved"
+  "adminActionResolvedSuccess": "Report resolved",
+  "profileHumgStudent": "HUMG Student",
+  "profileStatAnswers": "Answers",
+  "profileStatLikes": "Likes"
 }

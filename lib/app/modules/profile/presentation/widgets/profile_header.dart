@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_avatar.dart';
+import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
@@ -38,7 +39,7 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'HUMG Student',
+          AppLocalizations.of(context).profileHumgStudent,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.secondary,
             fontWeight: FontWeight.w500,
@@ -75,7 +76,10 @@ class _ProfileStatsRow extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: _StatItem(value: answerCount.toString(), label: 'Answers'),
+              child: _StatItem(
+                value: answerCount.toString(),
+                label: AppLocalizations.of(context).profileStatAnswers,
+              ),
             ),
             VerticalDivider(
               width: 1,
@@ -83,7 +87,10 @@ class _ProfileStatsRow extends StatelessWidget {
               color: cs.primary.withValues(alpha: 0.3),
             ),
             Expanded(
-              child: _StatItem(value: totalLikes.toString(), label: 'Likes'),
+              child: _StatItem(
+                value: totalLikes.toString(),
+                label: AppLocalizations.of(context).profileStatLikes,
+              ),
             ),
           ],
         ),

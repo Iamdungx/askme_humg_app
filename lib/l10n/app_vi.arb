@@ -242,5 +242,11 @@
   "adminActionDismiss": "Bỏ qua",
   "@adminActionDismiss": { "description": "Hành động bỏ qua báo cáo" },
   "adminActionResolvedSuccess": "Đã xử lý báo cáo",
-  "@adminActionResolvedSuccess": { "description": "Thông báo xử lý báo cáo thành công" }
+  "@adminActionResolvedSuccess": { "description": "Thông báo xử lý báo cáo thành công" },
+  "profileHumgStudent": "Sinh viên HUMG",
+  "@profileHumgStudent": { "description": "Nhãn vai trò sinh viên HUMG trên trang cá nhân" },
+  "profileStatAnswers": "Câu trả lời",
+  "@profileStatAnswers": { "description": "Nhãn thống kê số câu trả lời" },
+  "profileStatLikes": "Lượt thích",
+  "@profileStatLikes": { "description": "Nhãn thống kê tổng lượt thích" }
 }

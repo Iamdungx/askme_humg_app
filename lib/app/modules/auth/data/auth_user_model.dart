@@ -10,11 +10,25 @@ class AuthUserModel {
     photoUrl: user.photoURL,
   );
 
-  static AuthUser fromFirestore(
+  static Future<AuthUser> fromFirebaseUserWithClaims(User user) async {
+    final tokenResult = await user.getIdTokenResult();
+    final isAdmin = tokenResult.claims?['admin'] == true;
+    return AuthUser(
+      uid: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName,
+      photoUrl: user.photoURL,
+      isAdmin: isAdmin,
+    );
+  }
+
+  static Future<AuthUser> fromFirestore(
     User firebaseUser,
     DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
+  ) async {
     final data = doc.data();
+    final tokenResult = await firebaseUser.getIdTokenResult();
+    final isAdmin = tokenResult.claims?['admin'] == true;
     return AuthUser(
       uid: firebaseUser.uid,
       email: firebaseUser.email ?? '',
@@ -23,6 +37,7 @@ class AuthUserModel {
       isHumgVerified: data?['isHumgVerified'] as bool? ?? false,
       humgEmail: data?['humgEmail'] as String?,
       isBlocked: data?['isBlocked'] as bool? ?? false,
+      isAdmin: isAdmin,
     );
   }
 

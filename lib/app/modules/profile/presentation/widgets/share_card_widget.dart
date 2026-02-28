@@ -210,7 +210,7 @@ class _ShareCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Ask me anything!',
+            AppLocalizations.of(context).profileShareCardTitle,
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),

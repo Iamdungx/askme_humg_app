@@ -140,5 +140,8 @@
   "adminReportResolved": "解決済み",
   "adminActionRemove": "コンテンツを削除",
   "adminActionDismiss": "却下",
-  "adminActionResolvedSuccess": "報告が解決されました"
+  "adminActionResolvedSuccess": "報告が解決されました",
+  "profileHumgStudent": "HUMG学生",
+  "profileStatAnswers": "回答",
+  "profileStatLikes": "いいね"
 }
