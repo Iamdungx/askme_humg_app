@@ -253,7 +253,7 @@ GoRouter appRouter(Ref ref) {
       GoRoute(path: '/',       builder: (_, __) => const FeedScreen()),
       GoRoute(path: '/login',  builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/inbox',  builder: (_, __) => const InboxScreen()),
-      GoRoute(path: '/u/:userId', builder: (ctx, state) =>
+      GoRoute(path: '/user/:userId', builder: (ctx, state) =>
           ProfileScreen(userId: state.pathParameters['userId']!)),
       GoRoute(path: '/admin',  builder: (_, __) => const AdminDashboardScreen()),
     ],
@@ -285,13 +285,13 @@ ShellRoute(builder: AppShell)
 
 GoRoute(path: '/splash')         → SplashScreen            (outside shell)
 GoRoute(path: '/login')          → LoginScreen              (outside shell)
-GoRoute(path: '/u/:userId')      → ProfileScreen(userId)    (outside shell — deep link / other user)
+GoRoute(path: '/user/:userId')   → ProfileScreen(userId)    (outside shell — deep link / other user)
 GoRoute(path: '/inbox/answer/:questionId') → AnswerComposeScreen (outside shell — full-screen)
 GoRoute(path: '/me/edit')        → EditProfileScreen         (outside shell — full-screen)
 GoRoute(path: '/admin')          → AdminDashboardScreen      (outside shell)
 ```
 
-> **Key distinction:** `/me` (shell tab 2) always shows the **logged-in user's** own profile. `/u/:userId` is a full-screen push, used when tapping another user's avatar in the feed.
+> **Key distinction:** `/me` (shell tab 2) always shows the **logged-in user's** own profile. `/user/:userId` is a full-screen push, used when tapping another user's avatar in the feed.
 
 ### AppShell widget (`lib/app/core/widgets/app_shell.dart`)
 
@@ -339,8 +339,8 @@ class AppShell extends ConsumerWidget {
 |----------|----------|
 | Guest taps Inbox tab | `_RouterNotifier.redirect` sends to `/login`; after login, GoRouter resumes `/inbox` |
 | Guest taps Profile tab | Shell renders Profile tab; `ProfileScreen` detects `user == null` and shows sign-in CTA instead of profile content |
-| Deep link `/u/{otherId}` | Navigates to full-screen `ProfileScreen` **outside** the shell (no bottom nav) |
-| Deep link `/u/{myId}` | Same as above — resolves to full-screen for consistency; alternatively `context.go('/me')` if IDs match |
+| Deep link `/user/{otherId}` | Navigates to full-screen `ProfileScreen` **outside** the shell (no bottom nav) |
+| Deep link `/user/{myId}` | Same as above — resolves to full-screen for consistency; alternatively `context.go('/me')` if IDs match |
 
 ### Navigation conventions
 
@@ -352,7 +352,7 @@ context.go('/me');        // → Profile tab
 context.go('/settings');  // → Settings tab
 
 // Push full-screen over shell (back button returns to shell)
-context.push('/u/$userId');                     // Other user profile
+context.push('/user/$userId');                  // Other user profile
 context.push('/inbox/answer/$questionId');      // Answer compose
 context.push('/me/edit');                       // Edit profile
 ```
