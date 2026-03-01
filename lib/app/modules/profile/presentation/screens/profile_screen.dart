@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
@@ -7,13 +8,13 @@ import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/empty_state.dart';
 import 'package:askme_humg/app/global_widgets/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/profile/domain/user_profile.dart';
 import 'package:askme_humg/app/modules/profile/presentation/profile_providers.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_preview_card.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -167,7 +168,11 @@ class _ProfileBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
 
         // Recent Answers section
-        _RecentAnswersSection(answerCount: profile.answerCount, l10n: l10n),
+        _RecentAnswersSection(
+          userId: profile.userId,
+          answerCount: profile.answerCount,
+          l10n: l10n,
+        ),
       ],
     );
   }
@@ -231,7 +236,7 @@ class _OwnerActionSection extends StatelessWidget {
         OutlinedButton.icon(
           icon: Icon(LucideIcons.inbox, size: 18),
           label: Text(l10n.profileGoToInbox),
-          onPressed: () => const InboxRoute().go(context),
+          onPressed: () => context.go('/inbox'),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
             side: BorderSide(color: cs.outline),
@@ -244,18 +249,24 @@ class _OwnerActionSection extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Recent Answers section — placeholder tiles (real data in Phase 4)
+// Recent Answers section — real data from Firestore (UC-4.1)
 // ---------------------------------------------------------------------------
 
-class _RecentAnswersSection extends StatelessWidget {
-  const _RecentAnswersSection({required this.answerCount, required this.l10n});
+class _RecentAnswersSection extends ConsumerWidget {
+  const _RecentAnswersSection({
+    required this.userId,
+    required this.answerCount,
+    required this.l10n,
+  });
 
+  final String userId;
   final int answerCount;
   final AppLocalizations l10n;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final answersAsync = ref.watch(userAnswersProvider(userId));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,20 +281,13 @@ class _RecentAnswersSection extends StatelessWidget {
                 color: cs.onSurface,
               ),
             ),
+            // TODO(phase-5): Navigate to full published answers list screen
             if (answerCount > 0)
               TextButton(
-                // TODO(phase-4): navigate to full answer list for this user
                 onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
                 child: Text(
                   l10n.profileViewAll,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.secondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(color: cs.primary),
                 ),
               ),
           ],
@@ -297,28 +301,40 @@ class _RecentAnswersSection extends StatelessWidget {
               message: l10n.profileEmptyAnswers,
             ),
           )
-        else ...[
-          // TODO(phase-4): replace with real data — query answers where
-          //   userId == profile.userId && isPublished == true,
-          //   orderBy createdAt desc, limit 3 (UC-4.1 pagination pattern)
-          const AnswerPreviewCard(
-            question: 'What are the best tips for studying at HUMG?',
-            answer:
-                'Focus on field trips and make sure to attend key lectures, they are extremely helpful for exams...',
-            likeCount: 12,
-            commentCount: 4,
-            timestamp: '2h ago',
+        else
+          answersAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: ErrorState(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(userAnswersProvider(userId)),
+              ),
+            ),
+            data: (answers) {
+              if (answers.isEmpty) {
+                // answerCount > 0 but no published answers yet
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                  child: EmptyState(
+                    icon: LucideIcons.messageCircleOff,
+                    message: l10n.profileNoPublishedAnswers,
+                  ),
+                );
+              }
+              return Column(
+                children: [
+                  for (int i = 0; i < answers.length; i++) ...[
+                    if (i > 0) const SizedBox(height: AppSpacing.md),
+                    AnswerPreviewCard(item: answers[i]),
+                  ],
+                ],
+              );
+            },
           ),
-          const SizedBox(height: AppSpacing.md),
-          const AnswerPreviewCard(
-            question: 'Is the canteen food good this semester?',
-            answer:
-                "It's actually improved a lot! The Bun Cha on Tuesdays is a must-try.",
-            likeCount: 45,
-            commentCount: 8,
-            timestamp: 'Yesterday',
-          ),
-        ],
       ],
     );
   }

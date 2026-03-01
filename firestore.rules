@@ -37,7 +37,10 @@ service cloud.firestore {
       allow update: if isSignedIn() && (
         resource.data.toUserId == request.auth.uid || isAdmin()
       );
-      allow delete: if isAdmin();
+      // UC-3.2: host can delete questions sent to them; admin can delete any
+      allow delete: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
     }
 
     // ── answers ───────────────────────────────────────────────────────

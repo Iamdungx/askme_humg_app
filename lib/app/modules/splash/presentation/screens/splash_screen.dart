@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -57,9 +57,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     _authSub?.close();
     final isLoggedIn = ref.read(authStateProvider).asData?.value != null;
     if (isLoggedIn) {
-      const FeedRoute().go(context);
+      context.go('/');
     } else {
-      const LoginRoute().go(context);
+      context.go('/login');
     }
   }
 

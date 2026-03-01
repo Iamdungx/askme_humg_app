@@ -72,7 +72,10 @@ class FirebaseQnaDatasource {
         );
   }
 
-  /// UC-3.3: WriteBatch — answers.create + questions.update in one atomic commit
+  /// UC-3.3: WriteBatch — answers.create + questions.update in one atomic commit.
+  ///
+  /// Denormalizes questionContent, hostName, hostAvatar into the answers doc
+  /// so UC-4.1 feed queries read 1 doc instead of 3 (SRS NFR-02 performance).
   Future<void> answerQuestion({
     required String questionId,
     required String userId,
@@ -80,6 +83,23 @@ class FirebaseQnaDatasource {
     required bool isPublished,
   }) async {
     try {
+      // Fetch question content and host user info before the batch (denormalization).
+      final questionSnap =
+          await _firestore.collection('questions').doc(questionId).get();
+      if (!questionSnap.exists) {
+        throw FirestoreException(
+          'answerQuestion: question $questionId not found',
+        );
+      }
+      final questionContent =
+          (questionSnap.data()?['content'] as String?) ?? '';
+
+      final userSnap =
+          await _firestore.collection('users').doc(userId).get();
+      final userData = userSnap.data();
+      final hostName = (userData?['name'] as String?) ?? '';
+      final hostAvatar = (userData?['avatar'] as String?) ?? '';
+
       final batch = _firestore.batch();
 
       final answerRef = _firestore.collection('answers').doc();
@@ -92,6 +112,10 @@ class FirebaseQnaDatasource {
         'likeCount': 0,
         'commentCount': 0,
         'createdAt': FieldValue.serverTimestamp(),
+        // Denormalized fields for UC-4.1 feed display (SRS NFR-02)
+        'questionContent': questionContent,
+        'hostName': hostName,
+        'hostAvatar': hostAvatar,
       });
 
       final questionRef = _firestore.collection('questions').doc(questionId);

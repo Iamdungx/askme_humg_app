@@ -37,7 +37,8 @@ Tổng tiến độ: ~70% ███████░░░
 | Trang cá nhân + deep link | ✅ Xong |
 | Hộp thư câu hỏi (Inbox) | ✅ Xong |
 | Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
-| Feed công khai | ❌ Chưa làm |
+| Feed công khai | ✅ Xong |
+| Bottom Navigation Shell (ShellRoute) | ❌ Chưa làm |
 | Kiểm duyệt / báo cáo | ❌ Chưa làm |
 
 ---
@@ -84,8 +85,18 @@ Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa 
 - `_ReplyButton` dùng `l10n.inboxReplyButton` thay vì `answerComposeTitle`
 - Xóa field `questionId` thừa trong Firestore document write
 
-### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ⏳ TIẾP THEO
-Xem feed công khai (phân trang cursor 20 bài, `isPublished == true`, `orderBy createdAt desc`), like/unlike câu trả lời (`arrayUnion/arrayRemove` + `FieldValue.increment`), bình luận (WriteBatch: `comments` + `answers.commentCount`).
+### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ✅ XONG
+Feed công khai, like/unlike, bình luận đã implement. Composite Firestore indexes đã deploy.
+
+**⚠️ Còn thiếu: Bottom Navigation Shell**
+App chưa có `ShellRoute` — user không thể điều hướng giữa các tab. Đây là **blocker** cần làm ngay trước khi test end-to-end.
+
+Implement theo `ARCHITECTURE.md` → "Shell Navigation":
+1. Tạo `lib/app/core/widgets/app_shell.dart` (`StatefulNavigationShell` wrapper)
+2. Refactor `app_routes.dart`: bọc Feed/Inbox/Me trong `StatefulShellRoute`
+3. Thêm route `/me` → `ProfileScreen(myUserId)`
+4. Thêm l10n keys: `navFeed`, `navInbox`, `navProfile` vào 3 ARB files
+5. Xử lý auth edge cases (guest taps Inbox → redirect login)
 
 ### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
 Báo cáo nội dung vi phạm, admin xem và xử lý các báo cáo.

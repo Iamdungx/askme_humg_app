@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/empty_state.dart';
@@ -8,7 +9,6 @@ import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/question_card.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class InboxScreen extends ConsumerStatefulWidget {
@@ -71,7 +71,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
                 questions: unanswered,
                 showReply: true,
                 emptyMessage: l10n.inboxEmptyUnanswered,
-                onReply: (q) => AnswerComposeRoute(questionId: q.questionId).push(context),
+                onReply: (q) => context.push('/inbox/answer/${q.questionId}'),
                 onDelete: (q) => _deleteQuestion(q),
               ),
               _QuestionList(
@@ -136,16 +136,21 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
   }
 
   Future<void> _deleteQuestion(Question question) async {
+    final l10n = AppLocalizations.of(context);
     await ref
         .read(deleteQuestionProvider.notifier)
         .delete(question.questionId);
 
+    // Provider may have been disposed by the time the await returns
+    // (inbox stream fires immediately on deletion). Check mounted first.
+    if (!mounted) return;
+
+    // ref.read is safe here only if the provider is keepAlive=true.
     final state = ref.read(deleteQuestionProvider);
     if (state.hasError) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(state.error.toString()),
+          content: Text(l10n.commonError),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

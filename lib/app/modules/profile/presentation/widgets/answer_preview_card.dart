@@ -1,124 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
+import 'package:askme_humg/app/modules/feed/presentation/screens/comments_screen.dart';
+import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
 
 /// Read-only answer preview card shown in the Profile screen's "Recent Answers" section.
-// TODO(phase-4): add answerId field + onTap callback → navigate to full answer / comments sheet (UC-4.3)
 class AnswerPreviewCard extends StatelessWidget {
-  const AnswerPreviewCard({
-    super.key,
-    required this.question,
-    required this.answer,
-    required this.likeCount,
-    required this.commentCount,
-    this.timestamp,
-  });
+  const AnswerPreviewCard({super.key, required this.item});
 
-  final String question;
-  final String answer;
-  final int likeCount;
-  final int commentCount;
-  final String? timestamp;
+  final FeedItem item;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+    return InkWell(
+      onTap: () => showCommentsSheet(
+        context,
+        answerId: item.answerId,
+        commentCount: item.commentCount,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                LucideIcons.circleQuestionMark,
-                size: 18,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  '"$question"',
-                  style: tt.bodyMedium?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.8),
-                    fontStyle: FontStyle.italic,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: cs.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  LucideIcons.circleQuestionMark,
+                  size: 18,
+                  color: cs.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    '"${item.questionContent}"',
+                    style: tt.bodyMedium?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.8),
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
-            child: Text(
-              answer,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
+              ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
-            child: Column(
-              children: [
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: cs.primary.withValues(alpha: 0.1),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    // TODO(phase-4): like button → UC-4.2 (arrayUnion/arrayRemove + FieldValue.increment)
-                    _ActionChip(
-                      icon: LucideIcons.heart,
-                      count: likeCount,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    // TODO(phase-4): comment button → open DraggableScrollableSheet (UC-4.3)
-                    _ActionChip(
-                      icon: LucideIcons.messageCircle,
-                      count: commentCount,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    if (timestamp != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
+              child: Text(
+                item.answerContent,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
+              child: Column(
+                children: [
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: cs.primary.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      LikeButton(
+                        answerId: item.answerId,
+                        likeCount: item.likeCount,
+                        likedBy: item.likedBy,
+                      ),
+                      const SizedBox(width: AppSpacing.lg),
+                      _CommentChip(
+                        count: item.commentCount,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const Spacer(),
                       Text(
-                        timestamp!.toUpperCase(),
+                        timeago.format(item.createdAt).toUpperCase(),
                         style: tt.labelSmall?.copyWith(
                           color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({
-    required this.icon,
-    required this.count,
-    required this.color,
-  });
+class _CommentChip extends StatelessWidget {
+  const _CommentChip({required this.count, required this.color});
 
-  final IconData icon;
   final int count;
   final Color color;
 
@@ -127,14 +117,14 @@ class _ActionChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(LucideIcons.messageCircle, size: 16, color: color),
         const SizedBox(width: AppSpacing.xs),
         Text(
           count.toString(),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w500,
-          ),
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );

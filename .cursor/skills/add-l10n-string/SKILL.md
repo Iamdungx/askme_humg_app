@@ -27,17 +27,31 @@ Examples:
   adminActionRemove
 ```
 
+## MANDATORY: Every key must have an `@` metadata block
+
+**Every key in every ARB file requires a `@key` block with a `description`.** No exceptions.
+
+```json
+"feedEmpty": "No posts yet. Be the first!",
+"@feedEmpty": { "description": "Empty state message on feed screen" },
+```
+
+This is required by the `flutter gen-l10n` tool for code documentation and prevents silent drift between files.
+
 ## Simple string
 
 ```json
 // app_en.arb
 "myNewKey": "My text here",
+"@myNewKey": { "description": "Short description of where/when this string appears" },
 
 // app_vi.arb
 "myNewKey": "Văn bản của tôi",
+"@myNewKey": { "description": "Mô tả ngắn bằng tiếng Việt" },
 
 // app_ja.arb
 "myNewKey": "テキスト",
+"@myNewKey": { "description": "日本語での説明" },
 ```
 
 ## String with placeholder
@@ -46,17 +60,26 @@ Examples:
 // app_en.arb
 "questionCharCount": "{current}/300",
 "@questionCharCount": {
+  "description": "Character counter for question input",
   "placeholders": { "current": { "type": "int" } }
 },
 
-// app_vi.arb — same key, translated value
+// app_vi.arb — same structure, translated value
 "questionCharCount": "{current}/300",
 "@questionCharCount": {
+  "description": "Đếm ký tự input câu hỏi",
+  "placeholders": { "current": { "type": "int" } }
+},
+
+// app_ja.arb
+"questionCharCount": "{current}/300",
+"@questionCharCount": {
+  "description": "質問入力の文字カウンター",
   "placeholders": { "current": { "type": "int" } }
 },
 ```
 
-> `@` metadata block must be present in EVERY ARB file that has placeholders.
+> `@` metadata block with `description` AND `placeholders` must be present in EVERY ARB file that has placeholders.
 
 ## Using in widget
 
@@ -86,11 +109,13 @@ This regenerates `lib/l10n/app_localizations*.dart`. Never edit generated files.
 
 ## Checklist
 
-- [ ] Key added to all 3 ARB files (en + vi + ja)
-- [ ] `@` metadata added for any placeholder
+- [ ] Key added to **all 3** ARB files (en + vi + ja)
+- [ ] `@key` metadata block with `description` added in **every** ARB file
+- [ ] `placeholders` included in `@` block if the string has `{param}`
 - [ ] Key name follows `{screen}_{element}` convention
-- [ ] `flutter gen-l10n` run
+- [ ] `flutter gen-l10n` run with exit code 0
 - [ ] Widget uses `l10n.keyName` (no hardcoded string)
+- [ ] `flutter analyze` passes — no undefined l10n references
 
 ## Existing keys (do not duplicate)
 

@@ -6,7 +6,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/app/modules/auth/domain/auth_user.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/config/languages.dart';
 
 /// Dev-only navigation drawer.
@@ -33,19 +32,19 @@ class DevDrawer extends ConsumerWidget {
             _NavTile(
               icon: LucideIcons.house,
               label: 'Feed  /  (placeholder)',
-              onTap: () => _go(context, const FeedRoute().location),
+              onTap: () => _go(context, '/'),
             ),
             if (user != null) ...[
               _NavTile(
                 icon: LucideIcons.inbox,
                 label: 'Inbox  /inbox',
-                onTap: () => _go(context, const InboxRoute().location),
+                onTap: () => _go(context, '/inbox'),
               ),
               _NavTile(
                 icon: LucideIcons.circleUser,
                 label: 'My Profile  /u/:uid',
                 onTap: () =>
-                    _go(context, ProfileRoute(userId: user.uid).location),
+                    _go(context, '/me'),
               ),
               _NavTile(
                 icon: LucideIcons.userSearch,
@@ -55,19 +54,19 @@ class DevDrawer extends ConsumerWidget {
               _NavTile(
                 icon: LucideIcons.shieldCheck,
                 label: 'Admin  /admin  (placeholder)',
-                onTap: () => _go(context, const AdminRoute().location),
+                onTap: () => _go(context, '/admin'),
               ),
             ],
             const Divider(),
             _NavTile(
               icon: LucideIcons.logIn,
               label: 'Login Screen',
-              onTap: () => _go(context, const LoginRoute().location),
+              onTap: () => _go(context, '/login'),
             ),
             _NavTile(
               icon: LucideIcons.sparkles,
               label: 'Splash Screen',
-              onTap: () => _go(context, const SplashRoute().location),
+              onTap: () => _go(context, '/splash'),
             ),
             if (user != null) ...[
               const Divider(),
@@ -129,7 +128,7 @@ class DevDrawer extends ConsumerWidget {
               if (uid.isEmpty) return;
               Navigator.pop(ctx);
               Navigator.pop(context); // close drawer
-              context.go(ProfileRoute(userId: uid).location);
+              context.go('/u/$uid');
             },
             child: const Text('Go'),
           ),

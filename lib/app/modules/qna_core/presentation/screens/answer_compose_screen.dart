@@ -23,6 +23,8 @@ class AnswerComposeScreen extends ConsumerStatefulWidget {
 }
 
 class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
+  static const int _maxChars = 2000;
+
   final _controller = TextEditingController();
   bool _isPublished = true;
   String? _validationError;
@@ -42,16 +44,17 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
 
     ref.listen(answerProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
+        if (!context.mounted) return;
         final msg = _isPublished ? l10n.answerPublishSuccess : l10n.answerSaved;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),
         );
-        if (context.mounted) context.pop();
-      }
-      if (next.hasError) {
+        context.pop();
+      } else if (next.hasError) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.error.toString()),
+            content: Text(l10n.commonError),
             backgroundColor: cs.error,
           ),
         );
@@ -69,7 +72,11 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
       ),
       body: questionAsync.when(
         loading: () => const LoadingShimmer(),
-        error: (e, _) => ErrorState(message: e.toString()),
+        error: (e, _) => ErrorState(
+          message: l10n.commonError,
+          onRetry: () =>
+              ref.invalidate(questionByIdProvider(widget.questionId)),
+        ),
         data: (question) {
           if (question == null) {
             return ErrorState(message: l10n.commonError);
@@ -106,6 +113,7 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
             controller: _controller,
             minLines: 5,
             maxLines: null,
+            maxLength: _maxChars,
             onChanged: (_) {
               if (_validationError != null) {
                 setState(() => _validationError = null);
@@ -142,7 +150,7 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: l10n.answerPublishButton,
+            label: _isPublished ? l10n.answerPublishButton : l10n.answerSaveButton,
             variant: AppButtonVariant.primary,
             isLoading: answerState.isLoading,
             onPressed: answerState.isLoading ? null : _submit,
@@ -158,6 +166,10 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
     final l10n = AppLocalizations.of(context);
     if (content.isEmpty) {
       setState(() => _validationError = l10n.answerErrorEmpty);
+      return;
+    }
+    if (content.length > _maxChars) {
+      setState(() => _validationError = l10n.answerErrorTooLong);
       return;
     }
 
