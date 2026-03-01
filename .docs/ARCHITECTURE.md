@@ -260,7 +260,7 @@ Auth guard: `/inbox` and `/admin` redirect to `/login` if unauthenticated. `/log
 
 ### Why ShellRoute
 
-The app has a persistent 3-tab bottom nav (`Feed` / `Inbox` / `Profile`). GoRouter's `ShellRoute` wraps these 3 routes in a shared `AppShell` scaffold so:
+The app has a persistent 4-tab bottom nav (`Feed` / `Inbox` / `Profile` / `Settings`). GoRouter's `StatefulShellRoute` wraps these 4 routes in a shared `AppShell` scaffold so:
 - The `NavigationBar` persists across tab switches
 - Each tab keeps its own scroll position and state (`IndexedStack`)
 - Full-screen routes (Login, AnswerCompose, deep-link Profile) render **outside** the shell — no bottom nav visible
@@ -304,9 +304,10 @@ class AppShell extends ConsumerWidget {
           initialLocation: i == navigationShell.currentIndex,
         ),
         destinations: [
-          NavigationDestination(icon: Icon(LucideIcons.home),    label: l10n.navFeed),
-          NavigationDestination(icon: Icon(LucideIcons.mailbox), label: l10n.navInbox),
-          NavigationDestination(icon: Icon(LucideIcons.user),    label: l10n.navProfile),
+          NavigationDestination(icon: Icon(LucideIcons.home),     label: l10n.navFeed),
+          NavigationDestination(icon: Icon(LucideIcons.mailbox),  label: l10n.navInbox),
+          NavigationDestination(icon: Icon(LucideIcons.user),     label: l10n.navProfile),
+          NavigationDestination(icon: Icon(LucideIcons.settings), label: l10n.navSettings),
         ],
       ),
     );
@@ -339,10 +340,12 @@ class AppShell extends ConsumerWidget {
 context.go('/');          // → Feed tab
 context.go('/inbox');     // → Inbox tab
 context.go('/me');        // → Profile tab
+context.go('/settings');  // → Settings tab
 
 // Push full-screen over shell (back button returns to shell)
 context.push('/u/$userId');                     // Other user profile
 context.push('/inbox/answer/$questionId');      // Answer compose
+context.push('/me/edit');                       // Edit profile
 ```
 
 ### Firestore index note

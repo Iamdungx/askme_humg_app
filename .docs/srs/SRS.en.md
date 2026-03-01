@@ -1,6 +1,6 @@
 # AskmeHUMG – Software Requirements Specification (SRS)
 
-> **Version:** 2.0 | **Last Updated:** 2026-02-26
+> **Version:** 2.1 | **Last Updated:** 2026-03-01
 
 ---
 
@@ -112,16 +112,23 @@ The system follows a client-server architecture with real-time database support.
 
 ### FR-02: User Authentication
 
-**Description:** Only students with an institutional Google account may register and log in as a Host.
+**Description:** Any Google account may sign in to the application. Full Host features (receiving questions, answering, publishing to Feed) require additional HUMG identity verification.
 
-**Constraint:** The system enforces a strict **email domain restriction**. Only Google accounts with the `@humg.edu.vn` domain are accepted. Accounts using any other domain (e.g., `@gmail.com`) will be rejected at the authentication stage.
+**Two-tier authentication model:**
+- **Tier 1 — Google Sign-In:** Any Google account can sign in. A `users` document is created on first login. The user can browse the Feed and interact (like, comment).
+- **Tier 2 — HUMG Verification:** To unlock Host features, the user must verify ownership of a `@humg.edu.vn` email address. Upon successful verification, `isHumgVerified: true` and `humgEmail` are saved to the `users` document.
 
-**Processing:**
+**Processing (Tier 1):**
 1. User initiates Google Sign-In
-2. Firebase Auth returns the authenticated email
-3. System validates that the email ends with `@humg.edu.vn`; if not, the session is immediately revoked and an error message is displayed
-4. On first login, a new document is created in the `users` collection
-5. Session is established and the user is redirected to the home screen
+2. Firebase Auth returns the authenticated Google account
+3. On first login, a new document is created in the `users` collection with `isHumgVerified: false`
+4. Session is established and the user is redirected to the home screen
+
+**Processing (Tier 2 — HUMG Verification):**
+1. User submits their `@humg.edu.vn` email address in the Settings screen
+2. System sends an OTP to the submitted email via Cloud Functions (Resend API)
+3. User enters the OTP; system validates against the `otpRequests` collection
+4. On success: `isHumgVerified: true` and `humgEmail` written to the `users` document
 
 ---
 
@@ -192,10 +199,12 @@ The system follows a client-server architecture with real-time database support.
 ### FR-10: User Profile
 
 **Description:** Display a Host user's public information:
-- Display name
+- Display name (or anonymous handle if the user has disabled real name display)
 - Avatar
 - Number of published answers
 - Total likes received
+
+**Privacy control:** A Host may toggle "Show real name on profile" in Settings. When disabled, their real name is replaced with a generic placeholder on the public Feed and profile page. This preference is stored in the `users` document (`showRealName` field).
 
 ---
 
@@ -204,9 +213,9 @@ The system follows a client-server architecture with real-time database support.
 **Description:** Every Host user can generate and share a unique deep link that, when opened, navigates directly to their profile page where anonymous questions can be submitted.
 
 **Processing:**
-1. System generates a unique URL for the Host using **Firebase Dynamic Links** (or a custom scheme), e.g., `https://askme.humg.edu.vn/u/{userId}`
-2. Host can share this link or a visual card (image with the link) to external platforms (Facebook, Instagram Stories, etc.)
-3. When a recipient opens the link on a device with the app installed, the app opens directly to the Host's profile
+1. The system constructs a unique URL for the Host: `https://askme.humg.edu.vn/u/{userId}`
+2. Host can share this link or a visual QR card (image with the link) to external platforms (Facebook, Instagram Stories, etc.)
+3. When a recipient opens the link on a device with the app installed, the app opens directly to the Host's profile (handled by `app_links` + Android App Links / iOS Universal Links)
 4. If the app is not installed, the link redirects to an app store or a mobile web fallback page
 
 **Outputs:**
@@ -262,24 +271,26 @@ The system follows a client-server architecture with real-time database support.
 
 | Service | Role |
 |---|---|
-| **Firebase Authentication** | User login & identity, domain restriction enforcement |
+| **Firebase Authentication** | User login & identity |
 | **Cloud Firestore** | Real-time NoSQL database |
 | **Firebase Storage** | Avatar and media storage |
-| **Cloud Functions** | Rate limiting for anonymous submissions, server-side content moderation |
+| **Cloud Functions** | Rate limiting for anonymous submissions, OTP delivery (Resend API), server-side content moderation |
 | **Firebase App Check** | Attestation of legitimate app instances for anonymous endpoints |
-| **Firebase Dynamic Links** | Generation and routing of shareable Host profile deep links |
+| **`app_links` package** | Deep link handling for `askme.humg.edu.vn/u/{userId}` — replaces deprecated Firebase Dynamic Links |
+
+> **Note:** Firebase Dynamic Links was deprecated by Google in August 2025. The app uses the `app_links` package for deep link interception combined with native platform configuration (Android App Links / iOS Universal Links) pointing to `askme.humg.edu.vn`.
 
 ### Architecture Diagram (High-level)
 
 ```
 Flutter App (Riverpod)
     │
-    ├── Firebase Auth          (Login · @humg.edu.vn enforcement)
+    ├── Firebase Auth          (Login · any Google account)
     ├── Firebase App Check     (Bot prevention · anonymous submissions)
     ├── Cloud Firestore        (Data storage · real-time sync)
     ├── Firebase Storage       (Avatars · media)
-    ├── Cloud Functions        (Rate limiting · server moderation)
-    └── Firebase Dynamic Links (Shareable deep links)
+    ├── Cloud Functions        (Rate limiting · OTP · server moderation)
+    └── app_links + native     (Deep link routing: askme.humg.edu.vn/u/{userId})
 ```
 
 ---
@@ -291,11 +302,15 @@ Flutter App (Riverpod)
 | Field | Type | Description |
 |---|---|---|
 | `userId` | String | Unique user identifier (Firebase Auth UID) |
-| `name` | String | Display name |
+| `name` | String | Display name (from Google account) |
 | `avatar` | String (URL) | Avatar image URL |
-| `email` | String | Verified `@humg.edu.vn` email |
+| `email` | String | Google account email (any domain) |
+| `role` | String | `user` (default) or `admin` |
 | `createdAt` | Timestamp | Account creation time |
 | `isBlocked` | Boolean | Whether the account is suspended by Admin |
+| `isHumgVerified` | Boolean | Whether the user has verified a `@humg.edu.vn` email |
+| `humgEmail` | String (nullable) | The verified HUMG email address |
+| `showRealName` | Boolean | Whether the user's real name is shown publicly (default: `true`) |
 
 ### Collection: `questions`
 
@@ -318,9 +333,10 @@ Flutter App (Riverpod)
 | `createdAt` | Timestamp | Answer timestamp |
 | `likeCount` | Number | Cached total like count (for display performance) |
 | `likedBy` | Array\<String\> | List of `userId`s who liked this answer — enforces one-like-per-user rule |
+| `commentCount` | Number | Cached total comment count (for display performance) |
 | `isPublished` | Boolean | Whether the answer is visible on the public Feed |
 
-> **Design note:** `likeCount` is a denormalized cache updated atomically via `FieldValue.increment()` alongside the `likedBy` array update. This avoids a sub-collection read for the count on every feed item render.
+> **Design note:** Both `likeCount` and `commentCount` are denormalized caches updated atomically via `FieldValue.increment()`. For likes, the `likedBy` array is updated in the same operation. This avoids sub-collection reads for counts on every feed item render. Both updates use `WriteBatch` to ensure atomicity.
 
 ### Collection: `comments`
 
@@ -346,6 +362,17 @@ Flutter App (Riverpod)
 | `createdAt` | Timestamp | Report submission timestamp |
 | `resolvedAt` | Timestamp (nullable) | Timestamp when Admin acted on the report |
 
+### Collection: `otpRequests`
+
+Managed entirely by Cloud Functions. Client has no direct read/write access.
+
+| Field | Type | Description |
+|---|---|---|
+| `email` | String | The `@humg.edu.vn` email the OTP was sent to |
+| `otpHash` | String | Bcrypt hash of the OTP (plain-text OTP never stored) |
+| `expiresAt` | Timestamp | OTP expiry time (10 minutes from generation) |
+| `attempts` | Number | Failed attempt count (max 5 before lockout) |
+
 ---
 
 ## 7. Constraints
@@ -360,10 +387,17 @@ Flutter App (Riverpod)
 
 ## 8. Future Enhancements
 
+### Version 2 (Planned)
+
+- **Push notifications** for new received questions and new comments on answers — via Firebase Cloud Messaging (FCM). UI placeholder already exists in the Settings screen; backend implementation deferred pending FCM setup.
+- **Avatar & display name editing** — upload new avatar to Firebase Storage and update `name` in the `users` document. Edit Profile screen is a placeholder pending v2.
+- **`showRealName` Firestore persistence** — currently in-memory; v2 will persist the toggle to `users.showRealName`.
+
+### Version 3+ (Future Consideration)
+
 - AI-based answer suggestion using an LLM API
 - Analytics dashboard for popular questions and trending topics
 - Trend analysis segmented by faculty or department
-- Push notifications for new received questions (via Firebase Cloud Messaging)
 - Integration with HUMG's official student information systems
 
 ---

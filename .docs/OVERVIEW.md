@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~70% ███████░░░
+Tổng tiến độ: ~85% ████████░░
 ```
 
 | Hạng mục | Trạng thái |
@@ -90,15 +90,25 @@ Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa 
 ### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ✅ XONG
 Feed công khai, like/unlike, bình luận đã implement. Composite Firestore indexes đã deploy.
 
-**⚠️ Còn thiếu: Bottom Navigation Shell**
-App chưa có `ShellRoute` — user không thể điều hướng giữa các tab. Đây là **blocker** cần làm ngay trước khi test end-to-end.
+### Phase 4.5 — Navigation Shell & Settings ✅ XONG
 
-Implement theo `ARCHITECTURE.md` → "Shell Navigation":
-1. Tạo `lib/app/core/widgets/app_shell.dart` (`StatefulNavigationShell` wrapper)
-2. Refactor `app_routes.dart`: bọc Feed/Inbox/Me trong `StatefulShellRoute`
-3. Thêm route `/me` → `ProfileScreen(myUserId)`
-4. Thêm l10n keys: `navFeed`, `navInbox`, `navProfile` vào 3 ARB files
-5. Xử lý auth edge cases (guest taps Inbox → redirect login)
+**Đã implement:**
+- `AppShell` (`lib/app/core/widgets/app_shell.dart`) — 4 tabs: Feed / Inbox / Profile / Settings
+- `StatefulShellRoute` trong `router.dart` — tab state persist, scroll-to-top khi tap tab active
+- Badge đỏ trên Inbox tab hiển thị số câu hỏi chưa trả lời
+- `SettingsScreen` (`/settings`):
+  - Account: Edit Profile, HUMG verify status, Show real name toggle
+  - Notifications: placeholder với `// TODO(v2)` — chờ FCM
+  - App: Language picker (vi/en/ja), Theme picker (light/dark/system), Clear cache
+  - About: Version (PackageInfo), Terms, Privacy
+  - Sign out với confirmation dialog
+- `EditProfileScreen` (`/me/edit`) — placeholder (avatar + name read-only), `// TODO(v2)` upload
+- Profile tab: thêm nút ✏️ Edit trên AppBar của owner
+
+**⚠️ TODO v2 (Version 2):**
+- FCM push notifications (cần `firebase_messaging` package)
+- Avatar upload lên Firebase Storage
+- Lưu `showRealName` vào Firestore `users` doc
 
 ### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
 Báo cáo nội dung vi phạm, admin xem và xử lý các báo cáo.
@@ -112,12 +122,15 @@ lib/
 ├── config/          ← router, DI, env, bootstrap
 ├── app/
 │   ├── core/        ← màu sắc, font, theme, logger, validator, error classes
+│   │   ├── providers/   ← theme_provider, locale_provider (shared_preferences)
+│   │   └── widgets/     ← app_shell.dart (bottom nav scaffold)
 │   ├── global_widgets/  ← button, card, avatar, badge, shimmer...
 │   └── modules/
 │       ├── auth/        ← Phase 1
 │       ├── profile/     ← Phase 2
 │       ├── qna_core/    ← Phase 3
 │       ├── feed/        ← Phase 4
+│       ├── settings/    ← Phase 4.5
 │       └── moderation/  ← Phase 5
 ```
 
@@ -206,19 +219,21 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ## Bước tiếp theo ngay bây giờ
 
 ```
-Phase 3 đã xong. Tiến hành Phase 4: Feed & Tương tác
-
-1. Đọc .docs/use_case/UC-4.1_view_feed.md
-2. Đọc .docs/use_case/UC-4.2_like_unlike.md
-3. Đọc .docs/use_case/UC-4.3_comment.md
-4. Domain layer: FeedItem entity + IFeedRepository + use cases
-5. Data layer: AnswerFeedModel + FeedDatasource + FeedRepositoryImpl
-6. Presentation: FeedScreen (cursor pagination, limit 20) + feedProviders
-7. LikeButton widget (arrayUnion/arrayRemove + increment)
-8. CommentSheet + WriteBatch (comments + commentCount)
+Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
 ```
 
-> **Lưu ý quan trọng cho Phase 4:**
-> - `FeedScreen` cần `Firestore Composite Index` cho query `isPublished == true` + `orderBy createdAt desc`
-> - UC-3.1 (gửi câu hỏi ẩn danh) cần deploy Cloud Function trước khi test end-to-end
-> - `isHumgVerified` guard (UC-1.3 OTP) chưa implement → Host features chưa bị khóa
+### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
+
+1. Đọc `.docs/use_case/UC-5.1_report_content.md`
+2. Đọc `.docs/use_case/UC-5.2_admin_moderate.md`
+3. Domain layer: `Report` entity + `IReportRepository` + 2 use cases
+4. Data layer: `ReportModel` + `FirebaseReportDatasource` + `ReportRepositoryImpl`
+5. Presentation:
+   - `ReportBottomSheet` — hiển thị từ FeedScreen (3 chấm menu trên mỗi card)
+   - `AdminDashboardScreen` (`/admin`) — danh sách reports, approve/reject
+6. Security rules đã có trong `firestore.rules`; đảm bảo `reports` chỉ admin đọc được
+
+> **Lưu ý quan trọng trước khi test end-to-end:**
+> - UC-3.1 (gửi câu hỏi ẩn danh): Cloud Function `submitQuestion` chưa deploy do chưa upgrade Blaze plan
+> - `isHumgVerified` guard (UC-1.3 OTP): chưa implement → Host features chưa bị khóa
+> - Settings → "HUMG Verification" hiện là placeholder; cần implement UC-1.3 để hoàn chỉnh
