@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 
 class AnonymousBadge extends StatelessWidget {
   const AnonymousBadge({
     super.key,
     this.label = 'Your identity is hidden',
     this.compact = false,
+    this.size = 36,
   });
 
   final String label;
-
-  /// compact = true → chỉ hiện icon (dùng trong comment tile thay avatar)
   final bool compact;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +55,25 @@ class AnonymousBadge extends StatelessWidget {
   Widget _buildCompact(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 36,
-      height: 36,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         shape: BoxShape.circle,
         border: Border.all(color: cs.outline, width: 1),
       ),
-      child: Icon(LucideIcons.lock, size: 16, color: cs.onSurfaceVariant),
+      child: ClipOval(
+        child: Padding(
+          padding: EdgeInsets.all(size * 0.1),
+          child: Assets.svgsAnonymous.svg(
+            fit: BoxFit.contain,
+            colorFilter: ColorFilter.mode(
+              cs.onSurfaceVariant,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

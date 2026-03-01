@@ -8,7 +8,7 @@ import 'package:askme_humg/app/global_widgets/error_state.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/comments_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/feed_item_card.dart';
-import 'package:askme_humg/app/modules/feed/presentation/widgets/feed_loading_shimmer.dart';
+import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
@@ -19,7 +19,6 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
-  // Guards against double loadMore calls fired by consecutive ScrollEndNotifications.
   bool _isLoadingMoreGuard = false;
 
   Future<void> _triggerLoadMore() async {
@@ -55,10 +54,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         ],
       ),
       body: feedAsync.when(
-        loading: () => ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          children: List.generate(3, (_) => const FeedLoadingShimmer()),
-        ),
+        loading: () => const ShimmerList(),
         error: (e, _) => ErrorState(
           message: l10n.feedErrorLoad,
           onRetry: () => ref.read(feedProvider.notifier).refresh(),
@@ -77,8 +73,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             onRefresh: () => ref.read(feedProvider.notifier).refresh(),
             child: NotificationListener<ScrollNotification>(
               onNotification: (notification) {
-                if (notification is ScrollEndNotification &&
-                    notification.metrics.extentAfter < 200) {
+                if (notification is ScrollUpdateNotification &&
+                    notification.metrics.extentAfter < 400) {
                   _triggerLoadMore();
                 }
                 return false;
@@ -137,13 +133,13 @@ class _FeedListFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoadingMore) {
       return const Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
     if (hasReachedEnd) {
       return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
         child: Center(
           child: Text(
             l10n.feedReachedEnd,

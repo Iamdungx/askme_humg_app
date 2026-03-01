@@ -26,55 +26,67 @@ class LikeButton extends ConsumerWidget {
     final isLiked = uid != null && likedBy.contains(uid);
     final isLoading = ref.watch(toggleLikeProvider(answerId)).isLoading;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: isLoading
-          ? null
-          : () {
-              if (uid == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.loginRequiredToLike)),
-                );
-                return;
-              }
-              ref.read(toggleLikeProvider(answerId).notifier).toggle(
-                    uid: uid,
-                    isCurrentlyLiked: isLiked,
-                  );
-            },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons.heart,
-            color: isLiked
-                ? cs.error
-                : cs.onSurface.withValues(alpha: 0.5),
-            size: 20,
-          )
-              .animate(target: isLiked ? 1.0 : 0.0)
-              .scale(
-                begin: const Offset(1, 1),
-                end: const Offset(1.3, 1.3),
-                duration: 150.ms,
-              )
-              .then()
-              .scale(
-                begin: const Offset(1.3, 1.3),
-                end: const Offset(1, 1),
-                duration: 100.ms,
-              ),
-          const SizedBox(width: 4),
-          Text(
-            '$likeCount',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+    void handleTap() {
+      if (uid == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.loginRequiredToLike)),
+        );
+        return;
+      }
+      ref.read(toggleLikeProvider(answerId).notifier).toggle(
+            uid: uid,
+            isCurrentlyLiked: isLiked,
+          );
+    }
+
+    return Semantics(
+      label: isLiked
+          ? '$likeCount likes, liked'
+          : '$likeCount likes',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : handleTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  LucideIcons.heart,
                   color: isLiked
                       ? cs.error
-                      : cs.onSurface.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w600,
+                      : cs.onSurface.withValues(alpha: 0.5),
+                  size: 20,
+                )
+                    .animate(target: isLiked ? 1.0 : 0.0)
+                    .scale(
+                      begin: const Offset(1, 1),
+                      end: const Offset(1.3, 1.3),
+                      duration: 150.ms,
+                    )
+                    .then()
+                    .scale(
+                      begin: const Offset(1.3, 1.3),
+                      end: const Offset(1, 1),
+                      duration: 100.ms,
+                    ),
+                const SizedBox(width: 4),
+                Text(
+                  '$likeCount',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: isLiked
+                            ? cs.error
+                            : cs.onSurface.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

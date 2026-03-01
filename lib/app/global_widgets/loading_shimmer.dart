@@ -2,8 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 
-/// Generic shimmer skeleton that mirrors the [FeedItemCard] layout.
-/// Used by [FeedLoadingShimmer] and any other loading placeholder.
+/// A list of [count] skeleton cards sharing one shimmer sweep animation.
+class ShimmerList extends StatelessWidget {
+  const ShimmerList({super.key, this.count = 3});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Shimmer.fromColors(
+      baseColor: cs.surfaceContainerHigh,
+      highlightColor: cs.surfaceContainerHighest,
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        children: List.generate(count, (_) => _SkeletonCard(cs: cs)),
+      ),
+    );
+  }
+}
+
+/// Single skeleton card with its own shimmer — for use outside the feed list.
 class LoadingShimmer extends StatelessWidget {
   const LoadingShimmer({super.key});
 

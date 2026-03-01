@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 
 class AppAvatar extends StatelessWidget {
   const AppAvatar({
@@ -57,14 +58,24 @@ class AppAvatar extends StatelessWidget {
 
   Widget _buildFallback(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final initial = (name != null && name!.isNotEmpty)
-        ? name![0].toUpperCase()
-        : '?';
+
+    // No name → show anonymous SVG instead of "?" initial
+    if (name == null || name!.isEmpty) {
+      return Container(
+        color: cs.surfaceContainerHigh,
+        padding: EdgeInsets.all(size * 0.15),
+        child: Assets.svgsAnonymous.svg(
+          fit: BoxFit.contain,
+          colorFilter: ColorFilter.mode(cs.onSurfaceVariant, BlendMode.srcIn),
+        ),
+      );
+    }
+
     return Container(
       color: cs.surfaceContainerHigh,
       alignment: Alignment.center,
       child: Text(
-        initial,
+        name![0].toUpperCase(),
         style: TextStyle(
           color: cs.primary,
           fontSize: size * 0.4,

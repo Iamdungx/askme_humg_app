@@ -8,6 +8,7 @@ import 'package:askme_humg/app/modules/feed/data/firebase_feed_datasource.dart';
 import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_use_cases.dart';
+import 'package:askme_humg/app/core/values/app_durations.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
 
 part 'feed_providers.freezed.dart';
@@ -87,6 +88,7 @@ class FeedNotifier extends _$FeedNotifier {
     );
   }
 
+
   Future<void> loadMore() async {
     final current = state.asData?.value;
     if (current == null || current.isLoadingMore || current.hasReachedEnd) {
@@ -96,11 +98,14 @@ class FeedNotifier extends _$FeedNotifier {
     state = AsyncData(current.copyWith(isLoadingMore: true));
 
     try {
-      final page = await ref.read(getPublicFeedUseCaseProvider).call(
-            lastDocId: current.lastDocId,
-          );
+      // Run fetch and a minimum display delay concurrently so the shimmer is
+      // always visible for at least AppDuration.loadMoreMin — prevents a flash
+      // when Firestore responds faster than one animation frame.
+      final (page, _) = await (
+        ref.read(getPublicFeedUseCaseProvider).call(lastDocId: current.lastDocId),
+        Future<void>.delayed(AppDuration.loadMoreMin),
+      ).wait;
       if (!ref.mounted) return;
-
       state = AsyncData(
         current.copyWith(
           items: [...current.items, ...page.items],
@@ -118,15 +123,22 @@ class FeedNotifier extends _$FeedNotifier {
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final page =
-          await ref.read(getPublicFeedUseCaseProvider).call(lastDocId: null);
-      return FeedState(
+    try {
+      final (page, _) = await (
+        ref.read(getPublicFeedUseCaseProvider).call(),
+        Future<void>.delayed(AppDuration.loadMoreMin),
+      ).wait;
+      if (!ref.mounted) return;
+      state = AsyncData(FeedState(
         items: page.items,
         lastDocId: page.lastDocId,
         hasReachedEnd: !page.hasMore,
-      );
-    });
+      ));
+    } catch (e, s) {
+      logger.e('FeedNotifier.refresh failed', error: e, stackTrace: s);
+      if (!ref.mounted) return;
+      state = AsyncError(e, s);
+    }
   }
 
   /// Optimistic update — called by [ToggleLikeNotifier] before the network call.

@@ -43,7 +43,11 @@ class _CommentsSheetContent extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final commentsAsync = ref.watch(commentsProvider(answerId));
 
-    return Column(
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
       children: [
         const SizedBox(height: AppSpacing.md),
 
@@ -105,6 +109,7 @@ class _CommentsSheetContent extends ConsumerWidget {
         // Input bar
         _CommentInputBar(answerId: answerId),
       ],
+    ),
     );
   }
 }
@@ -183,11 +188,11 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
 
     return Container(
       color: cs.surfaceContainerHigh,
-      padding: EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.lg,
-        AppSpacing.lg + MediaQuery.of(context).viewInsets.bottom,
+        AppSpacing.lg,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
