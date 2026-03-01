@@ -3,7 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:askme_humg/app/core/values/app_colors.dart';
+import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/core/widgets/app_shell.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
@@ -19,6 +22,14 @@ import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen
 import 'package:askme_humg/config/app_routes.dart';
 
 part 'router.g.dart';
+
+// Instant no-animation transition for tab switches — preserves IndexedStack state.
+Widget _noTransition(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) => child;
 
 // ---------------------------------------------------------------------------
 // RouterNotifier
@@ -38,7 +49,7 @@ class _RouterNotifier extends ChangeNotifier {
     final path = state.matchedLocation;
 
     if (authAsync.isLoading) return null;
-    if (path == '/splash') return null;
+    if (path == AppRoutes.splash) return null;
 
     final user = authAsync.asData?.value;
     final isLoggedIn = user != null;
@@ -47,16 +58,16 @@ class _RouterNotifier extends ChangeNotifier {
     final isProtected = protectedLocationPrefixes.any(
       (prefix) => path.startsWith(prefix),
     );
-    if (!isLoggedIn && isProtected) return '/login';
+    if (!isLoggedIn && isProtected) return AppRoutes.login;
 
     // Admin route — requires isAdmin custom claim.
-    if (path.startsWith('/admin')) {
-      if (!isLoggedIn) return '/login';
-      if (user.isAdmin != true) return '/';
+    if (path.startsWith(AppRoutes.admin)) {
+      if (!isLoggedIn) return AppRoutes.login;
+      if (user.isAdmin != true) return AppRoutes.feed;
     }
 
     // Authenticated → leave the login screen.
-    if (isLoggedIn && path == '/login') return '/';
+    if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
     return null;
   }
@@ -71,41 +82,41 @@ GoRouter appRouter(Ref ref) {
   final notifier = _RouterNotifier(ref);
   ref.onDispose(notifier.dispose);
 
-  final router = GoRouter(
-    initialLocation: '/splash',
+  final     router = GoRouter(
+    initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: notifier,
     redirect: notifier.redirect,
     routes: [
       // ── Outside shell (full-screen, no bottom nav) ──────────────────────
       GoRoute(
-        path: '/splash',
+        path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
       // Deep-link profile for OTHER users — full-screen, no bottom nav.
       GoRoute(
-        path: '/u/:userId',
+        path: '${AppRoutes.userProfile}/:userId',
         builder: (context, state) =>
             ProfileScreen(userId: state.pathParameters['userId']!),
       ),
       // AnswerCompose is full-screen — no bottom nav visible while composing.
       GoRoute(
-        path: '/inbox/answer/:questionId',
+        path: '${AppRoutes.inbox}/answer/:questionId',
         builder: (context, state) => AnswerComposeScreen(
           questionId: state.pathParameters['questionId']!,
         ),
       ),
       // Edit Profile — full-screen, accessible from Profile tab and Settings tab.
       GoRoute(
-        path: '/me/edit',
+        path: AppRoutes.meEdit,
         builder: (context, state) => const EditProfileScreen(),
       ),
       GoRoute(
-        path: '/admin',
+        path: AppRoutes.admin,
         builder: (context, state) => const _AdminPlaceholder(),
       ),
 
@@ -118,8 +129,13 @@ GoRouter appRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/',
-                builder: (context, state) => const FeedScreen(),
+                path: AppRoutes.feed,
+                pageBuilder: (context, state) => const CustomTransitionPage(
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                  transitionsBuilder: _noTransition,
+                  child: FeedScreen(),
+                ),
               ),
             ],
           ),
@@ -128,8 +144,13 @@ GoRouter appRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/inbox',
-                builder: (context, state) => const InboxScreen(),
+                path: AppRoutes.inbox,
+                pageBuilder: (context, state) => const CustomTransitionPage(
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                  transitionsBuilder: _noTransition,
+                  child: InboxScreen(),
+                ),
               ),
             ],
           ),
@@ -140,8 +161,13 @@ GoRouter appRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/me',
-                builder: (context, state) => const _MeTab(),
+                path: AppRoutes.me,
+                pageBuilder: (context, state) => const CustomTransitionPage(
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                  transitionsBuilder: _noTransition,
+                  child: _MeTab(),
+                ),
               ),
             ],
           ),
@@ -151,8 +177,13 @@ GoRouter appRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/settings',
-                builder: (context, state) => const SettingsScreen(),
+                path: AppRoutes.settings,
+                pageBuilder: (context, state) => const CustomTransitionPage(
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                  transitionsBuilder: _noTransition,
+                  child: SettingsScreen(),
+                ),
               ),
             ],
           ),
@@ -227,24 +258,24 @@ class _ProfileLoginPrompt extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.person_outline_rounded,
+                LucideIcons.circleUserRound,
                 size: 72,
-                color: cs.onSurface.withValues(alpha: 0.3),
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityHint),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 l10n.authSubtitle,
                 style: tt.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               FilledButton(
-                onPressed: () => context.go('/login'),
+                onPressed: () => context.go(AppRoutes.login),
                 child: Text(l10n.authSignInWithGoogle),
               ),
             ],

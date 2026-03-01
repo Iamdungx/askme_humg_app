@@ -25,15 +25,16 @@ service cloud.firestore {
     }
 
     // ── questions ─────────────────────────────────────────────────────
-    // UC-3.1: anonymous write via Cloud Function (App Check enforced server-side)
+    // UC-3.1: anonymous write exclusively via Cloud Function (Admin SDK bypasses
+    //         rules). App Check token + per-device rate limiting enforced there.
+    //         Direct client writes are forbidden — no dev convenience bypass.
     // UC-3.2: host reads their own inbox
     // UC-3.3: host updates status when answering
     match /questions/{questionId} {
       allow read: if isSignedIn() && (
         resource.data.toUserId == request.auth.uid || isAdmin()
       );
-      // Create handled by Cloud Function; allow direct only for dev convenience
-      allow create: if true;
+      allow create: if false; // Cloud Function only (Admin SDK)
       allow update: if isSignedIn() && (
         resource.data.toUserId == request.auth.uid || isAdmin()
       );
@@ -55,16 +56,21 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid || isAdmin() ||
         // Like/unlike: only likeCount and likedBy change
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['likeCount', 'likedBy']))
+          .hasOnly(['likeCount', 'likedBy'])) ||
+        // Comment: only commentCount incremented by any signed-in user (UC-4.3)
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['commentCount']))
       );
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     // ── comments ──────────────────────────────────────────────────────
-    // UC-4.3: any signed-in user or anonymous (isAnonymous: true) can comment
+    // UC-4.3: any signed-in user can comment; "anonymous" means userId is null
+    //         in the document (isAnonymous toggle), but the request always comes
+    //         from an authenticated session. Unauthenticated direct writes forbidden.
     match /comments/{commentId} {
       allow read: if true;
-      allow create: if true; // rate-limited by Cloud Function
+      allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if (isSignedIn() && resource.data.userId == request.auth.uid)
         || isAdmin();

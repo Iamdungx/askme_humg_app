@@ -366,5 +366,13 @@
   "editProfileSuccess": "Profile updated!",
   "@editProfileSuccess": { "description": "Snackbar after successful profile update" },
   "editProfileChangeAvatar": "Change avatar",
-  "@editProfileChangeAvatar": { "description": "Button to change profile avatar" }
+  "@editProfileChangeAvatar": { "description": "Button to change profile avatar" },
+  "settingsTagline": "Crafted for Mining & Geology Students",
+  "@settingsTagline": { "description": "Footer tagline shown at the bottom of Settings screen" },
+  "feedAnonymousAsked": "asked:",
+  "@feedAnonymousAsked": { "description": "Label after AnonymousBadge in feed question block, e.g. '[Anonymous] asked:'" },
+  "feedFallbackHostName": "HUMG Student",
+  "@feedFallbackHostName": { "description": "Fallback display name when host name is empty (legacy data)" },
+  "feedEmptyQuestion": "(Question not available)",
+  "@feedEmptyQuestion": { "description": "Placeholder italic text when question content is empty (legacy data)" }
 }

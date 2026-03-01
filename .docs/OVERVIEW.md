@@ -42,6 +42,7 @@ Tổng tiến độ: ~85% ████████░░
 | Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
 | Edit Profile Screen (placeholder, full impl v2) | ✅ Xong |
 | Kiểm duyệt / báo cáo | ❌ Chưa làm |
+| Known issues (qna_repo_impl exception mapping, snackbar context) | ⚠️ Cần sửa |
 
 ---
 
@@ -232,6 +233,14 @@ Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
    - `ReportBottomSheet` — hiển thị từ FeedScreen (3 chấm menu trên mỗi card)
    - `AdminDashboardScreen` (`/admin`) — danh sách reports, approve/reject
 6. Security rules đã có trong `firestore.rules`; đảm bảo `reports` chỉ admin đọc được
+
+### Trước Phase 5 — Fix issues tồn đọng từ Phase 3
+
+| File | Vấn đề | Mức độ |
+|---|---|---|
+| `qna_core/data/qna_repository_impl.dart` | Chưa có try/catch mapping `FirestoreException → FirestoreFailure` | HIGH |
+| `profile/presentation/widgets/ask_question_sheet.dart` | `ScaffoldMessenger.of(context)` gọi sau `Navigator.pop()` — context có thể detached | MEDIUM |
+| `feed/presentation/widgets/feed_loading_shimmer.dart` | Chỉ 11 dòng — cần verify có phải stub không | MEDIUM |
 
 > **Lưu ý quan trọng trước khi test end-to-end:**
 > - UC-3.1 (gửi câu hỏi ẩn danh): Cloud Function `submitQuestion` chưa deploy do chưa upgrade Blaze plan

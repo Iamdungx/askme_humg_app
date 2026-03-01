@@ -366,5 +366,13 @@
   "editProfileSuccess": "プロフィールを更新しました！",
   "@editProfileSuccess": { "description": "プロフィール更新成功後のスナックバー" },
   "editProfileChangeAvatar": "アバターを変更",
-  "@editProfileChangeAvatar": { "description": "プロフィールアバター変更ボタン" }
+  "@editProfileChangeAvatar": { "description": "プロフィールアバター変更ボタン" },
+  "settingsTagline": "鉱山・地質学生のために作られました",
+  "@settingsTagline": { "description": "設定画面の下部に表示されるタグライン" },
+  "feedAnonymousAsked": "質問：",
+  "@feedAnonymousAsked": { "description": "フィードの質問ブロックにおけるAnonymousBadge後のラベル" },
+  "feedFallbackHostName": "HUMGの学生",
+  "@feedFallbackHostName": { "description": "hostNameが空の場合のフォールバック表示名（古いデータ）" },
+  "feedEmptyQuestion": "（質問は利用できません）",
+  "@feedEmptyQuestion": { "description": "質問内容が空の場合のイタリック体プレースホルダー（古いデータ）" }
 }

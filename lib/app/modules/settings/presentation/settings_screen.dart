@@ -6,8 +6,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
+import 'package:askme_humg/app/core/values/app_colors.dart';
+import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/core/values/app_typography.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/app/modules/settings/data/cache_service.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -66,12 +71,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     if (confirmed != true || !mounted) return;
     await ref.read(signOutProvider).call();
-    if (mounted) context.go('/login');
+    if (mounted) context.go(AppRoutes.login);
   }
 
-  void _clearCache() {
+  Future<void> _clearCache() async {
     final l10n = AppLocalizations.of(context);
-    ref.invalidate(authStateProvider);
+    await ref.read(cacheClearerProvider.notifier).clear();
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.settingsClearCacheSuccess)),
     );
@@ -88,6 +94,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final showRealName = ref.watch(showRealNameProvider);
+    final cacheSizeAsync = ref.watch(cacheSizeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -105,8 +112,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SettingsTile(
               icon: LucideIcons.userPen,
               label: l10n.settingsEditProfile,
-              trailing: const Icon(LucideIcons.chevronRight, size: 18),
-              onTap: () => context.push('/me/edit'),
+              trailing: const Icon(LucideIcons.chevronRight, size: AppIconSize.md),
+              onTap: () => context.push(AppRoutes.meEdit),
             ),
             _SettingsTile(
               icon: LucideIcons.badgeCheck,
@@ -118,12 +125,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: tt.bodySmall?.copyWith(
                   color: user.isHumgVerified == true
                       ? cs.primary
-                      : cs.onSurface.withValues(alpha: 0.5),
+                      : cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
                 ),
               ),
               onTap: user.isHumgVerified == true
                   ? null
-                  : () => context.push('/verify-humg'),
+                  : () => context.push(AppRoutes.verifyHumg),
             ),
             _SettingsTile(
               icon: LucideIcons.eye,
@@ -175,36 +182,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Text(
                   _localeName(locale.languageCode, l10n),
                   style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.6),
+                    color: cs.onSurface.withValues(alpha: AppSemanticColors.opacitySubtle),
                   ),
                 ),
-                const SizedBox(width: 4),
-                Icon(LucideIcons.chevronRight, size: 18, color: cs.outline),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(LucideIcons.chevronRight, size: AppIconSize.md, color: cs.outline),
               ],
             ),
             onTap: () => _showLanguageDialog(context, l10n, locale),
           ),
-          _SettingsTile(
-            icon: LucideIcons.sunMoon,
-            label: l10n.settingsTheme,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _themeLabel(themeMode, l10n),
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.6),
-                  ),
+          ListTile(
+            leading: Icon(LucideIcons.sunMoon, color: cs.primary, size: AppIconSize.lg),
+            title: Text(l10n.settingsTheme),
+            trailing: SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: const Icon(LucideIcons.sun, size: AppIconSize.sm),
                 ),
-                const SizedBox(width: 4),
-                Icon(LucideIcons.chevronRight, size: 18, color: cs.outline),
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: const Icon(LucideIcons.monitor, size: AppIconSize.sm),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: const Icon(LucideIcons.moon, size: AppIconSize.sm),
+                ),
               ],
+              selected: {themeMode},
+              onSelectionChanged: (s) =>
+                  ref.read(themeModeProvider.notifier).setMode(s.first),
+              style: const ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
-            onTap: () => _showThemeDialog(context, l10n, themeMode),
           ),
           _SettingsTile(
             icon: LucideIcons.trash2,
             label: l10n.settingsClearCache,
+            trailing: Text(
+              cacheSizeAsync.when(
+                data: CacheService.formatBytes,
+                loading: () => CacheService.loadingPlaceholder,
+                error: (_, _) => CacheService.errorPlaceholder,
+              ),
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
+              ),
+            ),
             onTap: _clearCache,
           ),
 
@@ -214,54 +240,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: LucideIcons.info,
             label: l10n.settingsVersion,
             trailing: Text(
-              _version.isEmpty ? '...' : _version,
+              _version.isEmpty ? CacheService.loadingPlaceholder : _version,
               style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.5),
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
               ),
             ),
           ),
           _SettingsTile(
             icon: LucideIcons.fileText,
             label: l10n.settingsTermsOfService,
-            trailing: Icon(LucideIcons.externalLink, size: 16, color: cs.outline),
-            onTap: () => _launchUrl('https://askme.humg.edu.vn/terms'),
+            trailing: Icon(LucideIcons.externalLink, size: AppIconSize.sm, color: cs.outline),
+            onTap: () => _launchUrl(AppUrls.terms),
           ),
           _SettingsTile(
             icon: LucideIcons.shield,
             label: l10n.settingsPrivacyPolicy,
-            trailing: Icon(LucideIcons.externalLink, size: 16, color: cs.outline),
-            onTap: () => _launchUrl('https://askme.humg.edu.vn/privacy'),
+            trailing: Icon(LucideIcons.externalLink, size: AppIconSize.sm, color: cs.outline),
+            onTap: () => _launchUrl(AppUrls.privacy),
           ),
 
           // ── SIGN OUT ──────────────────────────────────────────────────
           if (isLoggedIn) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: OutlinedButton.icon(
                 onPressed: _signOut,
                 icon: const Icon(LucideIcons.logOut),
                 label: Text(l10n.settingsSignOut),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: cs.error,
-                  side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: BorderSide(color: cs.error.withValues(alpha: AppSemanticColors.opacityDisabled)),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 ),
               ),
             ),
           ],
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxl),
           Center(
             child: Text(
-              'Crafted for Mining & Geology Students',
+              l10n.settingsTagline,
               style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.3),
-                fontSize: 10,
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityHint),
+                fontSize: AppTypography.fontSizeCaption,
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -272,12 +298,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     'en' => l10n.languageEnglish,
     'ja' => l10n.languageJapanese,
     _ => code,
-  };
-
-  String _themeLabel(ThemeMode mode, AppLocalizations l10n) => switch (mode) {
-    ThemeMode.light => l10n.settingsThemeLight,
-    ThemeMode.dark => l10n.settingsThemeDark,
-    ThemeMode.system => l10n.settingsThemeSystem,
   };
 
   Future<void> _showLanguageDialog(
@@ -294,71 +314,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(l10n.settingsLanguage),
-        children: options.map((opt) {
-          final (locale, name) = opt;
-          final isSelected = locale.languageCode == current.languageCode;
-          return ListTile(
-            title: Text(name),
-            leading: Radio<String>(
-              value: locale.languageCode,
-              groupValue: current.languageCode,
-              onChanged: (v) {
-                if (v != null) {
-                  ref.read(localeProvider.notifier).setLocale(Locale(v));
-                }
-                Navigator.of(ctx).pop();
-              },
-            ),
-            selected: isSelected,
-            onTap: () {
-              ref.read(localeProvider.notifier).setLocale(locale);
+        children: [
+          RadioGroup<String>(
+            groupValue: current.languageCode,
+            onChanged: (v) {
+              if (v != null) {
+                ref.read(localeProvider.notifier).setLocale(Locale(v));
+              }
               Navigator.of(ctx).pop();
             },
-          );
-        }).toList(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: options.map((opt) {
+                final (locale, name) = opt;
+                return RadioListTile<String>(
+                  secondary: Text(
+                    _flagFor(locale.languageCode),
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(name),
+                  value: locale.languageCode,
+                  selected: locale.languageCode == current.languageCode,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _showThemeDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-    ThemeMode current,
-  ) async {
-    final options = [
-      (ThemeMode.system, l10n.settingsThemeSystem),
-      (ThemeMode.light, l10n.settingsThemeLight),
-      (ThemeMode.dark, l10n.settingsThemeDark),
-    ];
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.settingsTheme),
-        children: options.map((opt) {
-          final (mode, name) = opt;
-          final isSelected = mode == current;
-          return ListTile(
-            title: Text(name),
-            leading: Radio<ThemeMode>(
-              value: mode,
-              groupValue: current,
-              onChanged: (v) {
-                if (v != null) {
-                  ref.read(themeModeProvider.notifier).setMode(v);
-                }
-                Navigator.of(ctx).pop();
-              },
-            ),
-            selected: isSelected,
-            onTap: () {
-              ref.read(themeModeProvider.notifier).setMode(mode);
-              Navigator.of(ctx).pop();
-            },
-          );
-        }).toList(),
-      ),
-    );
-  }
+  String _flagFor(String code) => switch (code) {
+    'vi' => '🇻🇳',
+    'en' => '🇬🇧',
+    'ja' => '🇯🇵',
+    _ => '🌐',
+  };
+
 }
 
 // ---------------------------------------------------------------------------
@@ -374,11 +366,16 @@ class _SectionHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 6),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.smPlus,
+      ),
       child: Text(
         label.toUpperCase(),
         style: tt.labelSmall?.copyWith(
-          color: cs.onSurface.withValues(alpha: 0.5),
+          color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
           letterSpacing: 1.2,
           fontWeight: FontWeight.w600,
         ),
@@ -406,19 +403,20 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return ListTile(
-      leading: Icon(icon, color: cs.primary, size: 22),
+      leading: Icon(icon, color: cs.primary, size: AppIconSize.lg),
       title: Text(label),
       subtitle: subtitle != null
           ? Text(
               subtitle!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.5),
+                    color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
                   ),
             )
           : null,
       trailing: trailing,
       onTap: onTap,
-      enabled: onTap != null || trailing is Switch,
+      enabled: onTap != null ||
+          (trailing is Switch && (trailing as Switch).onChanged != null),
     );
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
 import 'package:askme_humg/app/global_widgets/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/app_card.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
@@ -36,7 +36,9 @@ class FeedItemCard extends ConsumerWidget {
             children: [
               AppAvatar(
                 imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
-                name: item.hostName,
+                name: item.hostName.isNotEmpty
+                    ? item.hostName
+                    : l10n.feedFallbackHostName,
                 size: 40,
               ),
               const SizedBox(width: AppSpacing.md),
@@ -45,7 +47,9 @@ class FeedItemCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.hostName,
+                      item.hostName.isNotEmpty
+                          ? item.hostName
+                          : l10n.feedFallbackHostName,
                       style: tt.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -65,7 +69,12 @@ class FeedItemCard extends ConsumerWidget {
                 ),
               ),
               // Questions are always anonymous per spec (UC-3.1)
-              const AnonymousBadge(compact: true),
+              Icon(
+                LucideIcons.lock,
+                size: 14,
+                color: cs.onSurface.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: AppSpacing.xs),
               IconButton(
                 icon: Icon(
                   LucideIcons.ellipsis,
@@ -73,16 +82,35 @@ class FeedItemCard extends ConsumerWidget {
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
                 onPressed: () => _showMoreMenu(context, l10n),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Question block
+          // Question block with anonymous sender label
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                LucideIcons.lock,
+                size: 11,
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                l10n.feedAnonymousAsked,
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            '"${item.questionContent}"',
+            item.questionContent.isNotEmpty
+                ? '"${item.questionContent}"'
+                : l10n.feedEmptyQuestion,
             style: tt.bodyMedium?.copyWith(
               fontStyle: FontStyle.italic,
               color: cs.onSurface.withValues(alpha: 0.75),
@@ -94,7 +122,7 @@ class FeedItemCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
+              color: cs.surfaceContainerHighest,
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(AppRadius.sm),
                 bottomRight: Radius.circular(AppRadius.sm),
@@ -105,8 +133,8 @@ class FeedItemCard extends ConsumerWidget {
             ),
             child: Text(
               item.answerContent,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: 0.9),
+              style: tt.bodyMedium?.copyWith(
+                color: cs.onSurface,
                 height: 1.5,
               ),
             ),
@@ -136,8 +164,7 @@ class FeedItemCard extends ConsumerWidget {
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
                 onPressed: () => _onShare(context, l10n),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
               ),
             ],
           ),
@@ -147,20 +174,17 @@ class FeedItemCard extends ConsumerWidget {
   }
 
   void _showMoreMenu(BuildContext context, AppLocalizations l10n) {
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(LucideIcons.flag),
-              title: Text(l10n.reportTitle),
-              // TODO(phase-5): Open report bottom sheet → UC-5.1
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+      builder: (_) => AppBottomSheetBody(
+        children: [
+          ListTile(
+            leading: const Icon(LucideIcons.flag),
+            title: Text(l10n.reportTitle),
+            // TODO(phase-5): Open report bottom sheet → UC-5.1
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }
@@ -182,26 +206,36 @@ class _CommentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons.messageCircle,
-            size: 20,
-            color: cs.onSurface.withValues(alpha: 0.5),
+    final tt = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs,
+            vertical: AppSpacing.xs,
           ),
-          const SizedBox(width: 4),
-          Text(
-            '$commentCount',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                LucideIcons.messageCircle,
+                size: 20,
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '$commentCount',
+                style: tt.labelMedium?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
