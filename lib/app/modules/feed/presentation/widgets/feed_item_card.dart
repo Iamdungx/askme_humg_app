@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_avatar.dart';
-import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
-import 'package:askme_humg/app/global_widgets/app_card.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_card.dart';
+import 'package:askme_humg/app/global_widgets/layout/left_accent_block.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
-import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_reason_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedItemCard extends ConsumerWidget {
@@ -48,21 +50,29 @@ class FeedItemCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.hostName.isNotEmpty
-                          ? item.hostName
-                          : l10n.feedFallbackHostName,
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            item.hostName.isNotEmpty
+                                ? item.hostName
+                                : l10n.feedFallbackHostName,
+                            style: tt.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (item.hostIsHumgVerified) ...[
+                          const SizedBox(width: 4),
+                          const VerifiedBadge(size: 14),
+                        ],
+                      ],
                     ),
                     Text(
-                      timeago.format(
-                        item.createdAt,
-                        locale: Localizations.localeOf(context).languageCode,
-                      ),
+                      context.timeAgo(item.createdAt),
                       style: tt.labelSmall?.copyWith(
                         color: cs.onSurface.withValues(alpha: 0.5),
                       ),
@@ -121,24 +131,10 @@ class FeedItemCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
 
           // Answer block with left border accent
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(AppRadius.sm),
-                bottomRight: Radius.circular(AppRadius.sm),
-              ),
-              border: Border(
-                left: BorderSide(color: cs.primary, width: 3),
-              ),
-            ),
+          LeftAccentBlock(
             child: Text(
               item.answerContent,
-              style: tt.bodyMedium?.copyWith(
-                color: cs.onSurface,
-                height: 1.5,
-              ),
+              style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -176,15 +172,8 @@ class FeedItemCard extends ConsumerWidget {
   }
 
   void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
-    final isLoggedIn =
-        ref.read(authStateProvider).asData?.value != null;
-
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.loginRequiredToReport)),
-      );
-      return;
-    }
+    final uid = ref.read(authStateProvider).asData?.value?.uid;
+    if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
 
     showAppBottomSheet<void>(
       context: context,
@@ -195,16 +184,11 @@ class FeedItemCard extends ConsumerWidget {
             title: Text(l10n.reportTitle),
             onTap: () {
               Navigator.pop(context);
-              showModalBottomSheet<void>(
-                context: context,
-                useSafeArea: true,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => ReportReasonSheet(
-                  targetId: item.answerId,
-                  targetType: 'answer',
-                  content: item.answerContent,
-                ),
+              showReportSheet(
+                context,
+                targetId: item.answerId,
+                targetType: 'answer',
+                content: item.answerContent,
               );
             },
           ),

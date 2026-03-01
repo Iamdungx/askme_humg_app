@@ -61,15 +61,24 @@ lib/
     │       └── app_fontsize.dart        # Font size constants
     │
     ├── global_widgets/                  # Reusable across all features
-    │   ├── app_button.dart              # AppButton – 5 variants: primary/secondary/ghost/danger/google
-    │   ├── app_card.dart
-    │   ├── app_avatar.dart
-    │   ├── app_brand_wordmark.dart      # "AskmeHUMG" branded text
-    │   ├── anonymous_badge.dart
-    │   ├── empty_state.dart
-    │   ├── error_state.dart
-    │   ├── language_switch.dart
-    │   └── loading_shimmer.dart
+    │   ├── global_widgets.dart          # Barrel export (imports all sub-folders)
+    │   ├── states/                    # Loading, error, empty states
+    │   │   ├── empty_state.dart
+    │   │   ├── error_state.dart
+    │   │   └── loading_shimmer.dart
+    │   ├── input/                       # Text input widgets
+    │   │   ├── app_text_input.dart      # Filled multi-line input + AppTextInputWithCounter
+    │   │   └── app_comment_input.dart   # Compact pill-shape comment input
+    │   ├── layout/                      # Structural / container widgets
+    │   │   ├── app_bottom_sheet.dart    # showAppBottomSheet / showAppScrollableSheet
+    │   │   ├── app_card.dart
+    │   │   └── left_accent_block.dart   # Left-border accent container (answers, reports)
+    │   └── ui/                          # Visual / interactive components
+    │       ├── anonymous_badge.dart
+    │       ├── app_avatar.dart
+    │       ├── app_brand_wordmark.dart  # "AskmeHUMG" branded text
+    │       ├── app_button.dart          # AppButton – 5 variants: primary/secondary/ghost/danger/google
+    │       └── language_switch.dart
     │
     ├── services/
     │   └── api_client.dart              # Dio + interceptors for Cloud Functions

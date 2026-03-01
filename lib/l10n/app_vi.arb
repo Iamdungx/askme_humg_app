@@ -82,17 +82,6 @@
   "@otpConfirmButton": { "description": "Nút xác nhận OTP" },
   "otpSkipButton": "Bỏ qua, tiếp tục với tư cách khách",
   "@otpSkipButton": { "description": "Nút bỏ qua xác minh" },
-  "otpErrorInvalidEmail": "Chỉ chấp nhận email @humg.edu.vn",
-  "@otpErrorInvalidEmail": { "description": "Lỗi email không đúng domain" },
-  "otpErrorInvalidCode": "Mã không đúng. Còn {remaining} lần thử.",
-  "@otpErrorInvalidCode": {
-    "description": "Lỗi OTP sai, còn n lần thử",
-    "placeholders": { "remaining": { "type": "int" } }
-  },
-  "otpErrorExpired": "Mã đã hết hạn. Vui lòng gửi lại.",
-  "@otpErrorExpired": { "description": "Lỗi OTP hết hạn" },
-  "otpErrorMaxAttempts": "Đã vượt quá số lần thử. Vui lòng gửi lại mã.",
-  "@otpErrorMaxAttempts": { "description": "Lỗi vượt quá số lần thử OTP" },
   "otpSuccessMessage": "Email HUMG đã được xác minh!",
   "@otpSuccessMessage": { "description": "Thông báo xác minh thành công" },
 
@@ -405,5 +394,50 @@
   "@feedEmptyQuestion": { "description": "Văn bản in nghiêng dự phòng khi nội dung câu hỏi rỗng (dữ liệu cũ)" },
 
   "anonymousBadgeLabel": "Danh tính của bạn được ẩn",
-  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" }
+  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" },
+
+  "verifyHumgTitle": "Xác thực email HUMG",
+  "@verifyHumgTitle": { "description": "AppBar / heading on the HUMG email verification screen" },
+  "verifyHumgSubtitle": "Nhập địa chỉ email @humg.edu.vn để mở khóa đầy đủ tính năng.",
+  "@verifyHumgSubtitle": { "description": "Subtitle on the email input step of HUMG verification" },
+  "verifyHumgEmailHint": "mssv@humg.edu.vn",
+  "@verifyHumgEmailHint": { "description": "Placeholder text for the HUMG email input field" },
+  "verifyHumgSendOtp": "Gửi mã OTP",
+  "@verifyHumgSendOtp": { "description": "Button label to request OTP on email input step" },
+  "verifyHumgSkip": "Bỏ qua",
+  "@verifyHumgSkip": { "description": "Button to skip HUMG verification and go to feed" },
+  "verifyHumgOtpTitle": "Nhập mã xác thực",
+  "@verifyHumgOtpTitle": { "description": "Heading on the OTP input step" },
+  "verifyHumgOtpSubtitle": "Chúng tôi đã gửi mã 6 số đến {email}. Mã hết hạn sau 10 phút.",
+  "@verifyHumgOtpSubtitle": {
+    "description": "Subtitle on OTP input step showing the target email",
+    "placeholders": {
+      "email": { "type": "String", "example": "sinhvien@humg.edu.vn" }
+    }
+  },
+  "verifyHumgConfirm": "Xác nhận",
+  "@verifyHumgConfirm": { "description": "Button to submit OTP and complete verification" },
+  "verifyHumgResend": "Gửi lại mã",
+  "@verifyHumgResend": { "description": "Button to request a new OTP (active after countdown)" },
+  "verifyHumgResendIn": "Gửi lại sau {seconds}s",
+  "@verifyHumgResendIn": {
+    "description": "Countdown text before user can resend OTP",
+    "placeholders": {
+      "seconds": { "type": "int", "example": "60" }
+    }
+  },
+  "verifyHumgSuccess": "Xác thực thành công! Chào mừng đến AskMe HUMG.",
+  "@verifyHumgSuccess": { "description": "Snackbar shown after successful HUMG verification" },
+  "otpErrorInvalidEmail": "Vui lòng nhập địa chỉ email @humg.edu.vn hợp lệ.",
+  "@otpErrorInvalidEmail": { "description": "Inline error when email does not end with @humg.edu.vn" },
+  "otpErrorInvalidMssv": "Phần trước @ phải là mã số sinh viên (chỉ gồm chữ số).",
+  "@otpErrorInvalidMssv": { "description": "Inline error when the local part of the HUMG email is not a numeric student ID" },
+  "otpErrorExpired": "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.",
+  "@otpErrorExpired": { "description": "Error shown when OTP is past its 10-minute expiry" },
+  "otpErrorInvalid": "Mã không đúng. Vui lòng thử lại.",
+  "@otpErrorInvalid": { "description": "Error shown when user enters the wrong OTP" },
+  "otpErrorMaxAttempts": "Quá nhiều lần nhập sai. Vui lòng yêu cầu mã mới.",
+  "@otpErrorMaxAttempts": { "description": "Error shown after 3 consecutive wrong OTP attempts" },
+  "otpErrorNetwork": "Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.",
+  "@otpErrorNetwork": { "description": "Error shown when Resend API or Firestore call fails due to connectivity" }
 }

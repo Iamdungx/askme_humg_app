@@ -88,9 +88,14 @@ service cloud.firestore {
     }
 
     // ── otpRequests ───────────────────────────────────────────────────
-    // Managed entirely by Cloud Functions; no client access
-    match /otpRequests/{docId} {
-      allow read, write: if false;
+    // UC-1.3: client gọi trực tiếp Resend API, không qua Cloud Function.
+    // docId == uid của user — chỉ owner mới được thao tác doc của mình.
+    // Admin có thể đọc để debug, không cần ghi.
+    match /otpRequests/{uid} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid) || isAdmin();
     }
   }
 }

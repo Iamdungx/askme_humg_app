@@ -99,10 +99,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settingsTitle),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: context.canPop()
+            ? IconButton(
+                icon: const Icon(LucideIcons.arrowLeft),
+                onPressed: () => context.pop(),
+              )
+            : null,
       ),
       body: ListView(
         children: [

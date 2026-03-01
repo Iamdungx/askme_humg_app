@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
-import 'package:askme_humg/app/global_widgets/empty_state.dart';
-import 'package:askme_humg/app/global_widgets/error_state.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_brand_wordmark.dart';
+import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
+import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/comments_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/feed_item_card.dart';
-import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
+import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {

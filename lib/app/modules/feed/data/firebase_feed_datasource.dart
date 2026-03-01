@@ -127,12 +127,14 @@ class FirebaseFeedDatasource {
       // Fetch latest author info from Firestore for named comments.
       String authorName = '';
       String authorAvatar = '';
+      bool authorIsHumgVerified = false;
       if (!isAnonymous && userId != null) {
         final userSnap =
             await _firestore.collection('users').doc(userId).get();
         final data = userSnap.data();
         authorName = (data?['name'] as String?) ?? '';
         authorAvatar = (data?['avatar'] as String?) ?? '';
+        authorIsHumgVerified = (data?['isHumgVerified'] as bool?) ?? false;
       }
 
       final batch = _firestore.batch();
@@ -147,6 +149,7 @@ class FirebaseFeedDatasource {
         // Denormalized for display — empty strings for anonymous comments.
         'authorName': authorName,
         'authorAvatar': authorAvatar,
+        'authorIsHumgVerified': authorIsHumgVerified,
       });
 
       final answerRef = _firestore.collection('answers').doc(answerId);

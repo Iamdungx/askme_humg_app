@@ -12,6 +12,7 @@ abstract class UserProfileModel with _$UserProfileModel {
     @Default('') String avatar,
     @Default('') String email,
     @Default(false) bool isBlocked,
+    @Default(false) bool isHumgVerified,
   }) = _UserProfileModel;
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -28,5 +29,6 @@ extension UserProfileModelX on UserProfileModel {
         answerCount: answerCount,
         totalLikes: totalLikes,
         isBlocked: isBlocked,
+        isHumgVerified: isHumgVerified,
       );
 }

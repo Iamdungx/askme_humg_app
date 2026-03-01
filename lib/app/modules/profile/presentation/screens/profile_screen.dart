@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
+import 'package:askme_humg/config/app_routes.dart';
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/empty_state.dart';
-import 'package:askme_humg/app/global_widgets/error_state.dart';
+import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
+import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/profile/domain/user_profile.dart';
@@ -14,8 +16,8 @@ import 'package:askme_humg/app/modules/profile/presentation/profile_providers.da
 import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_preview_card.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
-import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
-import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_reason_sheet.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -69,15 +71,8 @@ class _ProfileContent extends ConsumerWidget {
   }
 
   void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
-    final isLoggedIn =
-        ref.read(authStateProvider).asData?.value != null;
-
-    if (!isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.loginRequiredToReport)),
-      );
-      return;
-    }
+    final uid = ref.read(authStateProvider).asData?.value?.uid;
+    if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
 
     showAppBottomSheet<void>(
       context: context,
@@ -88,16 +83,11 @@ class _ProfileContent extends ConsumerWidget {
             title: Text(l10n.reportTitle),
             onTap: () {
               Navigator.pop(context);
-              showModalBottomSheet<void>(
-                context: context,
-                useSafeArea: true,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => ReportReasonSheet(
-                  targetId: profile.userId,
-                  targetType: 'user',
-                  content: profile.name,
-                ),
+              showReportSheet(
+                context,
+                targetId: profile.userId,
+                targetType: 'user',
+                content: profile.name,
               );
             },
           ),
@@ -121,10 +111,14 @@ class _ProfileContent extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 1,
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: isOwner
+            ? null
+            : IconButton(
+                icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+              ),
         title: Text(
           l10n.profileTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -190,14 +184,15 @@ class _ProfileBody extends StatelessWidget {
       ),
       children: [
         // Profile header: avatar + name + stats
-        Center(
-          child: ProfileHeader(
-            name: profile.name,
-            avatarUrl: profile.avatar,
-            answerCount: profile.answerCount,
-            totalLikes: profile.totalLikes,
+          Center(
+            child: ProfileHeader(
+              name: profile.name,
+              avatarUrl: profile.avatar,
+              answerCount: profile.answerCount,
+              totalLikes: profile.totalLikes,
+              isHumgVerified: profile.isHumgVerified,
+            ),
           ),
-        ),
         const SizedBox(height: AppSpacing.xl),
 
         // isOwner: share link card + inbox shortcut (UC-2.2 §2)
@@ -428,9 +423,19 @@ class _ProfileLoadingScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+        ),
+      ),
       body: const SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
@@ -518,9 +523,19 @@ class _ProfileErrorScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+        ),
+      ),
       body: ErrorState(
         icon: isNotFound ? LucideIcons.userX : null,
         message: isNotFound ? l10n.profileUserNotFound : l10n.commonError,

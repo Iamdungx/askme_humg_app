@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
-import 'package:askme_humg/app/global_widgets/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/anonymous_badge.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/comment.dart';
-import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_reason_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class CommentTile extends ConsumerWidget {
@@ -47,37 +48,39 @@ class CommentTile extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Text(
-                          comment.isAnonymous
-                              ? l10n.commentAnonymous
-                              : (comment.authorName.isNotEmpty
-                                  ? comment.authorName
-                                  : l10n.commentAnonymous),
-                          style: comment.isAnonymous
-                              ? tt.labelMedium?.copyWith(
-                                  color: cs.onSurface.withValues(alpha: 0.5),
-                                  fontStyle: FontStyle.italic,
-                                )
-                              : tt.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              comment.isAnonymous
+                                  ? l10n.commentAnonymous
+                                  : (comment.authorName.isNotEmpty
+                                      ? comment.authorName
+                                      : l10n.commentAnonymous),
+                              style: comment.isAnonymous
+                                  ? tt.labelMedium?.copyWith(
+                                      color: cs.onSurface.withValues(alpha: 0.5),
+                                      fontStyle: FontStyle.italic,
+                                    )
+                                  : tt.labelMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                            ),
+                            if (!comment.isAnonymous &&
+                                comment.authorIsHumgVerified) ...[
+                              const SizedBox(width: 3),
+                              const VerifiedBadge(size: 12),
+                            ],
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              context.timeAgo(comment.createdAt),
+                              style: tt.labelSmall?.copyWith(
+                                color: cs.onSurface.withValues(alpha: 0.4),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          timeago.format(
-                            comment.createdAt,
-                            locale: Localizations.localeOf(context).languageCode,
-                          ),
-                          style: tt.labelSmall?.copyWith(
-                            color: cs.onSurface.withValues(alpha: 0.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
                   if (showReportButton)
                     IconButton(
                       icon: Icon(
@@ -87,16 +90,11 @@ class CommentTile extends ConsumerWidget {
                       ),
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
-                      onPressed: () => showModalBottomSheet<void>(
-                        context: context,
-                        useSafeArea: true,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => ReportReasonSheet(
-                          targetId: comment.commentId,
-                          targetType: 'comment',
-                          content: comment.content,
-                        ),
+                      onPressed: () => showReportSheet(
+                        context,
+                        targetId: comment.commentId,
+                        targetType: 'comment',
+                        content: comment.content,
                       ),
                     ),
                 ],

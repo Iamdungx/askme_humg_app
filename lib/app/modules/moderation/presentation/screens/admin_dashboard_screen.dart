@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/empty_state.dart';
-import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
+import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
+import 'package:askme_humg/app/global_widgets/states/error_state.dart';
+import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_card.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -26,31 +27,9 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
       body: reportsAsync.when(
         loading: () => const ShimmerList(count: 3),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.circleAlert,
-                  size: 48,
-                  color: cs.error,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  e.toString(),
-                  style: tt.bodyMedium?.copyWith(color: cs.error),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
-                  onPressed: () => ref.invalidate(pendingReportsProvider),
-                  child: Text(l10n.commonRetry),
-                ),
-              ],
-            ),
-          ),
+        error: (e, _) => ErrorState(
+          message: e.toString(),
+          onRetry: () => ref.invalidate(pendingReportsProvider),
         ),
         data: (reports) {
           if (reports.isEmpty) {

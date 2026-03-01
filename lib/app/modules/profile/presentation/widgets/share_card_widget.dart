@@ -9,8 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_avatar.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ShareCardWidget extends StatefulWidget {

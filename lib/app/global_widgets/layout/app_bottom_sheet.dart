@@ -31,12 +31,19 @@ Future<T?> showAppScrollableSheet<T>({
     context: context,
     useSafeArea: true,
     isScrollControlled: true,
-    builder: (_) => DraggableScrollableSheet(
-      initialChildSize: initialSize,
-      minChildSize: minSize,
-      maxChildSize: maxSize,
-      expand: false,
-      builder: builder,
+    builder: (ctx) => AnimatedPadding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.viewInsetsOf(ctx).bottom,
+      ),
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      child: DraggableScrollableSheet(
+        initialChildSize: initialSize,
+        minChildSize: minSize,
+        maxChildSize: maxSize,
+        expand: false,
+        builder: builder,
+      ),
     ),
   );
 }

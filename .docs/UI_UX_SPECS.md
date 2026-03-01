@@ -190,7 +190,7 @@ abstract final class AppDuration {
 - States: default / focused / error / disabled (opacity `AppSemanticColors.opacityDisabled`)
 
 ### Bottom Sheets
-All bottom sheets use the shared `showAppBottomSheet` / `showAppScrollableSheet` helpers in `lib/app/global_widgets/app_bottom_sheet.dart`.
+All bottom sheets use the shared `showAppBottomSheet` / `showAppScrollableSheet` helpers in `lib/app/global_widgets/layout/app_bottom_sheet.dart`.
 
 - Background: `cs.surfaceContainerHigh` (via `BottomSheetThemeData`)
 - Corner radius: `AppRadius.xl` (top only, via `BottomSheetThemeData`)

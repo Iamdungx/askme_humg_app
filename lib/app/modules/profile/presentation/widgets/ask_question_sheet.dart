@@ -4,8 +4,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/utils/validator.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/anonymous_badge.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
+import 'package:askme_humg/app/global_widgets/input/app_text_input.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -92,62 +93,16 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        Stack(
-          children: [
-            TextField(
-              controller: _controller,
-              maxLines: 4,
-              maxLength: _maxChars,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => FocusScope.of(context).unfocus(),
-              buildCounter:
-                  (
-                    _, {
-                    required currentLength,
-                    required isFocused,
-                    maxLength,
-                  }) => const SizedBox.shrink(),
-              style: TextStyle(color: cs.onSurface),
-              decoration: InputDecoration(
-                hintText: l10n.questionSubmitHint,
-                hintStyle: TextStyle(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-                errorText: _validationError,
-                filled: true,
-                fillColor: cs.surfaceContainerHigh,
-                contentPadding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.xxl,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  borderSide: BorderSide(color: cs.outline),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  borderSide: BorderSide(color: cs.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  borderSide: BorderSide(color: cs.secondary, width: 1.5),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: AppSpacing.sm,
-              right: AppSpacing.lg,
-              child: Text(
-                l10n.questionCharCount(_charCount),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isOverLimit ? cs.error : cs.onSurfaceVariant,
-                  fontWeight: isOverLimit ? FontWeight.bold : null,
-                ),
-              ),
-            ),
-          ],
+        AppTextInputWithCounter(
+          controller: _controller,
+          hintText: l10n.questionSubmitHint,
+          errorText: _validationError,
+          maxLines: 4,
+          maxLength: _maxChars,
+          charCount: _charCount,
+          counterLabel: l10n.questionCharCount(_charCount),
+          focusedBorderColor: cs.secondary,
+          onChanged: (_) {},
         ),
         const SizedBox(height: AppSpacing.md),
         AppButton(

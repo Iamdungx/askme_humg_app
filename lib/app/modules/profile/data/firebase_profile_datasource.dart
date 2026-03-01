@@ -25,6 +25,7 @@ class FirebaseProfileDatasource {
         avatar: data['avatar'] as String? ?? '',
         email: data['email'] as String? ?? '',
         isBlocked: data['isBlocked'] as bool? ?? false,
+        isHumgVerified: data['isHumgVerified'] as bool? ?? false,
       );
 
       final answersSnapshot = await _firestore

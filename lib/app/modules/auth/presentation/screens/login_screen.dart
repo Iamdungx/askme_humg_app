@@ -6,8 +6,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_brand_wordmark.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 

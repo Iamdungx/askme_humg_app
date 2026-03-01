@@ -80,17 +80,6 @@
   "@otpConfirmButton": { "description": "OTPコード確認ボタン" },
   "otpSkipButton": "スキップしてゲストとして続ける",
   "@otpSkipButton": { "description": "OTP認証をスキップするボタン" },
-  "otpErrorInvalidEmail": "@humg.edu.vnのメールのみ受け付けています",
-  "@otpErrorInvalidEmail": { "description": "HUMG以外のメールに対するバリデーションエラー" },
-  "otpErrorInvalidCode": "コードが正しくありません。残り{remaining}回。",
-  "@otpErrorInvalidCode": {
-    "description": "OTPコードが間違っている時のエラー（残り試行回数表示）",
-    "placeholders": { "remaining": { "type": "int" } }
-  },
-  "otpErrorExpired": "コードの有効期限が切れました。再送信してください。",
-  "@otpErrorExpired": { "description": "OTPコード期限切れエラー" },
-  "otpErrorMaxAttempts": "試行回数が超過しました。新しいコードをリクエストしてください。",
-  "@otpErrorMaxAttempts": { "description": "OTP最大試行回数超過エラー" },
   "otpSuccessMessage": "HUMGメールが認証されました！",
   "@otpSuccessMessage": { "description": "OTP認証成功メッセージ" },
 
@@ -402,5 +391,50 @@
   "@feedEmptyQuestion": { "description": "質問内容が空の場合のイタリック体プレースホルダー（古いデータ）" },
 
   "anonymousBadgeLabel": "あなたの身元は非公開です",
-  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" }
+  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" },
+
+  "verifyHumgTitle": "HUMGメール認証",
+  "@verifyHumgTitle": { "description": "AppBar / heading on the HUMG email verification screen" },
+  "verifyHumgSubtitle": "@humg.edu.vnのメールアドレスを入力してすべての機能を解放してください。",
+  "@verifyHumgSubtitle": { "description": "Subtitle on the email input step of HUMG verification" },
+  "verifyHumgEmailHint": "mssv@humg.edu.vn",
+  "@verifyHumgEmailHint": { "description": "Placeholder text for the HUMG email input field" },
+  "verifyHumgSendOtp": "OTPを送信",
+  "@verifyHumgSendOtp": { "description": "Button label to request OTP on email input step" },
+  "verifyHumgSkip": "スキップ",
+  "@verifyHumgSkip": { "description": "Button to skip HUMG verification and go to feed" },
+  "verifyHumgOtpTitle": "確認コードを入力",
+  "@verifyHumgOtpTitle": { "description": "Heading on the OTP input step" },
+  "verifyHumgOtpSubtitle": "{email}に6桁のコードを送信しました。10分で有効期限が切れます。",
+  "@verifyHumgOtpSubtitle": {
+    "description": "Subtitle on OTP input step showing the target email",
+    "placeholders": {
+      "email": { "type": "String", "example": "student@humg.edu.vn" }
+    }
+  },
+  "verifyHumgConfirm": "確認",
+  "@verifyHumgConfirm": { "description": "Button to submit OTP and complete verification" },
+  "verifyHumgResend": "コードを再送信",
+  "@verifyHumgResend": { "description": "Button to request a new OTP (active after countdown)" },
+  "verifyHumgResendIn": "{seconds}秒後に再送信",
+  "@verifyHumgResendIn": {
+    "description": "Countdown text before user can resend OTP",
+    "placeholders": {
+      "seconds": { "type": "int", "example": "60" }
+    }
+  },
+  "verifyHumgSuccess": "メール認証完了！AskMe HUMGへようこそ。",
+  "@verifyHumgSuccess": { "description": "Snackbar shown after successful HUMG verification" },
+  "otpErrorInvalidEmail": "有効な@humg.edu.vnメールアドレスを入力してください。",
+  "@otpErrorInvalidEmail": { "description": "Inline error when email does not end with @humg.edu.vn" },
+  "otpErrorInvalidMssv": "@の前は学籍番号（数字のみ）である必要があります。",
+  "@otpErrorInvalidMssv": { "description": "Inline error when the local part of the HUMG email is not a numeric student ID" },
+  "otpErrorExpired": "OTPの有効期限が切れました。新しいコードをリクエストしてください。",
+  "@otpErrorExpired": { "description": "Error shown when OTP is past its 10-minute expiry" },
+  "otpErrorInvalid": "コードが間違っています。もう一度お試しください。",
+  "@otpErrorInvalid": { "description": "Error shown when user enters the wrong OTP" },
+  "otpErrorMaxAttempts": "試行回数が多すぎます。新しいコードをリクエストしてください。",
+  "@otpErrorMaxAttempts": { "description": "Error shown after 3 consecutive wrong OTP attempts" },
+  "otpErrorNetwork": "ネットワークエラー。接続を確認して再試行してください。",
+  "@otpErrorNetwork": { "description": "Error shown when Resend API or Firestore call fails due to connectivity" }
 }

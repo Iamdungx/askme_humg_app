@@ -19,6 +19,7 @@ import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_scree
 import 'package:askme_humg/app/modules/settings/presentation/edit_profile_screen.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_screen.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/screens/admin_dashboard_screen.dart';
+import 'package:askme_humg/app/modules/auth/presentation/screens/verify_humg_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 import 'package:askme_humg/config/app_routes.dart';
 
@@ -70,6 +71,17 @@ class _RouterNotifier extends ChangeNotifier {
     // Authenticated → leave the login screen.
     if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
+    // UC-1.3 — Redirect to HUMG verification if not yet verified.
+    // Exception: already on verifyHumg or explicitly skipped (on /feed).
+    if (isLoggedIn &&
+        user.isHumgVerified == false &&
+        path != AppRoutes.verifyHumg &&
+        path != AppRoutes.login &&
+        path != AppRoutes.splash &&
+        path != AppRoutes.feed) {
+      return AppRoutes.verifyHumg;
+    }
+
     return null;
   }
 }
@@ -119,6 +131,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: AppRoutes.admin,
         builder: (context, state) => const AdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyHumg,
+        builder: (context, state) => const VerifyHumgScreen(),
       ),
 
       // ── Shell: 4 tabs with persistent bottom NavigationBar ───────────────

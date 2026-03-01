@@ -17,5 +17,6 @@ abstract class FeedItem with _$FeedItem {
     required List<String> likedBy,
     required int commentCount,
     required bool isPublished,
+    @Default(false) bool hostIsHumgVerified,
   }) = _FeedItem;
 }

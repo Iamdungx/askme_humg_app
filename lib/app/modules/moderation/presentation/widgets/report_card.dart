@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_card.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_card.dart';
+import 'package:askme_humg/app/global_widgets/layout/left_accent_block.dart';
 import 'package:askme_humg/app/modules/moderation/domain/i_moderation_repository.dart';
 import 'package:askme_humg/app/modules/moderation/domain/report.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
@@ -87,10 +88,7 @@ class ReportCard extends ConsumerWidget {
                 ),
               ),
               Text(
-                timeago.format(
-                  report.createdAt,
-                  locale: Localizations.localeOf(context).languageCode,
-                ),
+                context.timeAgo(report.createdAt),
                 style: tt.labelSmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.4),
                 ),
@@ -100,19 +98,8 @@ class ReportCard extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
 
           // Row 2: content preview with left accent border
-          Container(
+          LeftAccentBlock(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(AppRadius.sm),
-                bottomRight: Radius.circular(AppRadius.sm),
-              ),
-              border: Border(
-                left: BorderSide(color: cs.primary, width: 3),
-              ),
-            ),
             child: Text(
               report.content.isNotEmpty ? report.content : '—',
               style: tt.bodySmall?.copyWith(
