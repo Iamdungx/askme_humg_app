@@ -1,11 +1,13 @@
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/core/widgets/app_shell.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/l10n/app_localizations.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
@@ -88,6 +90,13 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) =>
             ProfileScreen(userId: state.pathParameters['userId']!),
       ),
+      // AnswerCompose is full-screen — no bottom nav visible while composing.
+      GoRoute(
+        path: '/inbox/answer/:questionId',
+        builder: (context, state) => AnswerComposeScreen(
+          questionId: state.pathParameters['questionId']!,
+        ),
+      ),
       GoRoute(
         path: '/admin',
         builder: (context, state) => const _AdminPlaceholder(),
@@ -114,32 +123,18 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: '/inbox',
                 builder: (context, state) => const InboxScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'answer/:questionId',
-                    builder: (context, state) => AnswerComposeScreen(
-                      questionId: state.pathParameters['questionId']!,
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
 
           // Tab 2 — Own profile (/me)
-          // userId is passed via extra when navigating: context.go('/me', extra: uid)
-          // If not logged in, shows sign-in prompt.
+          // _MeTab reads authStateProvider directly — survives GoRouter rebuilds.
+          // No state.extra needed, so auth refresh never breaks the tab.
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/me',
-                builder: (context, state) {
-                  final userId = state.extra as String?;
-                  if (userId == null || userId.isEmpty) {
-                    return const _ProfileLoginPrompt();
-                  }
-                  return ProfileScreen(userId: userId);
-                },
+                builder: (context, state) => const _MeTab(),
               ),
             ],
           ),
@@ -190,11 +185,25 @@ void _initDeepLinks(GoRouter router, Ref ref) {
 // Local widgets
 // ---------------------------------------------------------------------------
 
+/// Profile tab widget — reads auth state directly so it survives GoRouter
+/// rebuilds (e.g. refreshListenable triggers). Never relies on state.extra.
+class _MeTab extends ConsumerWidget {
+  const _MeTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).asData?.value;
+    if (user == null) return const _ProfileLoginPrompt();
+    return ProfileScreen(userId: user.uid);
+  }
+}
+
 class _ProfileLoginPrompt extends StatelessWidget {
   const _ProfileLoginPrompt();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Scaffold(
@@ -211,14 +220,14 @@ class _ProfileLoginPrompt extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Sign in to view your profile',
+                l10n.authSubtitle,
                 style: tt.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('Sign in'),
+                child: Text(l10n.authSignInWithGoogle),
               ),
             ],
           ),

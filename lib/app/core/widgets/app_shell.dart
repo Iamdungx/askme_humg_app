@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 /// Persistent shell scaffold wrapping the 3 bottom-nav tabs:
@@ -21,14 +22,24 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final user = ref.watch(authStateProvider).asData?.value;
-    final isLoggedIn = user != null;
+    final isLoggedIn =
+        ref.watch(authStateProvider).asData?.value != null;
+
+    // Unanswered count for Inbox badge — 0 when logged out.
+    final unansweredCount = isLoggedIn
+        ? ref
+            .watch(inboxProvider)
+            .asData
+            ?.value
+            .where((q) => q.status == 'unanswered')
+            .length ?? 0
+        : 0;
 
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => _onTabSelected(context, ref, index),
+        onDestinationSelected: (index) => _onTabSelected(context, index),
         indicatorColor: cs.secondary.withValues(alpha: 0.15),
         destinations: [
           NavigationDestination(
@@ -37,8 +48,16 @@ class AppShell extends ConsumerWidget {
             label: l10n.navFeed,
           ),
           NavigationDestination(
-            icon: const Icon(LucideIcons.mailbox),
-            selectedIcon: Icon(LucideIcons.mailbox, color: cs.secondary),
+            icon: Badge(
+              label: Text('$unansweredCount'),
+              isLabelVisible: unansweredCount > 0,
+              child: const Icon(LucideIcons.mailbox),
+            ),
+            selectedIcon: Badge(
+              label: Text('$unansweredCount'),
+              isLabelVisible: unansweredCount > 0,
+              child: Icon(LucideIcons.mailbox, color: cs.secondary),
+            ),
             label: l10n.navInbox,
           ),
           NavigationDestination(
@@ -56,20 +75,13 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  void _onTabSelected(BuildContext context, WidgetRef ref, int index) {
+  void _onTabSelected(BuildContext context, int index) {
     if (index == navigationShell.currentIndex) {
-      // Tapping active tab re-navigates to its initial location (scroll to top).
+      // Tapping active tab scrolls back to top (re-navigate to initial location).
       navigationShell.goBranch(index, initialLocation: true);
       return;
     }
-
-    if (index == 2) {
-      // Profile tab: pass userId as extra so GoRoute builder receives it.
-      final user = ref.read(authStateProvider).asData?.value;
-      context.go('/me', extra: user?.uid ?? '');
-      return;
-    }
-
+    // Profile tab (/me): _MeTab reads authStateProvider itself — no extra needed.
     navigationShell.goBranch(index);
   }
 }
