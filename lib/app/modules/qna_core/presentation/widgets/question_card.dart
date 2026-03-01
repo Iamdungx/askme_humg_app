@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -76,10 +76,7 @@ class QuestionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    timeago.format(
-                      question.createdAt,
-                      locale: Localizations.localeOf(context).languageCode,
-                    ),
+                    context.timeAgo(question.createdAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),

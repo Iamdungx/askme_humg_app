@@ -20,6 +20,7 @@ abstract class FeedItemModel with _$FeedItemModel {
     required List<String> likedBy,
     required int commentCount,
     required bool isPublished,
+    @Default(false) bool hostIsHumgVerified,
   }) = _FeedItemModel;
 
   factory FeedItemModel.fromFirestore(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
@@ -41,6 +42,7 @@ abstract class FeedItemModel with _$FeedItemModel {
       likedBy: List<String>.from(data['likedBy'] as List? ?? []),
       commentCount: data['commentCount'] as int? ?? 0,
       isPublished: data['isPublished'] as bool? ?? false,
+      hostIsHumgVerified: data['hostIsHumgVerified'] as bool? ?? false,
     );
   }
 }
@@ -59,5 +61,6 @@ extension FeedItemModelX on FeedItemModel {
         likedBy: likedBy,
         commentCount: commentCount,
         isPublished: isPublished,
+        hostIsHumgVerified: hostIsHumgVerified,
       );
 }

@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/core/network/firebase_providers.dart';
 import 'package:askme_humg/app/modules/auth/data/auth_repository_impl.dart';
 import 'package:askme_humg/app/modules/auth/data/firebase_auth_datasource.dart';
+import 'package:askme_humg/app/modules/auth/data/otp_datasource.dart';
 import 'package:askme_humg/app/modules/auth/domain/auth_use_cases.dart';
 import 'package:askme_humg/app/modules/auth/domain/auth_user.dart';
 import 'package:askme_humg/app/modules/auth/domain/i_auth_repository.dart';
@@ -20,8 +21,15 @@ FirebaseAuthDatasource firebaseAuthDatasource(Ref ref) =>
     );
 
 @riverpod
-IAuthRepository authRepository(Ref ref) =>
-    AuthRepositoryImpl(ref.watch(firebaseAuthDatasourceProvider));
+OtpDatasource otpDatasource(Ref ref) => OtpDatasource(
+  firestore: ref.watch(firestoreProvider),
+);
+
+@riverpod
+IAuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
+  ref.watch(firebaseAuthDatasourceProvider),
+  ref.watch(otpDatasourceProvider),
+);
 
 // ---------------------------------------------------------------------------
 // Use case providers
@@ -33,6 +41,14 @@ SignInWithGoogle signInWithGoogle(Ref ref) =>
 
 @riverpod
 SignOut signOut(Ref ref) => SignOut(ref.watch(authRepositoryProvider));
+
+@riverpod
+GenerateOtp generateOtpUseCase(Ref ref) =>
+    GenerateOtp(ref.watch(authRepositoryProvider));
+
+@riverpod
+VerifyOtp verifyOtpUseCase(Ref ref) =>
+    VerifyOtp(ref.watch(authRepositoryProvider));
 
 // ---------------------------------------------------------------------------
 // Auth state stream — watched by router guard
@@ -63,6 +79,50 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncLoading();
     final useCase = ref.read(signOutProvider);
     final next = await AsyncValue.guard(() => useCase.call());
+    if (!ref.mounted) return;
+    state = next;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GenerateOtpNotifier — UC-1.3: sends OTP email
+// ---------------------------------------------------------------------------
+
+@riverpod
+class GenerateOtpNotifier extends _$GenerateOtpNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> send({
+    required String email,
+    required String uid,
+    String? recipientName,
+  }) async {
+    state = const AsyncLoading();
+    final useCase = ref.read(generateOtpUseCaseProvider);
+    final next = await AsyncValue.guard(
+      () => useCase.call(email: email, uid: uid, recipientName: recipientName),
+    );
+    if (!ref.mounted) return;
+    state = next;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// VerifyOtpNotifier — UC-1.3: verifies OTP entered by user
+// ---------------------------------------------------------------------------
+
+@riverpod
+class VerifyOtpNotifier extends _$VerifyOtpNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> verify({required String otp, required String uid}) async {
+    state = const AsyncLoading();
+    final useCase = ref.read(verifyOtpUseCaseProvider);
+    final next = await AsyncValue.guard(
+      () => useCase.call(otp: otp, uid: uid),
+    );
     if (!ref.mounted) return;
     state = next;
   }

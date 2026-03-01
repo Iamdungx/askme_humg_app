@@ -46,7 +46,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final isLoggedIn = ref.watch(authStateProvider).asData?.value != null;
+    final authUser = ref.watch(authStateProvider).asData?.value;
+    final isLoggedIn = authUser != null;
+    final needsVerification = isLoggedIn && authUser.isHumgVerified == false;
     final navigationShell = widget.navigationShell;
 
     // Unanswered count for Inbox badge — 0 when logged out or provider not ready.
@@ -102,8 +104,14 @@ class _AppShellState extends ConsumerState<AppShell> {
             label: l10n.navProfile,
           ),
           NavigationDestination(
-            icon: const Icon(LucideIcons.settings),
-            selectedIcon: Icon(LucideIcons.settings, color: cs.secondary),
+            icon: Badge(
+              isLabelVisible: needsVerification,
+              child: const Icon(LucideIcons.settings),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: needsVerification,
+              child: Icon(LucideIcons.settings, color: cs.secondary),
+            ),
             label: l10n.navSettings,
           ),
         ],

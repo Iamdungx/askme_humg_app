@@ -80,17 +80,6 @@
   "@otpConfirmButton": { "description": "Button to confirm OTP code" },
   "otpSkipButton": "Skip, continue as guest",
   "@otpSkipButton": { "description": "Button to skip OTP verification" },
-  "otpErrorInvalidEmail": "Only @humg.edu.vn emails are accepted",
-  "@otpErrorInvalidEmail": { "description": "Validation error for non-HUMG email" },
-  "otpErrorInvalidCode": "Incorrect code. {remaining} attempts remaining.",
-  "@otpErrorInvalidCode": {
-    "description": "Error when OTP code is wrong, shows remaining attempts",
-    "placeholders": { "remaining": { "type": "int" } }
-  },
-  "otpErrorExpired": "Code has expired. Please resend.",
-  "@otpErrorExpired": { "description": "Error when OTP code has expired" },
-  "otpErrorMaxAttempts": "Too many attempts. Please request a new code.",
-  "@otpErrorMaxAttempts": { "description": "Error when OTP max attempts exceeded" },
   "otpSuccessMessage": "HUMG email verified!",
   "@otpSuccessMessage": { "description": "Success message after OTP verification" },
 
@@ -134,6 +123,8 @@
   "@profileGoToInbox": { "description": "Shortcut button to inbox for profile owner" },
   "profileHumgStudent": "HUMG Student",
   "@profileHumgStudent": { "description": "Verified HUMG student badge label" },
+  "profileNotVerified": "Not verified",
+  "@profileNotVerified": { "description": "Label shown when user has not verified their HUMG email" },
   "profileStatAnswers": "Answers",
   "@profileStatAnswers": { "description": "Stat label for answer count" },
   "profileStatLikes": "Likes",
@@ -230,6 +221,10 @@
   "@loginRequiredToLike": { "description": "Snackbar when unauthenticated user taps like" },
   "loginRequiredToComment": "Sign in to leave a comment",
   "@loginRequiredToComment": { "description": "Snackbar when unauthenticated user tries to comment" },
+  "verifyRequiredToLike": "Verify your HUMG email to like posts",
+  "@verifyRequiredToLike": { "description": "Snackbar when unverified user taps like" },
+  "verifyRequiredToComment": "Verify your HUMG email to comment",
+  "@verifyRequiredToComment": { "description": "Snackbar when unverified user tries to comment" },
 
   "likeButton": "Like",
   "@likeButton": { "description": "Accessibility label for like button (unused in UI text)" },
@@ -402,5 +397,50 @@
   "@feedEmptyQuestion": { "description": "Placeholder italic text when question content is empty (legacy data)" },
 
   "anonymousBadgeLabel": "Your identity is hidden",
-  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" }
+  "@anonymousBadgeLabel": { "description": "Label shown in full AnonymousBadge widget" },
+
+  "verifyHumgTitle": "Verify HUMG Email",
+  "@verifyHumgTitle": { "description": "AppBar / heading on the HUMG email verification screen" },
+  "verifyHumgSubtitle": "Enter your @humg.edu.vn email address to unlock all features.",
+  "@verifyHumgSubtitle": { "description": "Subtitle on the email input step of HUMG verification" },
+  "verifyHumgEmailHint": "mssv@humg.edu.vn",
+  "@verifyHumgEmailHint": { "description": "Placeholder text for the HUMG email input field" },
+  "verifyHumgSendOtp": "Send OTP",
+  "@verifyHumgSendOtp": { "description": "Button label to request OTP on email input step" },
+  "verifyHumgSkip": "Skip for now",
+  "@verifyHumgSkip": { "description": "Button to skip HUMG verification and go to feed" },
+  "verifyHumgOtpTitle": "Enter verification code",
+  "@verifyHumgOtpTitle": { "description": "Heading on the OTP input step" },
+  "verifyHumgOtpSubtitle": "We sent a 6-digit code to {email}. It expires in 10 minutes.",
+  "@verifyHumgOtpSubtitle": {
+    "description": "Subtitle on OTP input step showing the target email",
+    "placeholders": {
+      "email": { "type": "String", "example": "student@humg.edu.vn" }
+    }
+  },
+  "verifyHumgConfirm": "Confirm",
+  "@verifyHumgConfirm": { "description": "Button to submit OTP and complete verification" },
+  "verifyHumgResend": "Resend code",
+  "@verifyHumgResend": { "description": "Button to request a new OTP (active after countdown)" },
+  "verifyHumgResendIn": "Resend in {seconds}s",
+  "@verifyHumgResendIn": {
+    "description": "Countdown text before user can resend OTP",
+    "placeholders": {
+      "seconds": { "type": "int", "example": "60" }
+    }
+  },
+  "verifyHumgSuccess": "Email verified! Welcome to AskMe HUMG.",
+  "@verifyHumgSuccess": { "description": "Snackbar shown after successful HUMG verification" },
+  "otpErrorInvalidEmail": "Please enter a valid @humg.edu.vn email address.",
+  "@otpErrorInvalidEmail": { "description": "Inline error when email does not end with @humg.edu.vn" },
+  "otpErrorInvalidMssv": "The part before @ must be your student ID (digits only).",
+  "@otpErrorInvalidMssv": { "description": "Inline error when the local part of the HUMG email is not a numeric student ID" },
+  "otpErrorExpired": "OTP has expired. Please request a new one.",
+  "@otpErrorExpired": { "description": "Error shown when OTP is past its 10-minute expiry" },
+  "otpErrorInvalid": "Incorrect code. Please try again.",
+  "@otpErrorInvalid": { "description": "Error shown when user enters the wrong OTP" },
+  "otpErrorMaxAttempts": "Too many failed attempts. Please request a new code.",
+  "@otpErrorMaxAttempts": { "description": "Error shown after 3 consecutive wrong OTP attempts" },
+  "otpErrorNetwork": "Network error. Please check your connection and try again.",
+  "@otpErrorNetwork": { "description": "Error shown when Resend API or Firestore call fails due to connectivity" }
 }

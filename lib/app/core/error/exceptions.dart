@@ -47,3 +47,21 @@ class RateLimitException extends AppException {
 class AppCheckException extends AppException {
   const AppCheckException() : super('App verification failed.');
 }
+
+/// UC-1.3 — OTP-specific exceptions thrown from OtpDatasource.
+class OtpExpiredException extends AppException {
+  const OtpExpiredException() : super('OTP has expired. Please request a new one.');
+}
+
+class OtpInvalidException extends AppException {
+  const OtpInvalidException() : super('Invalid OTP. Please try again.');
+}
+
+class OtpMaxAttemptsException extends AppException {
+  const OtpMaxAttemptsException()
+      : super('Too many failed attempts. Please request a new OTP.');
+}
+
+class OtpSendException extends AppException {
+  const OtpSendException(super.message);
+}

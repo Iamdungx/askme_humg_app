@@ -100,7 +100,7 @@ Use placeholder/mock data for pure UI screens. If the screen needs live data:
 ## Reference files
 
 - Design tokens: `lib/app/core/values/app_colors.dart`, `app_spacing.dart`, `app_typography.dart`
-- Global widgets: `lib/app/global_widgets/`
+- Global widgets: `lib/app/global_widgets/` (subfolders: `states/`, `input/`, `layout/`, `ui/`; barrel: `global_widgets.dart`)
 - Routes: `lib/config/app_routes.dart`
 - UI specs: `.docs/UI_UX_SPECS.md`
 - UC details: `.docs/use_case/`

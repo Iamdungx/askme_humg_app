@@ -14,7 +14,7 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 - **Firebase Auth** – Google Sign-In (any Google account); HUMG email verified separately via OTP (UC-1.3)
 - **Cloud Firestore** – NoSQL database
 - **Firebase Storage** – Avatar and media storage
-- **Cloud Functions** – Rate limiting, OTP generation/verification (Resend), server-side moderation
+- **Cloud Functions** – Rate limiting, server-side moderation (OTP is client-generated, not via Cloud Function)
 - **Firebase App Check** – Bot protection for anonymous question submission
 - **`app_links`** – Deep links (`askme-humg-app.web.app/user/{userId}`)
 
@@ -35,7 +35,26 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 ## Firestore Collections
 - `users`: uid, name, avatar, email, role, createdAt, isBlocked, isHumgVerified, humgEmail
 - `questions`: questionId, toUserId, content, createdAt, status (`unanswered`|`answered`)
-- `answers`: answerId, questionId, userId, content, createdAt, likeCount, likedBy[], isPublished, commentCount
-- `comments`: commentId, answerId, userId (nullable), content, isAnonymous, createdAt
+- `answers`: answerId, questionId, userId, content, createdAt, likeCount, likedBy[], isPublished, commentCount, **hostName**, **hostAvatar**, **hostIsHumgVerified** (denormalized for feed display)
+- `comments`: commentId, answerId, userId (nullable), content, isAnonymous, createdAt, **authorName**, **authorAvatar**, **authorIsHumgVerified** (denormalized for display)
 - `reports`: reportId, targetId, targetType, reportedBy, reason, status, createdAt, resolvedAt
 - `otpRequests`: email, otpHash, expiresAt, attempts
+
+## Verified Badge
+- Widget: `lib/app/global_widgets/ui/verified_badge.dart` (`VerifiedBadge`)
+- Two modes: `inline: true` (icon only, for name rows), `inline: false` (icon + "HUMG" label, for profile header)
+- Shown wherever `isHumgVerified / hostIsHumgVerified / authorIsHumgVerified == true`
+- Locations: ProfileHeader (next to name + subtitle row), FeedItemCard (next to host name), CommentTile (next to author name, hidden for anonymous)
+
+## Feed Interaction Rules
+- **View feed**: open to all (guest, logged-in, unverified)
+- **Like / Comment**: requires `isHumgVerified == true`; unverified users see a snackbar directing them to verify
+- Guard implemented via `BuildContextX.requireVerified()` in `lib/app/core/extensions/context_extensions.dart`
+- Snackbar keys: `verifyRequiredToLike`, `verifyRequiredToComment`
+
+## OTP / HUMG Verification (UC-1.3)
+- Email sending: Gmail SMTP via `mailer` package, plain-text body (HTML blocked by HUMG Microsoft 365 filter)
+- Env vars: `GMAIL_USER`, `GMAIL_APP_PASSWORD` (Gmail App Password, 2FA required)
+- OTP: 6-digit secure random, SHA-256 hashed, stored in `otpRequests/{uid}`
+- Expiry: 10 minutes, max 3 wrong attempts before lockout
+- Route guard: unverified users → `/verify-humg` (except `/` feed which is skippable)

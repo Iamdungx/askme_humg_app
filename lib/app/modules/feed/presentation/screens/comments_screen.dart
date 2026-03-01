@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
-import 'package:askme_humg/app/global_widgets/error_state.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
+import 'package:askme_humg/app/global_widgets/input/app_comment_input.dart';
+import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
@@ -44,15 +46,10 @@ class _CommentsSheetContent extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final commentsAsync = ref.watch(commentsProvider(answerId));
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Column(
+    return Column(
       children: [
         const SizedBox(height: AppSpacing.md),
 
-        // Header — live count from stream, falls back to initial commentCount
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Row(
@@ -110,7 +107,6 @@ class _CommentsSheetContent extends ConsumerWidget {
         // Input bar
         _CommentInputBar(answerId: answerId),
       ],
-    ),
     );
   }
 }
@@ -139,13 +135,15 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
-    final uid = ref.read(authStateProvider).asData?.value?.uid;
-    if (uid == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.loginRequiredToComment)),
-      );
-      return;
-    }
+    final authUser = ref.read(authStateProvider).asData?.value;
+    final uid = authUser?.uid;
+    final isVerified = authUser?.isHumgVerified == true;
+    if (!context.requireVerified(
+      uid: uid,
+      isVerified: isVerified,
+      loginMessage: l10n.loginRequiredToComment,
+      verifyMessage: l10n.verifyRequiredToComment,
+    )) { return; }
 
     setState(() => _error = null);
 
@@ -221,25 +219,11 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: TextField(
+                child: AppCommentInput(
                   controller: _controller,
-                  minLines: 1,
-                  maxLines: 4,
+                  hintText: l10n.commentInputHint,
+                  errorText: _error,
                   maxLength: 500,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
-                  decoration: InputDecoration(
-                    hintText: l10n.commentInputHint,
-                    errorText: _error,
-                    counterText: '',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.xl),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.md,
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

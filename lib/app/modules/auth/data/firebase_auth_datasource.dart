@@ -21,17 +21,26 @@ class FirebaseAuthDatasource {
   GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
 
   Stream<AuthUser?> get authStateChanges =>
-      _auth.authStateChanges().asyncMap((user) async {
-        if (user == null) return null;
-        try {
-          final doc = await _firestore.collection('users').doc(user.uid).get();
-          if (!doc.exists) return AuthUserModel.fromFirebaseUserWithClaims(user);
-          return AuthUserModel.fromFirestore(user, doc);
-        } catch (e) {
-          logger.w('Failed to fetch user doc, falling back to Firebase user');
-          return AuthUserModel.fromFirebaseUser(user);
-        }
+      _auth.authStateChanges().asyncExpand((user) {
+        if (user == null) return Stream.value(null);
+        return _userDocStream(user);
       });
+
+  Stream<AuthUser?> _userDocStream(User user) async* {
+    final snapshots = _firestore.collection('users').doc(user.uid).snapshots();
+    await for (final doc in snapshots) {
+      if (!doc.exists) {
+        yield await AuthUserModel.fromFirebaseUserWithClaims(user);
+      } else {
+        try {
+          yield await AuthUserModel.fromFirestore(user, doc);
+        } catch (e) {
+          logger.w('Failed to parse user doc snapshot', error: e);
+          yield AuthUserModel.fromFirebaseUser(user);
+        }
+      }
+    }
+  }
 
   AuthUser? get currentUser {
     final user = _auth.currentUser;

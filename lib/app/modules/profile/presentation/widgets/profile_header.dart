@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -10,12 +11,14 @@ class ProfileHeader extends StatelessWidget {
     required this.avatarUrl,
     required this.answerCount,
     required this.totalLikes,
+    this.isHumgVerified = false,
   });
 
   final String name;
   final String avatarUrl;
   final int answerCount;
   final int totalLikes;
+  final bool isHumgVerified;
 
   @override
   Widget build(BuildContext context) {
@@ -30,21 +33,32 @@ class ProfileHeader extends StatelessWidget {
           ringWidth: 2,
         ),
         const SizedBox(height: AppSpacing.md),
-        Text(
-          name,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              name,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            if (isHumgVerified) ...[
+              const SizedBox(width: AppSpacing.xs),
+              const VerifiedBadge(size: 20, inline: true),
+            ],
+          ],
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          AppLocalizations.of(context).profileHumgStudent,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.secondary,
-            fontWeight: FontWeight.w500,
+        if (!isHumgVerified) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            AppLocalizations.of(context).profileNotVerified,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         _ProfileStatsRow(answerCount: answerCount, totalLikes: totalLikes),
       ],

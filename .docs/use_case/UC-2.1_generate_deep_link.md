@@ -36,7 +36,7 @@
 Case A – App IS installed on recipient's device:
   1. OS intercepts the URL askme-humg-app.web.app/user/{userId}
   2. app_links package receives the link in AppLinks().uriLinkStream
-  3. GoRouter navigates to /u/{userId} (ProfileScreen)
+  3. GoRouter navigates to /user/{userId} (ProfileScreen)
   4. ProfileScreen loads the Host's profile data
 
 Case B – App is NOT installed:
@@ -62,8 +62,8 @@ lib/app/modules/profile/
 │   └── use_cases/generate_deep_link.dart       [CREATE]
 ├── data/
 │   └── repositories/profile_repository_impl.dart  [CREATE]
-└── presentation/
-    ├── screens/profile_screen.dart              [CREATE] route /u/:userId
+    └── presentation/
+    ├── screens/profile_screen.dart              [CREATE] route /user/:userId
     └── widgets/
         ├── share_card_widget.dart               [CREATE] renders QR + avatar card
         └── profile_header.dart                  [CREATE]
@@ -90,7 +90,7 @@ class GenerateDeepLink {
 // Using app_links package
 final appLinks = AppLinks();
 appLinks.uriLinkStream.listen((uri) {
-  // uri.path = /u/{userId}
+  // uri.path = /user/{userId}
   router.go(uri.path);
 });
 ```

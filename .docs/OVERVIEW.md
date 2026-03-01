@@ -125,7 +125,7 @@ lib/
 │   ├── core/        ← màu sắc, font, theme, logger, validator, error classes
 │   │   ├── providers/   ← theme_provider, locale_provider (shared_preferences)
 │   │   └── widgets/     ← app_shell.dart (bottom nav scaffold)
-│   ├── global_widgets/  ← button, card, avatar, badge, shimmer...
+│   ├── global_widgets/  ← states/ · input/ · layout/ · ui/
 │   └── modules/
 │       ├── auth/        ← Phase 1
 │       ├── profile/     ← Phase 2
@@ -241,12 +241,12 @@ Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
 | `config/app_routes.dart` | Thêm `/me/edit` vào `protectedLocationPrefixes` | P1-Security ✅ |
 | `profile/data/profile_repository_impl.dart` | Thêm try/catch → `FirestoreFailure` / `UnknownFailure` | P1-Architecture ✅ |
 | `profile/presentation/screens/profile_screen.dart` | Check `FirestoreFailure` thay vì `FirestoreException` | P1-Architecture ✅ |
-| `global_widgets/anonymous_badge.dart` | Label nullable, fallback `l10n.anonymousBadgeLabel` | Minor ✅ |
+| `global_widgets/ui/anonymous_badge.dart` | Label nullable, fallback `l10n.anonymousBadgeLabel` | Minor ✅ |
 | `auth/presentation/auth_providers.dart` | `authStateProvider` thêm `keepAlive: true` | Minor ✅ |
 | `feed/presentation/feed_providers.dart` | `FeedNotifier.build()` dùng `ref.watch` | Minor ✅ |
 | `qna_core/data/qna_repository_impl.dart` | Exception mapping đầy đủ (đã fix Phase 3) | HIGH ✅ |
 | `profile/presentation/widgets/ask_question_sheet.dart` | Widget inline — không còn Navigator.pop() issue | MEDIUM ✅ |
-| `global_widgets/loading_shimmer.dart` | Implement đầy đủ 172 dòng skeleton | MEDIUM ✅ |
+| `global_widgets/states/loading_shimmer.dart` | Implement đầy đủ 172 dòng skeleton | MEDIUM ✅ |
 
 **⚠️ Còn tồn đọng (không blocking):**
 - UC-3.1 App Check: Cloud Function `submitQuestion` chưa deploy — chờ Blaze plan (thẻ tín dụng)

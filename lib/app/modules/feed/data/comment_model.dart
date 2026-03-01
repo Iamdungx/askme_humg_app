@@ -16,6 +16,7 @@ abstract class CommentModel with _$CommentModel {
     required DateTime createdAt,
     @Default('') String authorName,
     @Default('') String authorAvatar,
+    @Default(false) bool authorIsHumgVerified,
   }) = _CommentModel;
 
   factory CommentModel.fromFirestore(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
@@ -33,6 +34,7 @@ abstract class CommentModel with _$CommentModel {
       createdAt: createdAtTs.toDate(),
       authorName: data['authorName'] as String? ?? '',
       authorAvatar: data['authorAvatar'] as String? ?? '',
+      authorIsHumgVerified: data['authorIsHumgVerified'] as bool? ?? false,
     );
   }
 }
@@ -47,5 +49,6 @@ extension CommentModelX on CommentModel {
         createdAt: createdAt,
         authorName: authorName,
         authorAvatar: authorAvatar,
+        authorIsHumgVerified: authorIsHumgVerified,
       );
 }

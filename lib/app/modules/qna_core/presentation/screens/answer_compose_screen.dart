@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
-import 'package:askme_humg/app/global_widgets/error_state.dart';
-import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
+import 'package:askme_humg/app/global_widgets/input/app_text_input.dart';
+import 'package:askme_humg/app/global_widgets/states/error_state.dart';
+import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/answer_publish_toggle.dart';
@@ -109,8 +110,10 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextField(
+          AppTextInput(
             controller: _controller,
+            hintText: l10n.answerComposeHint,
+            errorText: _validationError,
             minLines: 5,
             maxLines: null,
             maxLength: _maxChars,
@@ -119,29 +122,6 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
                 setState(() => _validationError = null);
               }
             },
-            style: TextStyle(color: cs.onSurface),
-            decoration: InputDecoration(
-              hintText: l10n.answerComposeHint,
-              hintStyle: TextStyle(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-              errorText: _validationError,
-              filled: true,
-              fillColor: cs.surfaceContainerHigh,
-              contentPadding: const EdgeInsets.all(AppSpacing.lg),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                borderSide: BorderSide(color: cs.primary, width: 1.5),
-              ),
-            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           AnswerPublishToggle(
@@ -246,10 +226,7 @@ class _QuestionCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
               Text(
                 l10n.answerReceivedTimeAgo(
-                  timeago.format(
-                    question.createdAt,
-                    locale: Localizations.localeOf(context).languageCode,
-                  ),
+                  context.timeAgo(question.createdAt),
                 ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,

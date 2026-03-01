@@ -32,8 +32,11 @@ class Assets {
   /// File path: assets/svgs/google_logo.svg
   static const SvgGenImage svgsGoogleLogo = SvgGenImage('assets/svgs/google_logo.svg');
 
+  /// File path: assets/svgs/verified.svg
+  static const SvgGenImage svgsVerified = SvgGenImage('assets/svgs/verified.svg');
+
   /// List of all assets
-  static List<dynamic> get values => [aEnv, iconGitkeep, imagesAppIcon, svgsAnonymous, svgsGoogleLogo];
+  static List<dynamic> get values => [aEnv, iconGitkeep, imagesAppIcon, svgsAnonymous, svgsGoogleLogo, svgsVerified];
 }
 
 class AssetGenImage {

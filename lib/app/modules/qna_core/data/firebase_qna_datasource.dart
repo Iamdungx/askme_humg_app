@@ -99,6 +99,7 @@ class FirebaseQnaDatasource {
       final userData = userSnap.data();
       final hostName = (userData?['name'] as String?) ?? '';
       final hostAvatar = (userData?['avatar'] as String?) ?? '';
+      final hostIsHumgVerified = (userData?['isHumgVerified'] as bool?) ?? false;
 
       final batch = _firestore.batch();
 
@@ -116,6 +117,7 @@ class FirebaseQnaDatasource {
         'questionContent': questionContent,
         'hostName': hostName,
         'hostAvatar': hostAvatar,
+        'hostIsHumgVerified': hostIsHumgVerified,
       });
 
       final questionRef = _firestore.collection('questions').doc(questionId);

@@ -11,9 +11,8 @@ abstract class Comment with _$Comment {
     required String content,
     required bool isAnonymous,
     required DateTime createdAt,
-    /// Denormalized from users collection — empty string for anonymous comments.
     @Default('') String authorName,
-    /// Denormalized from users collection — empty string for anonymous comments.
     @Default('') String authorAvatar,
+    @Default(false) bool authorIsHumgVerified,
   }) = _Comment;
 }

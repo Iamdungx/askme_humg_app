@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart' show toggleLikeProvider;
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -22,19 +23,21 @@ class LikeButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final uid = ref.watch(authStateProvider).asData?.value?.uid;
+    final authUser = ref.watch(authStateProvider).asData?.value;
+    final uid = authUser?.uid;
+    final isVerified = authUser?.isHumgVerified == true;
     final isLiked = uid != null && likedBy.contains(uid);
     final isLoading = ref.watch(toggleLikeProvider(answerId)).isLoading;
 
     void handleTap() {
-      if (uid == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.loginRequiredToLike)),
-        );
-        return;
-      }
+      if (!context.requireVerified(
+        uid: uid,
+        isVerified: isVerified,
+        loginMessage: l10n.loginRequiredToLike,
+        verifyMessage: l10n.verifyRequiredToLike,
+      )) { return; }
       ref.read(toggleLikeProvider(answerId).notifier).toggle(
-            uid: uid,
+            uid: uid!,
             isCurrentlyLiked: isLiked,
           );
     }

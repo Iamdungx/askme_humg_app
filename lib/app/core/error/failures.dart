@@ -46,3 +46,21 @@ final class RateLimitFailure extends Failure {
 final class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'An unknown error occurred']);
 }
+
+/// UC-1.3 — OTP-specific failures surfaced to presentation layer.
+final class OtpExpiredFailure extends Failure {
+  const OtpExpiredFailure() : super('OTP has expired. Please request a new one.');
+}
+
+final class OtpInvalidFailure extends Failure {
+  const OtpInvalidFailure() : super('Invalid OTP. Please try again.');
+}
+
+final class OtpMaxAttemptsFailure extends Failure {
+  const OtpMaxAttemptsFailure()
+      : super('Too many failed attempts. Please request a new OTP.');
+}
+
+final class OtpSendFailure extends Failure {
+  const OtpSendFailure(super.message);
+}

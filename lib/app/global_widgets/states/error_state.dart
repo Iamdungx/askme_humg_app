@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ErrorState extends StatelessWidget {

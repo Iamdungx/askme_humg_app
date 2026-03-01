@@ -12,5 +12,6 @@ abstract class UserProfile with _$UserProfile {
     @Default(0) int answerCount,
     @Default(0) int totalLikes,
     @Default(false) bool isBlocked,
+    @Default(false) bool isHumgVerified,
   }) = _UserProfile;
 }

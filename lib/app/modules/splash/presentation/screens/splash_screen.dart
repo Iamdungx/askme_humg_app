@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:askme_humg/generated/assets.gen.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_brand_wordmark.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
