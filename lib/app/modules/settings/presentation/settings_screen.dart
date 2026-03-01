@@ -121,16 +121,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SettingsTile(
               icon: LucideIcons.badgeCheck,
               label: l10n.settingsHumgVerification,
-              trailing: Text(
-                user.isHumgVerified == true
-                    ? l10n.settingsHumgVerified
-                    : l10n.settingsHumgNotVerified,
-                style: tt.bodySmall?.copyWith(
-                  color: user.isHumgVerified == true
-                      ? cs.primary
-                      : cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-                ),
-              ),
+              trailing: user.isHumgVerified == true
+                  ? Text(
+                      l10n.settingsHumgVerified,
+                      style: tt.bodySmall?.copyWith(color: cs.primary),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.settingsHumgNotVerified,
+                          style: tt.bodySmall?.copyWith(color: cs.error),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(LucideIcons.circleAlert, size: AppIconSize.md, color: cs.error),
+                      ],
+                    ),
               onTap: user.isHumgVerified == true
                   ? null
                   : () => context.push(AppRoutes.verifyHumg),

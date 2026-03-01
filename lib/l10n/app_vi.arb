@@ -215,6 +215,10 @@
   "@loginRequiredToLike": { "description": "Snackbar khi khách thích bài" },
   "loginRequiredToComment": "Đăng nhập để bình luận",
   "@loginRequiredToComment": { "description": "Snackbar khi khách bình luận" },
+  "verifyRequiredToLike": "Xác minh email HUMG để thích bài viết",
+  "@verifyRequiredToLike": { "description": "Snackbar khi user chưa xác minh HUMG cố thích bài" },
+  "verifyRequiredToComment": "Xác minh email HUMG để bình luận",
+  "@verifyRequiredToComment": { "description": "Snackbar khi user chưa xác minh HUMG cố bình luận" },
 
   "likeButton": "Thích",
   "@likeButton": { "description": "Nút thích" },
@@ -380,6 +384,8 @@
 
   "profileHumgStudent": "Sinh viên HUMG",
   "@profileHumgStudent": { "description": "Nhãn vai trò sinh viên HUMG trên trang cá nhân" },
+  "profileNotVerified": "Chưa xác thực",
+  "@profileNotVerified": { "description": "Nhãn hiển thị khi người dùng chưa xác thực email HUMG" },
   "profileStatAnswers": "Câu trả lời",
   "@profileStatAnswers": { "description": "Nhãn thống kê số câu trả lời" },
   "profileStatLikes": "Lượt thích",

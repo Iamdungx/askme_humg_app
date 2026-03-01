@@ -23,12 +23,19 @@ class LikeButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final uid = ref.watch(authStateProvider).asData?.value?.uid;
+    final authUser = ref.watch(authStateProvider).asData?.value;
+    final uid = authUser?.uid;
+    final isVerified = authUser?.isHumgVerified == true;
     final isLiked = uid != null && likedBy.contains(uid);
     final isLoading = ref.watch(toggleLikeProvider(answerId)).isLoading;
 
     void handleTap() {
-      if (!context.requireAuth(uid, l10n.loginRequiredToLike)) return;
+      if (!context.requireVerified(
+        uid: uid,
+        isVerified: isVerified,
+        loginMessage: l10n.loginRequiredToLike,
+        verifyMessage: l10n.verifyRequiredToLike,
+      )) { return; }
       ref.read(toggleLikeProvider(answerId).notifier).toggle(
             uid: uid!,
             isCurrentlyLiked: isLiked,

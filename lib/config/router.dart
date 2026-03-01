@@ -62,6 +62,12 @@ class _RouterNotifier extends ChangeNotifier {
     );
     if (!isLoggedIn && isProtected) return AppRoutes.login;
 
+    // /me and /settings require login but NOT HUMG verification.
+    if (!isLoggedIn &&
+        (path.startsWith(AppRoutes.me) || path.startsWith(AppRoutes.settings))) {
+      return AppRoutes.login;
+    }
+
     // Admin route — requires isAdmin custom claim.
     if (path.startsWith(AppRoutes.admin)) {
       if (!isLoggedIn) return AppRoutes.login;
@@ -72,13 +78,15 @@ class _RouterNotifier extends ChangeNotifier {
     if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
     // UC-1.3 — Redirect to HUMG verification if not yet verified.
-    // Exception: already on verifyHumg or explicitly skipped (on /feed).
+    // Exception: /feed, /me, /settings, /verify-humg, /login, /splash are accessible.
     if (isLoggedIn &&
         user.isHumgVerified == false &&
         path != AppRoutes.verifyHumg &&
         path != AppRoutes.login &&
         path != AppRoutes.splash &&
-        path != AppRoutes.feed) {
+        path != AppRoutes.feed &&
+        !path.startsWith(AppRoutes.me) &&
+        !path.startsWith(AppRoutes.settings)) {
       return AppRoutes.verifyHumg;
     }
 

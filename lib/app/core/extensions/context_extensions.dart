@@ -20,6 +20,30 @@ extension BuildContextX on BuildContext {
     return false;
   }
 
+  /// Returns false (showing a snackbar) if the user is not logged in OR
+  /// is logged in but has not completed HUMG verification.
+  /// [isVerified] should be `authUser?.isHumgVerified == true`.
+  bool requireVerified({
+    required String? uid,
+    required bool isVerified,
+    required String loginMessage,
+    required String verifyMessage,
+  }) {
+    if (uid == null) {
+      ScaffoldMessenger.of(this).showSnackBar(
+        SnackBar(content: Text(loginMessage)),
+      );
+      return false;
+    }
+    if (!isVerified) {
+      ScaffoldMessenger.of(this).showSnackBar(
+        SnackBar(content: Text(verifyMessage)),
+      );
+      return false;
+    }
+    return true;
+  }
+
   /// Shorthand for [AppLocalizations.of(context)].
   AppLocalizations get l10n => AppLocalizations.of(this);
 }

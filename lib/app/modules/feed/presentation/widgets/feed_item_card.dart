@@ -25,6 +25,9 @@ class FeedItemCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final authUser = ref.watch(authStateProvider).asData?.value;
+    final uid = authUser?.uid;
+    final isVerified = authUser?.isHumgVerified == true;
 
     return AppCard(
       margin: const EdgeInsets.symmetric(
@@ -152,7 +155,17 @@ class FeedItemCard extends ConsumerWidget {
               const SizedBox(width: AppSpacing.xl),
               _CommentButton(
                 commentCount: item.commentCount,
-                onTap: onCommentTap,
+                onTap: onCommentTap != null
+                    ? () {
+                        if (!context.requireVerified(
+                          uid: uid,
+                          isVerified: isVerified,
+                          loginMessage: l10n.loginRequiredToComment,
+                          verifyMessage: l10n.verifyRequiredToComment,
+                        )) { return; }
+                        onCommentTap!();
+                      }
+                    : null,
               ),
               const Spacer(),
               IconButton(

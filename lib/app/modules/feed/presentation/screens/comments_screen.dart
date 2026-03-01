@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/input/app_comment_input.dart';
@@ -134,13 +135,15 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
-    final uid = ref.read(authStateProvider).asData?.value?.uid;
-    if (uid == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.loginRequiredToComment)),
-      );
-      return;
-    }
+    final authUser = ref.read(authStateProvider).asData?.value;
+    final uid = authUser?.uid;
+    final isVerified = authUser?.isHumgVerified == true;
+    if (!context.requireVerified(
+      uid: uid,
+      isVerified: isVerified,
+      loginMessage: l10n.loginRequiredToComment,
+      verifyMessage: l10n.verifyRequiredToComment,
+    )) { return; }
 
     setState(() => _error = null);
 

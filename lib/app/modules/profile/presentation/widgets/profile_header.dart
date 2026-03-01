@@ -49,37 +49,16 @@ class ProfileHeader extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: AppSpacing.xs),
-        if (isHumgVerified)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const VerifiedBadge(size: 13, inline: false),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '·',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                AppLocalizations.of(context).profileHumgStudent,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          )
-        else
+        if (!isHumgVerified) ...[
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            AppLocalizations.of(context).profileHumgStudent,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.secondary,
+            AppLocalizations.of(context).profileNotVerified,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.error,
               fontWeight: FontWeight.w500,
             ),
           ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         _ProfileStatsRow(answerCount: answerCount, totalLikes: totalLikes),
       ],
