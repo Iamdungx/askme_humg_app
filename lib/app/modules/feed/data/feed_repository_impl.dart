@@ -66,8 +66,6 @@ class FeedRepositoryImpl implements IFeedRepository {
     String? userId,
     required String content,
     required bool isAnonymous,
-    String authorName = '',
-    String authorAvatar = '',
   }) async {
     try {
       await _datasource.postComment(
@@ -75,8 +73,6 @@ class FeedRepositoryImpl implements IFeedRepository {
         userId: userId,
         content: content,
         isAnonymous: isAnonymous,
-        authorName: authorName,
-        authorAvatar: authorAvatar,
       );
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);

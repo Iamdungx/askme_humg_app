@@ -36,13 +36,20 @@ class _RouterNotifier extends ChangeNotifier {
 
     // asData?.value: returns null on both AsyncLoading and AsyncError,
     // treating error state as logged-out (safe fallback).
-    final isLoggedIn = authAsync.asData?.value != null;
+    final user = authAsync.asData?.value;
+    final isLoggedIn = user != null;
 
     // Unauthenticated → redirect to login for protected locations.
     final isProtected = protectedLocationPrefixes.any(
       (prefix) => path.startsWith(prefix),
     );
     if (!isLoggedIn && isProtected) return const LoginRoute().location;
+
+    // Admin route — requires isAdmin custom claim in addition to login.
+    if (path.startsWith('/admin')) {
+      if (!isLoggedIn) return const LoginRoute().location;
+      if (user.isAdmin != true) return const FeedRoute().location;
+    }
 
     // Authenticated → leave the login screen.
     if (isLoggedIn && path == const LoginRoute().location) {

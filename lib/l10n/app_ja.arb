@@ -114,6 +114,7 @@
   "answerSaved": "回答が保存されました（非公開）。",
   "@answerSaved": { "description": "フィードに公開しない場合の保存通知" },
   "answerErrorEmpty": "回答を入力してください",
+  "answerErrorTooLong": "回答は2000文字以内で入力してください",
   "answerReceivedTimeAgo": "{timeAgo}に受信",
   "@answerReceivedTimeAgo": {
     "placeholders": { "timeAgo": { "type": "String" } }

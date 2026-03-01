@@ -43,16 +43,12 @@ class PostComment {
     String? userId,
     required String content,
     required bool isAnonymous,
-    String authorName = '',
-    String authorAvatar = '',
   }) =>
       _repo.postComment(
         answerId: answerId,
         userId: userId,
         content: content,
         isAnonymous: isAnonymous,
-        authorName: authorName,
-        authorAvatar: authorAvatar,
       );
 }
 

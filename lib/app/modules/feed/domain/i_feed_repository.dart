@@ -18,8 +18,6 @@ abstract class IFeedRepository {
     String? userId,
     required String content,
     required bool isAnonymous,
-    String authorName = '',
-    String authorAvatar = '',
   });
 
   /// Returns the most recent [limit] published answers by a user (UC-4.1 pattern).

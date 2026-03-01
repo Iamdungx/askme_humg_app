@@ -231,16 +231,7 @@ class PostCommentNotifier extends _$PostCommentNotifier {
     if (trimmed.isEmpty) return 'errorCommentEmpty';
     if (trimmed.length > 500) return 'errorCommentTooLong';
 
-    final authUser = ref.read(authStateProvider).asData?.value;
-    final uid = authUser?.uid;
-
-    // Fetch author info for non-anonymous comments to denormalize into the doc.
-    String authorName = '';
-    String authorAvatar = '';
-    if (!isAnonymous && authUser != null) {
-      authorName = authUser.displayName ?? '';
-      authorAvatar = authUser.photoUrl ?? '';
-    }
+    final uid = ref.read(authStateProvider).asData?.value?.uid;
 
     state = const AsyncLoading();
     final result = await AsyncValue.guard(
@@ -249,8 +240,6 @@ class PostCommentNotifier extends _$PostCommentNotifier {
             userId: isAnonymous ? null : uid,
             content: trimmed,
             isAnonymous: isAnonymous,
-            authorName: authorName,
-            authorAvatar: authorAvatar,
           ),
     );
     state = result;

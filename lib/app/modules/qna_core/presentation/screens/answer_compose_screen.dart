@@ -23,6 +23,8 @@ class AnswerComposeScreen extends ConsumerStatefulWidget {
 }
 
 class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
+  static const int _maxChars = 2000;
+
   final _controller = TextEditingController();
   bool _isPublished = true;
   String? _validationError;
@@ -106,6 +108,7 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
             controller: _controller,
             minLines: 5,
             maxLines: null,
+            maxLength: _maxChars,
             onChanged: (_) {
               if (_validationError != null) {
                 setState(() => _validationError = null);
@@ -158,6 +161,10 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
     final l10n = AppLocalizations.of(context);
     if (content.isEmpty) {
       setState(() => _validationError = l10n.answerErrorEmpty);
+      return;
+    }
+    if (content.length > _maxChars) {
+      setState(() => _validationError = l10n.answerErrorTooLong);
       return;
     }
 

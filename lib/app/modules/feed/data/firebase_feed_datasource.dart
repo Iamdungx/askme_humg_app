@@ -108,16 +108,14 @@ class FirebaseFeedDatasource {
 
   /// UC-4.3: WriteBatch — MANDATORY: comments add + answers.commentCount increment.
   ///
-  /// Denormalizes [authorName] and [authorAvatar] into the comment doc so
-  /// CommentTile can render without a separate user lookup.
+  /// Fetches authorName/authorAvatar from `users/{userId}` (Firestore source of
+  /// truth) so denormalized data reflects the latest profile, not stale Auth data.
   /// Guard: [userId] must be non-null when [isAnonymous] is false.
   Future<void> postComment({
     required String answerId,
     String? userId,
     required String content,
     required bool isAnonymous,
-    String authorName = '',
-    String authorAvatar = '',
   }) async {
     if (!isAnonymous && userId == null) {
       throw const FirestoreException(
@@ -126,6 +124,17 @@ class FirebaseFeedDatasource {
     }
 
     try {
+      // Fetch latest author info from Firestore for named comments.
+      String authorName = '';
+      String authorAvatar = '';
+      if (!isAnonymous && userId != null) {
+        final userSnap =
+            await _firestore.collection('users').doc(userId).get();
+        final data = userSnap.data();
+        authorName = (data?['name'] as String?) ?? '';
+        authorAvatar = (data?['avatar'] as String?) ?? '';
+      }
+
       final batch = _firestore.batch();
 
       final commentRef = _firestore.collection('comments').doc();
@@ -136,8 +145,8 @@ class FirebaseFeedDatasource {
         'isAnonymous': isAnonymous,
         'createdAt': FieldValue.serverTimestamp(),
         // Denormalized for display — empty strings for anonymous comments.
-        'authorName': isAnonymous ? '' : authorName,
-        'authorAvatar': isAnonymous ? '' : authorAvatar,
+        'authorName': authorName,
+        'authorAvatar': authorAvatar,
       });
 
       final answerRef = _firestore.collection('answers').doc(answerId);

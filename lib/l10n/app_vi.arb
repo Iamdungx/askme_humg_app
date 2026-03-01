@@ -191,6 +191,7 @@
   "@answerSaved": { "description": "Thông báo lưu câu trả lời không đăng" },
   "answerErrorEmpty": "Vui lòng nhập câu trả lời",
   "@answerErrorEmpty": { "description": "Lỗi câu trả lời trống" },
+  "answerErrorTooLong": "Câu trả lời không được vượt quá 2000 ký tự",
   "answerReceivedTimeAgo": "Nhận được {timeAgo}",
   "@answerReceivedTimeAgo": {
     "description": "Thời gian nhận câu hỏi",

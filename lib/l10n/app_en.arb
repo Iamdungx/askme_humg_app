@@ -114,6 +114,7 @@
   "answerSaved": "Answer saved (not published).",
   "@answerSaved": { "description": "Snackbar when answer is saved but not published to feed" },
   "answerErrorEmpty": "Please enter an answer",
+  "answerErrorTooLong": "Answer must not exceed 2000 characters",
   "answerReceivedTimeAgo": "Received {timeAgo}",
   "@answerReceivedTimeAgo": {
     "placeholders": { "timeAgo": { "type": "String" } }
