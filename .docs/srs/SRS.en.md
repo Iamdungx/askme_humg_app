@@ -213,7 +213,7 @@ The system follows a client-server architecture with real-time database support.
 **Description:** Every Host user can generate and share a unique deep link that, when opened, navigates directly to their profile page where anonymous questions can be submitted.
 
 **Processing:**
-1. The system constructs a unique URL for the Host: `https://askme.humg.edu.vn/u/{userId}`
+1. The system constructs a unique URL for the Host: `https://askme-humg-app.web.app/user/{userId}`
 2. Host can share this link or a visual QR card (image with the link) to external platforms (Facebook, Instagram Stories, etc.)
 3. When a recipient opens the link on a device with the app installed, the app opens directly to the Host's profile (handled by `app_links` + Android App Links / iOS Universal Links)
 4. If the app is not installed, the link redirects to an app store or a mobile web fallback page
@@ -276,9 +276,9 @@ The system follows a client-server architecture with real-time database support.
 | **Firebase Storage** | Avatar and media storage |
 | **Cloud Functions** | Rate limiting for anonymous submissions, OTP delivery (Resend API), server-side content moderation |
 | **Firebase App Check** | Attestation of legitimate app instances for anonymous endpoints |
-| **`app_links` package** | Deep link handling for `askme.humg.edu.vn/u/{userId}` — replaces deprecated Firebase Dynamic Links |
+| **`app_links` package** | Deep link handling for `askme-humg-app.web.app/user/{userId}` — replaces deprecated Firebase Dynamic Links |
 
-> **Note:** Firebase Dynamic Links was deprecated by Google in August 2025. The app uses the `app_links` package for deep link interception combined with native platform configuration (Android App Links / iOS Universal Links) pointing to `askme.humg.edu.vn`.
+> **Note:** Firebase Dynamic Links was deprecated by Google in August 2025. The app uses the `app_links` package for deep link interception combined with native platform configuration (Android App Links / iOS Universal Links) pointing to `askme-humg-app.web.app`.
 
 ### Architecture Diagram (High-level)
 
@@ -290,7 +290,7 @@ Flutter App (Riverpod)
     ├── Cloud Firestore        (Data storage · real-time sync)
     ├── Firebase Storage       (Avatars · media)
     ├── Cloud Functions        (Rate limiting · OTP · server moderation)
-    └── app_links + native     (Deep link routing: askme.humg.edu.vn/u/{userId})
+    └── app_links + native     (Deep link routing: askme-humg-app.web.app/user/{userId})
 ```
 
 ---

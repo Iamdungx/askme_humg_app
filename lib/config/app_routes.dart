@@ -2,7 +2,7 @@
 // The actual GoRoute tree is declared in router.dart (StatefulShellRoute).
 
 /// Routes that require authentication. GoRouter checks `startsWith`.
-const protectedLocationPrefixes = ['/inbox', '/admin'];
+const protectedLocationPrefixes = ['/inbox', '/me/edit', '/admin'];
 
 /// Named path constants for all app routes.
 abstract final class AppRoutes {
@@ -20,6 +20,6 @@ abstract final class AppRoutes {
 
 /// External URLs opened via url_launcher.
 abstract final class AppUrls {
-  static const String terms = 'https://askme.humg.edu.vn/terms';
-  static const String privacy = 'https://askme.humg.edu.vn/privacy';
+  static const String terms = 'https://askme-humg-app.web.app/terms';
+  static const String privacy = 'https://askme-humg-app.web.app/privacy';
 }

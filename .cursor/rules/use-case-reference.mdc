@@ -11,7 +11,7 @@ When implementing a feature, find the UC code and follow its Database Impact exa
 |---------|---------|---------------|
 | UC-1.1 | Google Sign-In | Reject if email ≠ `@humg.edu.vn`. Create `users` doc on first login. |
 | UC-1.2 | Logout | Clear Firebase Auth session. |
-| UC-2.1 | Generate Deep Link | URL format: `askme.humg.edu.vn/u/{userId}`. Export shareable card image. |
+| UC-2.1 | Generate Deep Link | URL format: `askme-humg-app.web.app/user/{userId}`. Export shareable card image. |
 | UC-2.2 | View Profile | Show: name, avatar, answer count, total likes. |
 | UC-3.1 | Submit Anonymous Question | App Check required. 300 char max. Rate limit via Cloud Function. |
 | UC-3.2 | Manage Inbox | Query `questions` where `toUserId == currentUser.uid`. Two tabs: unanswered / answered. |

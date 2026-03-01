@@ -98,6 +98,8 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
               controller: _controller,
               maxLines: 4,
               maxLength: _maxChars,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
               buildCounter:
                   (
                     _, {

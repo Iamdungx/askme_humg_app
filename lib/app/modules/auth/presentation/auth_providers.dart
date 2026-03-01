@@ -38,7 +38,7 @@ SignOut signOut(Ref ref) => SignOut(ref.watch(authRepositoryProvider));
 // Auth state stream — watched by router guard
 // ---------------------------------------------------------------------------
 
-@riverpod
+@Riverpod(keepAlive: true)
 Stream<AuthUser?> authState(Ref ref) =>
     ref.watch(authRepositoryProvider).authStateChanges;
 

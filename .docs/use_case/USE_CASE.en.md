@@ -46,7 +46,7 @@
 * **Pre-condition:** Must be logged in.
 * **Main Flow:**
   1. User navigates to the Profile screen.
-  2. System generates a unique link (via Firebase Dynamic Links or a custom URL scheme) in the format `askme.humg.edu.vn/u/{userId}`.
+  2. System generates a unique link (via Firebase Dynamic Links or a custom URL scheme) in the format `askme-humg-app.web.app/user/{userId}`.
   3. User taps "Copy Link" or "Share to Instagram/Facebook Story".
   4. System generates a visual Card Image containing the link/QR code for easy sharing.
 * **Alternative Flow (Fallback):** When another person taps the link:

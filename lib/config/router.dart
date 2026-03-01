@@ -18,6 +18,7 @@ import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_comp
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
 import 'package:askme_humg/app/modules/settings/presentation/edit_profile_screen.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_screen.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/screens/admin_dashboard_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 import 'package:askme_humg/config/app_routes.dart';
 
@@ -117,7 +118,7 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: AppRoutes.admin,
-        builder: (context, state) => const _AdminPlaceholder(),
+        builder: (context, state) => const AdminDashboardScreen(),
       ),
 
       // ── Shell: 4 tabs with persistent bottom NavigationBar ───────────────
@@ -210,8 +211,8 @@ void _initDeepLinks(GoRouter router, Ref ref) {
   final sub = appLinks.uriLinkStream.listen(
     (uri) {
       logger.i('Deep link warm-start: $uri');
-      final path = uri.path;
-      if (path.isNotEmpty && path != '/') router.go(path);
+      final path = _resolveDeepLinkPath(uri);
+      if (path != null) router.go(path);
     },
     onError: (Object e, StackTrace s) {
       logger.w('Deep link stream error', error: e, stackTrace: s);
@@ -221,9 +222,9 @@ void _initDeepLinks(GoRouter router, Ref ref) {
 
   appLinks.getInitialLink().then((initialUri) {
     if (initialUri != null) {
-      final path = initialUri.path;
       logger.i('Deep link cold-start: $initialUri');
-      if (path.isNotEmpty && path != '/') router.go(path);
+      final path = _resolveDeepLinkPath(initialUri);
+      if (path != null) router.go(path);
     }
   }).catchError((Object e, StackTrace s) {
     logger.w('Failed to get initial deep link', error: e, stackTrace: s);
@@ -286,13 +287,30 @@ class _ProfileLoginPrompt extends StatelessWidget {
   }
 }
 
-class _AdminPlaceholder extends StatelessWidget {
-  const _AdminPlaceholder();
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Admin Dashboard')),
-        // TODO(phase-5): replace with AdminDashboardScreen — UC-5.2
-        body: const Center(child: Text('Admin Dashboard')),
-      );
+// Resolves both https and custom scheme (askme://) deep links to GoRouter paths.
+// askme://user/{id} → host="user", pathSegments=["{id}"] → /user/{id}
+// https://askme-humg-app.web.app/user/{id} → path="/user/{id}"
+String? _resolveDeepLinkPath(Uri uri) {
+  logger.d('resolveDeepLinkPath: scheme=${uri.scheme} host=${uri.host} path=${uri.path} segments=${uri.pathSegments}');
+  if (uri.scheme == 'askme') {
+    // askme://user/{userId} → host="user", pathSegments=["{userId}"]
+    final pathSegments = uri.pathSegments;
+    if (uri.host == 'user' && pathSegments.isNotEmpty) {
+      return '/user/${pathSegments.first}';
+    }
+    // Fallback: treat host as route segment + pathSegments
+    if (uri.host.isNotEmpty) return '/${uri.host}${uri.path}';
+    return null;
+  }
+  // HTTPS scheme — only pass the path portion, never full URI.
+  if (uri.scheme == 'https' || uri.scheme == 'http') {
+    final path = uri.path;
+    if (path.isNotEmpty && path != '/') return path;
+    return null;
+  }
+  return null;
 }

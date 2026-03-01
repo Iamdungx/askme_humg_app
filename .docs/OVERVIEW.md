@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~85% ████████░░
+Tổng tiến độ: ~90% █████████░
 ```
 
 | Hạng mục | Trạng thái |
@@ -33,7 +33,7 @@ Tổng tiến độ: ~85% ████████░░
 | Splash screen (auth-aware, navigate sau 2.8s) | ✅ Xong |
 | Đăng nhập Google — UI + domain check + upsert Firestore | ✅ Xong |
 | Đăng xuất | ✅ Xong |
-| Router guard (auth redirect `/inbox`, `/admin`) | ✅ Xong |
+| Router guard (auth redirect `/inbox`, `/me/edit`, `/admin`) | ✅ Xong |
 | Trang cá nhân + deep link | ✅ Xong |
 | Hộp thư câu hỏi (Inbox) | ✅ Xong |
 | Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
@@ -59,7 +59,7 @@ Firebase init, `firebase_options.dart`, error/failure classes, Riverpod provider
 Google Sign-In, chặn email không phải `@humg.edu.vn`, upsert document `users` trên Firestore, đăng xuất, auth guard router, Splash screen.
 
 ### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2) ✅ XONG
-ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme.humg.edu.vn/u/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
+ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme-humg-app.web.app/user/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
 
 ### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3) ✅ XONG
 
@@ -234,13 +234,22 @@ Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
    - `AdminDashboardScreen` (`/admin`) — danh sách reports, approve/reject
 6. Security rules đã có trong `firestore.rules`; đảm bảo `reports` chỉ admin đọc được
 
-### Trước Phase 5 — Fix issues tồn đọng từ Phase 3
+### Pre-Phase 5 — Fixes đã apply ✅
 
-| File | Vấn đề | Mức độ |
+| File | Fix | Mức độ |
 |---|---|---|
-| `qna_core/data/qna_repository_impl.dart` | Chưa có try/catch mapping `FirestoreException → FirestoreFailure` | HIGH |
-| `profile/presentation/widgets/ask_question_sheet.dart` | `ScaffoldMessenger.of(context)` gọi sau `Navigator.pop()` — context có thể detached | MEDIUM |
-| `feed/presentation/widgets/feed_loading_shimmer.dart` | Chỉ 11 dòng — cần verify có phải stub không | MEDIUM |
+| `config/app_routes.dart` | Thêm `/me/edit` vào `protectedLocationPrefixes` | P1-Security ✅ |
+| `profile/data/profile_repository_impl.dart` | Thêm try/catch → `FirestoreFailure` / `UnknownFailure` | P1-Architecture ✅ |
+| `profile/presentation/screens/profile_screen.dart` | Check `FirestoreFailure` thay vì `FirestoreException` | P1-Architecture ✅ |
+| `global_widgets/anonymous_badge.dart` | Label nullable, fallback `l10n.anonymousBadgeLabel` | Minor ✅ |
+| `auth/presentation/auth_providers.dart` | `authStateProvider` thêm `keepAlive: true` | Minor ✅ |
+| `feed/presentation/feed_providers.dart` | `FeedNotifier.build()` dùng `ref.watch` | Minor ✅ |
+| `qna_core/data/qna_repository_impl.dart` | Exception mapping đầy đủ (đã fix Phase 3) | HIGH ✅ |
+| `profile/presentation/widgets/ask_question_sheet.dart` | Widget inline — không còn Navigator.pop() issue | MEDIUM ✅ |
+| `global_widgets/loading_shimmer.dart` | Implement đầy đủ 172 dòng skeleton | MEDIUM ✅ |
+
+**⚠️ Còn tồn đọng (không blocking):**
+- UC-3.1 App Check: Cloud Function `submitQuestion` chưa deploy — chờ Blaze plan (thẻ tín dụng)
 
 > **Lưu ý quan trọng trước khi test end-to-end:**
 > - UC-3.1 (gửi câu hỏi ẩn danh): Cloud Function `submitQuestion` chưa deploy do chưa upgrade Blaze plan

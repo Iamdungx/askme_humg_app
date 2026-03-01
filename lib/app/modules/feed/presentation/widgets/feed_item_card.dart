@@ -6,8 +6,10 @@ import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_avatar.dart';
 import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/app_card.dart';
+import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_reason_sheet.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedItemCard extends ConsumerWidget {
@@ -81,7 +83,7 @@ class FeedItemCard extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
-                onPressed: () => _showMoreMenu(context, l10n),
+                onPressed: () => _showMoreMenu(context, l10n, ref),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -173,7 +175,17 @@ class FeedItemCard extends ConsumerWidget {
     );
   }
 
-  void _showMoreMenu(BuildContext context, AppLocalizations l10n) {
+  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+    final isLoggedIn =
+        ref.read(authStateProvider).asData?.value != null;
+
+    if (!isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.loginRequiredToReport)),
+      );
+      return;
+    }
+
     showAppBottomSheet<void>(
       context: context,
       builder: (_) => AppBottomSheetBody(
@@ -181,8 +193,20 @@ class FeedItemCard extends ConsumerWidget {
           ListTile(
             leading: const Icon(LucideIcons.flag),
             title: Text(l10n.reportTitle),
-            // TODO(phase-5): Open report bottom sheet → UC-5.1
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet<void>(
+                context: context,
+                useSafeArea: true,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => ReportReasonSheet(
+                  targetId: item.answerId,
+                  targetType: 'answer',
+                  content: item.answerContent,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -190,7 +214,7 @@ class FeedItemCard extends ConsumerWidget {
   }
 
   void _onShare(BuildContext context, AppLocalizations l10n) {
-    // TODO(phase-5): Implement share via share_plus package (deep link UC-2.1)
+    // TODO(UC-2.1): Implement share via share_plus package
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.commonShare)),
     );

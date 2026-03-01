@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- UC-2.1: Universal Links for askme.humg.edu.vn deep links -->
+    <!-- UC-2.1: Universal Links for askme-humg-app.web.app deep links -->
     <key>com.apple.developer.associated-domains</key>
     <array>
-        <string>applinks:askme.humg.edu.vn</string>
+        <string>applinks:askme-humg-app.web.app</string>
     </array>
 </dict>
 </plist>

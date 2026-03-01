@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/empty_state.dart';
 import 'package:askme_humg/app/global_widgets/error_state.dart';
@@ -15,6 +15,7 @@ import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_previ
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
 import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/widgets/report_reason_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -34,7 +35,7 @@ class ProfileScreen extends ConsumerWidget {
       error: (e, _) {
         // UC-2.2 §3: distinguish "user not found" from generic network error
         final isNotFound =
-            e is FirestoreException && e.message == 'User not found';
+            e is FirestoreFailure && e.message == 'User not found';
         return _ProfileErrorScaffold(
           isNotFound: isNotFound,
           onRetry: () => ref.invalidate(userProfileProvider(userId)),
@@ -63,6 +64,44 @@ class _ProfileContent extends ConsumerWidget {
         displayName: profile.name,
         avatarUrl: profile.avatar,
         deepLink: deepLink,
+      ),
+    );
+  }
+
+  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+    final isLoggedIn =
+        ref.read(authStateProvider).asData?.value != null;
+
+    if (!isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.loginRequiredToReport)),
+      );
+      return;
+    }
+
+    showAppBottomSheet<void>(
+      context: context,
+      builder: (_) => AppBottomSheetBody(
+        children: [
+          ListTile(
+            leading: const Icon(LucideIcons.flag),
+            title: Text(l10n.reportTitle),
+            onTap: () {
+              Navigator.pop(context);
+              showModalBottomSheet<void>(
+                context: context,
+                useSafeArea: true,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => ReportReasonSheet(
+                  targetId: profile.userId,
+                  targetType: 'user',
+                  content: profile.name,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -107,8 +146,7 @@ class _ProfileContent extends ConsumerWidget {
           ] else
             IconButton(
               icon: Icon(LucideIcons.ellipsisVertical, color: cs.onSurface),
-              // TODO(phase-5): open "More" bottom sheet → Report (UC-5.1)
-              onPressed: () {},
+              onPressed: () => _showMoreMenu(context, l10n, ref),
             ),
         ],
       ),
@@ -285,7 +323,7 @@ class _RecentAnswersSection extends ConsumerWidget {
                 color: cs.onSurface,
               ),
             ),
-            // TODO(phase-5): Navigate to full published answers list screen
+            // TODO(future): Navigate to full published answers list screen
             if (answerCount > 0)
               TextButton(
                 onPressed: () {},

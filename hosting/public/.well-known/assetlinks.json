@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.humg.askmehumg",
+      "sha256_cert_fingerprints": [
+        "BA:A4:9C:82:36:F8:E2:40:05:3E:8A:38:76:93:2E:B1:15:C5:2E:FC:4A:B3:79:C5:04:59:65:64:DE:71:5F:DD"
+      ]
+    }
+  }
+]
