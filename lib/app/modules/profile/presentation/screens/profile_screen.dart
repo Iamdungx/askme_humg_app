@@ -95,12 +95,17 @@ class _ProfileContent extends ConsumerWidget {
           ),
         ),
         actions: [
-          if (isOwner)
+          if (isOwner) ...[
+            IconButton(
+              icon: Icon(LucideIcons.userPen, color: cs.onSurface),
+              tooltip: 'Edit Profile',
+              onPressed: () => context.push('/me/edit'),
+            ),
             IconButton(
               icon: Icon(LucideIcons.share2, color: cs.onSurface),
               onPressed: () => _showShareCard(context, deepLink),
-            )
-          else
+            ),
+          ] else
             IconButton(
               icon: Icon(LucideIcons.ellipsisVertical, color: cs.onSurface),
               // TODO(phase-5): open "More" bottom sheet → Report (UC-5.1)

@@ -318,17 +318,32 @@ abstract final class AppRadius {
 ## 6. Navigation Structure
 
 ```
-Bottom Navigation Bar (3 tabs):
-├── [🏠] Feed          → /      (tab 0 — always visible)
-├── [📩] Inbox         → /inbox (tab 1 — redirect to /login if unauthenticated)
-└── [👤] Profile       → /me    (tab 2 — shows sign-in CTA if unauthenticated)
+Bottom Navigation Bar (4 tabs):
+├── [🏠] Feed          → /         (tab 0 — always visible)
+├── [📩] Inbox         → /inbox    (tab 1 — redirect to /login if unauthenticated)
+├── [👤] Profile       → /me       (tab 2 — shows sign-in CTA if unauthenticated)
+└── [⚙️] Settings      → /settings (tab 3 — account items hidden when guest)
 ```
 
 - Bottom nav uses `NavigationBar` (Material 3), `indicatorColor: AppColors.accent` with low opacity
 - Floating Action Button on Feed: `"Share my link"` — only visible when logged in
-- Full-screen routes rendered **outside** the shell (no bottom nav): `/login`, `/splash`, `/u/:userId` (other user), `/admin`, `/inbox/answer/:questionId`
+- Full-screen routes rendered **outside** the shell (no bottom nav): `/login`, `/splash`, `/u/:userId` (other user), `/admin`, `/inbox/answer/:questionId`, `/me/edit`
 - Implementation: GoRouter `StatefulShellRoute` wrapping an `AppShell` widget (`lib/app/core/widgets/app_shell.dart`)
 - See `ARCHITECTURE.md` → "Shell Navigation" section for route tree and edge cases
+
+### Profile tab (`/me`) — owner actions
+- AppBar shows `[✏️ Edit]` icon → push `/me/edit` (full-screen, outside shell)
+- AppBar shows `[🔗 Share]` icon → opens ShareCardWidget bottom sheet
+
+### Settings screen (`/settings`) — sections
+
+| Section | Items | Auth required |
+|---------|-------|---------------|
+| Account | Edit Profile, HUMG Verification, Show real name toggle | ✅ |
+| Notifications | New question (TODO v2 FCM), New comment (TODO v2 FCM) | ✅ |
+| App | Language (vi/en/ja), Theme (light/dark/system), Clear cache | ❌ |
+| About | Version, Terms of Service, Privacy Policy | ❌ |
+| Sign out | Button (red) | ✅ |
 
 ### L10n keys for navigation labels
 
@@ -337,6 +352,7 @@ Bottom Navigation Bar (3 tabs):
 | `navFeed` | Feed | Feed | フィード |
 | `navInbox` | Inbox | Hộp thư | 受信箱 |
 | `navProfile` | Profile | Hồ sơ | プロフィール |
+| `navSettings` | Settings | Cài đặt | 設定 |
 
 ---
 

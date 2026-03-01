@@ -6,13 +6,15 @@ import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
-/// Persistent shell scaffold wrapping the 3 bottom-nav tabs:
+/// Persistent shell scaffold wrapping the 4 bottom-nav tabs:
 ///   0 → Feed      (/)
 ///   1 → Inbox     (/inbox)
 ///   2 → Profile   (/me)
+///   3 → Settings  (/settings)
 ///
-/// Full-screen routes (Login, AnswerCompose, /u/:userId, Admin, Splash) are
-/// declared outside the StatefulShellRoute and render without this shell.
+/// Full-screen routes (Login, AnswerCompose, /u/:userId, Admin, Splash,
+/// /me/edit, /verify-humg) are declared outside the StatefulShellRoute
+/// and render without this shell.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -72,6 +74,11 @@ class AppShell extends ConsumerWidget {
             ),
             label: l10n.navProfile,
           ),
+          NavigationDestination(
+            icon: const Icon(LucideIcons.settings),
+            selectedIcon: Icon(LucideIcons.settings, color: cs.secondary),
+            label: l10n.navSettings,
+          ),
         ],
       ),
     );
@@ -83,7 +90,6 @@ class AppShell extends ConsumerWidget {
       navigationShell.goBranch(index, initialLocation: true);
       return;
     }
-    // Profile tab (/me): _MeTab reads authStateProvider itself — no extra needed.
     navigationShell.goBranch(index);
   }
 }

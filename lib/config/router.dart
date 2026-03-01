@@ -13,6 +13,8 @@ import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dar
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
+import 'package:askme_humg/app/modules/settings/presentation/edit_profile_screen.dart';
+import 'package:askme_humg/app/modules/settings/presentation/settings_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 import 'package:askme_humg/config/app_routes.dart';
 
@@ -97,12 +99,17 @@ GoRouter appRouter(Ref ref) {
           questionId: state.pathParameters['questionId']!,
         ),
       ),
+      // Edit Profile — full-screen, accessible from Profile tab and Settings tab.
+      GoRoute(
+        path: '/me/edit',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
       GoRoute(
         path: '/admin',
         builder: (context, state) => const _AdminPlaceholder(),
       ),
 
-      // ── Shell: 3 tabs with persistent bottom NavigationBar ───────────────
+      // ── Shell: 4 tabs with persistent bottom NavigationBar ───────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -135,6 +142,17 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: '/me',
                 builder: (context, state) => const _MeTab(),
+              ),
+            ],
+          ),
+
+          // Tab 3 — Settings (/settings)
+          // Visible to all users; account-specific items are hidden when guest.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),
