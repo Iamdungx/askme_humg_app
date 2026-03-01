@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:askme_humg/generated/assets.gen.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Small verified checkmark badge for HUMG-verified users.
-/// Uses [colorScheme.primary] for the badge circle colour.
+/// Uses LucideIcons.badgeCheck filled with [colorScheme.primary].
 /// Use [inline] for name rows (icon only), use default for profile header (icon + label).
 class VerifiedBadge extends StatelessWidget {
   const VerifiedBadge({super.key, this.size = 14, this.inline = true});
@@ -10,10 +10,10 @@ class VerifiedBadge extends StatelessWidget {
   final double size;
   final bool inline;
 
-  Widget _icon(Color color) => Assets.svgsVerified.svg(
-        width: size,
-        height: size,
-        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+  Widget _icon(Color color) => Icon(
+        LucideIcons.badgeCheck,
+        size: size,
+        color: color,
       );
 
   @override
