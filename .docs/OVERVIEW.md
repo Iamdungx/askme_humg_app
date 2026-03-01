@@ -38,7 +38,9 @@ Tổng tiến độ: ~70% ███████░░░
 | Hộp thư câu hỏi (Inbox) | ✅ Xong |
 | Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
 | Feed công khai | ✅ Xong |
-| Bottom Navigation Shell (ShellRoute) | ❌ Chưa làm |
+| Bottom Navigation Shell (ShellRoute, 4 tabs) | ✅ Xong |
+| Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
+| Edit Profile Screen (placeholder, full impl v2) | ✅ Xong |
 | Kiểm duyệt / báo cáo | ❌ Chưa làm |
 
 ---
