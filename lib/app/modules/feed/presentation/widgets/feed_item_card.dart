@@ -53,7 +53,10 @@ class FeedItemCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      timeago.format(item.createdAt),
+                      timeago.format(
+                        item.createdAt,
+                        locale: Localizations.localeOf(context).languageCode,
+                      ),
                       style: tt.labelSmall?.copyWith(
                         color: cs.onSurface.withValues(alpha: 0.5),
                       ),

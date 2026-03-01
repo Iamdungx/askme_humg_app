@@ -51,10 +51,16 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
 
     ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
-        final messenger = ScaffoldMessenger.of(context);
-        final successMessage = l10n.questionSubmitSuccess;
-        Navigator.of(context).pop();
-        messenger.showSnackBar(SnackBar(content: Text(successMessage)));
+        if (!context.mounted) return;
+        // Widget is inline (not a modal) — reset form instead of popping.
+        _controller.clear();
+        setState(() {
+          _charCount = 0;
+          _validationError = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.questionSubmitSuccess)),
+        );
       } else if (next.hasError) {
         final err = next.error;
         final message = err is RateLimitFailure
@@ -72,7 +78,8 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
     });
 
     final bool isOverLimit = _charCount > _maxChars;
-    final bool canSubmit = !submitState.isLoading && !isOverLimit;
+    final bool canSubmit =
+        !submitState.isLoading && !isOverLimit && _charCount > 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -44,16 +44,17 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
 
     ref.listen(answerProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
+        if (!context.mounted) return;
         final msg = _isPublished ? l10n.answerPublishSuccess : l10n.answerSaved;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),
         );
-        if (context.mounted) context.pop();
-      }
-      if (next.hasError) {
+        context.pop();
+      } else if (next.hasError) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.error.toString()),
+            content: Text(l10n.commonError),
             backgroundColor: cs.error,
           ),
         );
@@ -71,7 +72,11 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
       ),
       body: questionAsync.when(
         loading: () => const LoadingShimmer(),
-        error: (e, _) => ErrorState(message: e.toString()),
+        error: (e, _) => ErrorState(
+          message: l10n.commonError,
+          onRetry: () =>
+              ref.invalidate(questionByIdProvider(widget.questionId)),
+        ),
         data: (question) {
           if (question == null) {
             return ErrorState(message: l10n.commonError);
@@ -145,7 +150,7 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: l10n.answerPublishButton,
+            label: _isPublished ? l10n.answerPublishButton : l10n.answerSaveButton,
             variant: AppButtonVariant.primary,
             isLoading: answerState.isLoading,
             onPressed: answerState.isLoading ? null : _submit,

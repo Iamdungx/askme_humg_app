@@ -86,6 +86,11 @@ class FirebaseQnaDatasource {
       // Fetch question content and host user info before the batch (denormalization).
       final questionSnap =
           await _firestore.collection('questions').doc(questionId).get();
+      if (!questionSnap.exists) {
+        throw FirestoreException(
+          'answerQuestion: question $questionId not found',
+        );
+      }
       final questionContent =
           (questionSnap.data()?['content'] as String?) ?? '';
 
