@@ -5,6 +5,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/anonymous_badge.dart';
 import 'package:askme_humg/app/global_widgets/app_avatar.dart';
+import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/app_card.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
@@ -36,7 +37,9 @@ class FeedItemCard extends ConsumerWidget {
             children: [
               AppAvatar(
                 imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
-                name: item.hostName,
+                name: item.hostName.isNotEmpty
+                    ? item.hostName
+                    : l10n.feedFallbackHostName,
                 size: 40,
               ),
               const SizedBox(width: AppSpacing.md),
@@ -45,7 +48,9 @@ class FeedItemCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.hostName,
+                      item.hostName.isNotEmpty
+                          ? item.hostName
+                          : l10n.feedFallbackHostName,
                       style: tt.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -80,9 +85,25 @@ class FeedItemCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Question block
+          // Question block with anonymous sender label
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AnonymousBadge(compact: true),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                l10n.feedAnonymousAsked,
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            '"${item.questionContent}"',
+            item.questionContent.isNotEmpty
+                ? '"${item.questionContent}"'
+                : l10n.feedEmptyQuestion,
             style: tt.bodyMedium?.copyWith(
               fontStyle: FontStyle.italic,
               color: cs.onSurface.withValues(alpha: 0.75),
@@ -147,20 +168,17 @@ class FeedItemCard extends ConsumerWidget {
   }
 
   void _showMoreMenu(BuildContext context, AppLocalizations l10n) {
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(LucideIcons.flag),
-              title: Text(l10n.reportTitle),
-              // TODO(phase-5): Open report bottom sheet → UC-5.1
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+      builder: (_) => AppBottomSheetBody(
+        children: [
+          ListTile(
+            leading: const Icon(LucideIcons.flag),
+            title: Text(l10n.reportTitle),
+            // TODO(phase-5): Open report bottom sheet → UC-5.1
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }

@@ -14,6 +14,7 @@ import 'package:askme_humg/app/modules/profile/presentation/profile_providers.da
 import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_preview_card.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
+import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -55,10 +56,8 @@ class _ProfileContent extends ConsumerWidget {
   final bool isOwner;
 
   void _showShareCard(BuildContext context, String deepLink) {
-    showModalBottomSheet<void>(
+    showAppBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => ShareCardWidget(
         userId: profile.userId,
         displayName: profile.name,
@@ -77,9 +76,9 @@ class _ProfileContent extends ConsumerWidget {
         .call(profile.userId);
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: cs.surface.withValues(alpha: 0.9),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 1,
@@ -392,7 +391,7 @@ class _ProfileLoadingScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: const SingleChildScrollView(
         padding: EdgeInsets.symmetric(
@@ -482,7 +481,7 @@ class _ProfileErrorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: ErrorState(
         icon: isNotFound ? LucideIcons.userX : null,

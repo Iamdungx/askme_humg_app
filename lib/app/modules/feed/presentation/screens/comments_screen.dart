@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
@@ -14,20 +15,12 @@ Future<void> showCommentsSheet(
   required String answerId,
   required int commentCount,
 }) {
-  return showModalBottomSheet<void>(
+  return showAppScrollableSheet<void>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    useSafeArea: true,
-    builder: (_) => DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      minChildSize: 0.4,
-      maxChildSize: 0.95,
-      builder: (ctx, scrollController) => _CommentsSheetContent(
-        answerId: answerId,
-        commentCount: commentCount,
-        scrollController: scrollController,
-      ),
+    builder: (ctx, scrollController) => _CommentsSheetContent(
+      answerId: answerId,
+      commentCount: commentCount,
+      scrollController: scrollController,
     ),
   );
 }
@@ -50,88 +43,68 @@ class _CommentsSheetContent extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final commentsAsync = ref.watch(commentsProvider(answerId));
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      child: Column(
-        children: [
-          // Drag handle
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.md),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: cs.onSurface.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
+    return Column(
+      children: [
+        const SizedBox(height: AppSpacing.md),
 
-          // Header — live count from stream, falls back to initial commentCount
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Row(
-              children: [
-                Text(
-                  '${l10n.commentTitle} (${commentsAsync.asData?.value.length ?? commentCount})',
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(LucideIcons.x, color: cs.onSurface.withValues(alpha: 0.6)),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: cs.outline.withValues(alpha: 0.3)),
-
-          // Comment list
-          Expanded(
-            child: commentsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => ErrorState(
-                message: e.toString(),
-                onRetry: () => ref.invalidate(commentsProvider(answerId)),
+        // Header — live count from stream, falls back to initial commentCount
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Row(
+            children: [
+              Text(
+                '${l10n.commentTitle} (${commentsAsync.asData?.value.length ?? commentCount})',
+                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
-              data: (comments) {
-                if (comments.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.commentEmpty,
-                      style: tt.bodyMedium?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.5),
-                      ),
+              const Spacer(),
+              IconButton(
+                icon: Icon(LucideIcons.x, color: cs.onSurface.withValues(alpha: 0.6)),
+                onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ),
+        Divider(color: cs.outline.withValues(alpha: 0.3)),
+
+        // Comment list
+        Expanded(
+          child: commentsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => ErrorState(
+              message: e.toString(),
+              onRetry: () => ref.invalidate(commentsProvider(answerId)),
+            ),
+            data: (comments) {
+              if (comments.isEmpty) {
+                return Center(
+                  child: Text(
+                    l10n.commentEmpty,
+                    style: tt.bodyMedium?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.5),
                     ),
-                  );
-                }
-                return ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
                   ),
-                  itemCount: comments.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: AppSpacing.xl),
-                  itemBuilder: (_, i) => CommentTile(comment: comments[i]),
                 );
-              },
-            ),
+              }
+              return ListView.separated(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                itemCount: comments.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: AppSpacing.xl),
+                itemBuilder: (_, i) => CommentTile(comment: comments[i]),
+              );
+            },
           ),
+        ),
 
-          // Input bar
-          _CommentInputBar(answerId: answerId),
-        ],
-      ),
+        // Input bar
+        _CommentInputBar(answerId: answerId),
+      ],
     );
   }
 }
@@ -209,7 +182,7 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     final isPosting = ref.watch(postCommentProvider).isLoading;
 
     return Container(
-      color: cs.surfaceContainerLow,
+      color: cs.surfaceContainerHigh,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,

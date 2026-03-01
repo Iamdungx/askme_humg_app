@@ -76,13 +76,9 @@ class _ShareCardWidgetState extends State<ShareCardWidget> {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xl),
-        ),
-      ),
+    return ColoredBox(
+      color: cs.surfaceContainerHigh,
+      child: Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
         AppSpacing.lg,
@@ -92,17 +88,6 @@ class _ShareCardWidgetState extends State<ShareCardWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-            ),
-          ),
           const SizedBox(height: AppSpacing.lg),
 
           // Title
@@ -160,6 +145,7 @@ class _ShareCardWidgetState extends State<ShareCardWidget> {
           ),
         ],
       ),
+    ),
     );
   }
 }

@@ -55,7 +55,10 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid || isAdmin() ||
         // Like/unlike: only likeCount and likedBy change
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['likeCount', 'likedBy']))
+          .hasOnly(['likeCount', 'likedBy'])) ||
+        // Comment: only commentCount incremented by any signed-in user (UC-4.3)
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['commentCount']))
       );
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }

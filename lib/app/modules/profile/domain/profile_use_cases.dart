@@ -12,5 +12,5 @@ class GetUserProfile {
 class GenerateDeepLink {
   const GenerateDeepLink();
 
-  String call(String userId) => 'https://askme.humg.edu.vn/u/$userId';
+  String call(String userId) => 'https://askme.humg.edu.vn/user/$userId';
 }

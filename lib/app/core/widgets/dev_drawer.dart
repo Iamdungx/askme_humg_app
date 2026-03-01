@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/app/modules/auth/domain/auth_user.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/config/languages.dart';
 
 /// Dev-only navigation drawer.
@@ -42,7 +43,7 @@ class DevDrawer extends ConsumerWidget {
               ),
               _NavTile(
                 icon: LucideIcons.circleUser,
-                label: 'My Profile  /u/:uid',
+                label: 'My Profile  ${AppRoutes.userProfile}/:uid',
                 onTap: () =>
                     _go(context, '/me'),
               ),
@@ -128,7 +129,7 @@ class DevDrawer extends ConsumerWidget {
               if (uid.isEmpty) return;
               Navigator.pop(ctx);
               Navigator.pop(context); // close drawer
-              context.go('/u/$uid');
+              context.go('${AppRoutes.userProfile}/$uid');
             },
             child: const Text('Go'),
           ),

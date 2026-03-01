@@ -369,5 +369,13 @@
   "profileStatAnswers": "Câu trả lời",
   "@profileStatAnswers": { "description": "Nhãn thống kê số câu trả lời" },
   "profileStatLikes": "Lượt thích",
-  "@profileStatLikes": { "description": "Nhãn thống kê tổng lượt thích" }
+  "@profileStatLikes": { "description": "Nhãn thống kê tổng lượt thích" },
+  "settingsTagline": "Được tạo ra cho Sinh viên Mỏ & Địa chất",
+  "@settingsTagline": { "description": "Tagline hiển thị ở cuối màn hình Cài đặt" },
+  "feedAnonymousAsked": "hỏi:",
+  "@feedAnonymousAsked": { "description": "Nhãn sau AnonymousBadge trong khối câu hỏi, ví dụ '[Ẩn danh] hỏi:'" },
+  "feedFallbackHostName": "Sinh viên HUMG",
+  "@feedFallbackHostName": { "description": "Tên hiển thị dự phòng khi hostName rỗng (dữ liệu cũ)" },
+  "feedEmptyQuestion": "(Câu hỏi không có sẵn)",
+  "@feedEmptyQuestion": { "description": "Văn bản in nghiêng dự phòng khi nội dung câu hỏi rỗng (dữ liệu cũ)" }
 }

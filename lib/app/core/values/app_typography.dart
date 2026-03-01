@@ -4,6 +4,9 @@ import 'package:askme_humg/app/core/values/app_colors.dart';
 abstract final class AppTypography {
   static const String fontFamily = 'Inter';
 
+  // Font sizes outside the standard TextTheme slots
+  static const double fontSizeCaption = 10;
+
   // TextTheme is a theme definition (consumed by AppTheme._buildTheme),
   // so using raw dark tokens here is correct — colors are overridden by
   // colorScheme.onSurface at runtime via Material 3 text theme merging.
