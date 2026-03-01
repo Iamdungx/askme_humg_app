@@ -46,6 +46,12 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 - Shown wherever `isHumgVerified / hostIsHumgVerified / authorIsHumgVerified == true`
 - Locations: ProfileHeader (next to name + subtitle row), FeedItemCard (next to host name), CommentTile (next to author name, hidden for anonymous)
 
+## Feed Interaction Rules
+- **View feed**: open to all (guest, logged-in, unverified)
+- **Like / Comment**: requires `isHumgVerified == true`; unverified users see a snackbar directing them to verify
+- Guard implemented via `BuildContextX.requireVerified()` in `lib/app/core/extensions/context_extensions.dart`
+- Snackbar keys: `verifyRequiredToLike`, `verifyRequiredToComment`
+
 ## OTP / HUMG Verification (UC-1.3)
 - Email sending: Gmail SMTP via `mailer` package, plain-text body (HTML blocked by HUMG Microsoft 365 filter)
 - Env vars: `GMAIL_USER`, `GMAIL_APP_PASSWORD` (Gmail App Password, 2FA required)

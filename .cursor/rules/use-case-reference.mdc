@@ -18,8 +18,8 @@ When implementing a feature, find the UC code and follow its Database Impact exa
 | UC-3.2 | Manage Inbox | Query `questions` where `toUserId == currentUser.uid`. Two tabs: unanswered / answered. |
 | UC-3.3 | Answer & Publish | **Batch Write** `answers` (new doc) + `questions` (set `status: 'answered'`). Denormalize `hostName`, `hostAvatar`, `hostIsHumgVerified` from `users` into `answers` doc. |
 | UC-4.1 | View Feed | `isPublished == true`, `orderBy createdAt desc`, cursor pagination, limit 20. Show `VerifiedBadge` next to host name when `hostIsHumgVerified == true`. |
-| UC-4.2 | Like/Unlike | `arrayUnion/arrayRemove` on `likedBy` + `FieldValue.increment(±1)` on `likeCount`. |
-| UC-4.3 | Comment | **Batch Write** `comments` (new doc) + `answers` (`commentCount` increment). Denormalize `authorName`, `authorAvatar`, `authorIsHumgVerified` from `users` into `comments` doc. Show `VerifiedBadge` next to commenter name when `authorIsHumgVerified == true`. |
+| UC-4.2 | Like/Unlike | `arrayUnion/arrayRemove` on `likedBy` + `FieldValue.increment(±1)` on `likeCount`. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToLike` snackbar. |
+| UC-4.3 | Comment | **Batch Write** `comments` (new doc) + `answers` (`commentCount` increment). Denormalize `authorName`, `authorAvatar`, `authorIsHumgVerified` from `users` into `comments` doc. Show `VerifiedBadge` next to commenter name when `authorIsHumgVerified == true`. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToComment` snackbar. |
 | UC-5.1 | Report Content | Create `reports` doc with `status: 'pending'`. |
 | UC-5.2 | Admin Moderate | Update `reports.status` + delete or set `isPublished: false` on content. |
 

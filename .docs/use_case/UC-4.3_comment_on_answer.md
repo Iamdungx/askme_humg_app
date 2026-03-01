@@ -38,16 +38,25 @@
 
 ```
 A1. currentUser is null
-A2. Show bottom sheet/dialog: l10n.loginRequiredToComment
+A2. Show snackbar: l10n.loginRequiredToComment
 A3. Comment is NOT submitted
 ```
 
-## 4. Alternative Flow B – Empty Comment
+## 3b. Alternative Flow B – Authenticated but Unverified User Taps Comment
 
 ```
-B1. User taps Send with empty text
-B2. Show inline validation error: l10n.errorCommentEmpty
-B3. No Firebase call made
+B1. currentUser != null BUT isHumgVerified == false
+B2. Show snackbar: l10n.verifyRequiredToComment (both when opening sheet and when tapping Send)
+B3. Comment is NOT submitted
+B4. User can navigate to /settings → HUMG Verification to verify
+```
+
+## 4. Alternative Flow C – Empty Comment
+
+```
+C1. User taps Send with empty text
+C2. Show inline validation error: l10n.errorCommentEmpty
+C3. No Firebase call made
 ```
 
 ---
@@ -193,7 +202,8 @@ AppBar: "Comments (8)"           [← close]
 
 ## 9. Acceptance Criteria (from SRS FR-07)
 
-- [ ] Unauthenticated user taps comment → login prompt, no write
+- [ ] Unauthenticated user taps comment → snackbar `loginRequiredToComment`, no write
+- [ ] Authenticated but unverified user taps comment → snackbar `verifyRequiredToComment`, no write (checked both when opening sheet and when tapping Send)
 - [ ] WriteBatch ALWAYS used — `comments` add + `answers.commentCount` increment in one commit
 - [ ] If batch fails, NEITHER write is applied
 - [ ] `isAnonymous: true` → `userId` stored as `null` in Firestore

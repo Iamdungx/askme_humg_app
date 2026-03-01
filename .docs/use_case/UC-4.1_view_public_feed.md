@@ -205,7 +205,10 @@ Fields: isPublished (ASC), createdAt (DESC)
 - [ ] Scrolling to bottom loads next 20 (cursor pagination, no duplicate items)
 - [ ] Pull-to-refresh resets feed from beginning
 - [ ] FeedItemCard shows: host avatar, host name, question content, answer content, likeCount, commentCount
-- [ ] Unauthenticated users (Guest Viewer) CAN view the Feed
+- [ ] Unauthenticated users (Guest Viewer) CAN view the Feed — read-only
+- [ ] Authenticated but unverified users CAN view the Feed — read-only (like/comment blocked)
+- [ ] HUMG-verified users can like and comment
+- [ ] `VerifiedBadge` displayed next to host name when `hostIsHumgVerified == true`
 - [ ] LoadingShimmer shown on initial load
 - [ ] EmptyState shown when no published answers exist
 - [ ] Response time < 2 seconds (SRS NFR-02)
