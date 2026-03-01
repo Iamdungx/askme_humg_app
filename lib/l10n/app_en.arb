@@ -67,6 +67,7 @@
   "profileAskAnonymously": "Ask anonymously",
   "profileShareLink": "Share link",
   "profileEmptyAnswers": "No answers yet",
+  "profileNoPublishedAnswers": "No published answers yet",
   "profileBlockedUser": "This account has been blocked",
   "profileUserNotFound": "User not found",
   "profileLinkCopied": "Link copied to clipboard",
@@ -124,6 +125,10 @@
   "feedEmpty": "No posts yet. Be the first!",
   "feedLoadMore": "Load more",
   "feedErrorLoad": "Failed to load feed. Try again?",
+  "feedReachedEnd": "You've seen all posts",
+
+  "loginRequiredToLike": "Sign in to like this answer",
+  "loginRequiredToComment": "Sign in to leave a comment",
 
   "likeButton": "Like",
   "likeCount": "{count}",
@@ -132,10 +137,13 @@
   },
 
   "commentTitle": "Comments",
+  "commentAnonymous": "Anonymous",
   "commentInputHint": "Write a comment...",
   "commentAnonymousToggle": "Comment anonymously",
   "commentSubmitButton": "Post",
   "commentEmpty": "No comments yet",
+  "errorCommentEmpty": "Comment cannot be empty",
+  "errorCommentTooLong": "Comment must not exceed 500 characters",
   "commentCount": "{count} comments",
   "@commentCount": {
     "placeholders": { "count": { "type": "int" } }

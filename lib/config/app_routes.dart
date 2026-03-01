@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/widgets/dev_drawer.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
+import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
@@ -27,9 +28,8 @@ class FeedRoute extends GoRouteData with $FeedRoute {
   const FeedRoute();
 
   @override
-  // TODO(phase-4): replace with FeedScreen — UC-4.1 public feed
   Widget build(BuildContext context, GoRouterState state) =>
-      const _PlaceholderScreen(title: 'Feed');
+      const FeedScreen();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')

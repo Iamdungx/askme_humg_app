@@ -67,6 +67,7 @@
   "profileAskAnonymously": "匿名で質問する",
   "profileShareLink": "リンクをシェア",
   "profileEmptyAnswers": "まだ回答がありません",
+  "profileNoPublishedAnswers": "公開された回答はまだありません",
   "profileBlockedUser": "このアカウントはブロックされています",
   "profileUserNotFound": "ユーザーが見つかりません",
   "profileLinkCopied": "リンクをクリップボードにコピーしました",
@@ -124,6 +125,10 @@
   "feedEmpty": "まだ投稿がありません。最初に投稿しましょう！",
   "feedLoadMore": "もっと読む",
   "feedErrorLoad": "フィードの読み込みに失敗しました。再試行しますか？",
+  "feedReachedEnd": "すべての投稿を見ました",
+
+  "loginRequiredToLike": "この回答にいいねするにはサインインしてください",
+  "loginRequiredToComment": "コメントするにはサインインしてください",
 
   "likeButton": "いいね",
   "likeCount": "{count}",
@@ -132,10 +137,13 @@
   },
 
   "commentTitle": "コメント",
+  "commentAnonymous": "匿名",
   "commentInputHint": "コメントを書く...",
   "commentAnonymousToggle": "匿名でコメント",
   "commentSubmitButton": "投稿",
   "commentEmpty": "まだコメントがありません",
+  "errorCommentEmpty": "コメントを入力してください",
+  "errorCommentTooLong": "コメントは500文字以内にしてください",
   "commentCount": "{count}件のコメント",
   "@commentCount": {
     "placeholders": { "count": { "type": "int" } }
