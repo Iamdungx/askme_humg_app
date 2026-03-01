@@ -16,7 +16,7 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 - **Firebase Storage** – Avatar and media storage
 - **Cloud Functions** – Rate limiting, OTP generation/verification (Resend), server-side moderation
 - **Firebase App Check** – Bot protection for anonymous question submission
-- **`app_links`** – Deep links (`askme.humg.edu.vn/u/{userId}`)
+- **`app_links`** – Deep links (`askme-humg-app.web.app/user/{userId}`)
 
 ## User Roles
 - **Anonymous Sender** – No login required, sends questions via deep link

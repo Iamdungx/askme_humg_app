@@ -242,6 +242,6 @@ flutter gen-l10n                                          # after .arb changes
 
 | Package | Replacement |
 |---|---|
-| `firebase_dynamic_links` | `app_links ^6.x` + redirect at `askme.humg.edu.vn/u/{userId}` |
+| `firebase_dynamic_links` | `app_links ^6.x` + redirect at `askme-humg-app.web.app/user/{userId}` |
 | `image_gallery_saver` | `share_plus` |
 | `provider` / GetX | `flutter_riverpod` + `go_router` |

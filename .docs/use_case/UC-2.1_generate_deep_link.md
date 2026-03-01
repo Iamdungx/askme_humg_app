@@ -16,7 +16,7 @@
 
 ```
 1. User taps "Copy Link" on Profile screen
-2. System constructs the deep link URL: https://askme.humg.edu.vn/u/{currentUser.uid}
+2. System constructs the deep link URL: https://askme-humg-app.web.app/user/{currentUser.uid}
 3. System copies URL to clipboard via Clipboard.setData()
 4. System shows success snackbar: l10n.linkCopied
 ```
@@ -34,7 +34,7 @@
 
 ```
 Case A – App IS installed on recipient's device:
-  1. OS intercepts the URL askme.humg.edu.vn/u/{userId}
+  1. OS intercepts the URL askme-humg-app.web.app/user/{userId}
   2. app_links package receives the link in AppLinks().uriLinkStream
   3. GoRouter navigates to /u/{userId} (ProfileScreen)
   4. ProfileScreen loads the Host's profile data
@@ -81,7 +81,7 @@ ios/Runner/Info.plist             [MODIFY] Associated Domains / URL Schemes
 ### Use Case: `generate_deep_link.dart`
 ```dart
 class GenerateDeepLink {
-  String call(String userId) => 'https://askme.humg.edu.vn/u/$userId';
+  String call(String userId) => 'https://askme-humg-app.web.app/user/$userId';
 }
 ```
 
@@ -109,7 +109,7 @@ appLinks.uriLinkStream.listen((uri) {
   <action android:name="android.intent.action.VIEW"/>
   <category android:name="android.intent.category.DEFAULT"/>
   <category android:name="android.intent.category.BROWSABLE"/>
-  <data android:scheme="https" android:host="askme.humg.edu.vn"/>
+  <data android:scheme="https" android:host="askme-humg-app.web.app"/>
 </intent-filter>
 ```
 
@@ -118,7 +118,7 @@ appLinks.uriLinkStream.listen((uri) {
 ```xml
 <key>com.apple.developer.associated-domains</key>
 <array>
-  <string>applinks:askme.humg.edu.vn</string>
+  <string>applinks:askme-humg-app.web.app</string>
 </array>
 ```
 
@@ -126,7 +126,7 @@ appLinks.uriLinkStream.listen((uri) {
 
 ## 10. Acceptance Criteria (from SRS FR-11)
 
-- [ ] Deep link format is exactly `https://askme.humg.edu.vn/u/{userId}`
+- [ ] Deep link format is exactly `https://askme-humg-app.web.app/user/{userId}`
 - [ ] Tapping link when app installed → opens ProfileScreen of correct user
 - [ ] Tapping link when app not installed → opens browser fallback/store page
 - [ ] "Copy Link" copies URL to clipboard and shows snackbar

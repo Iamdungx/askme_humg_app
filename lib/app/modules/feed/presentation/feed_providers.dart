@@ -9,6 +9,7 @@ import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_use_cases.dart';
 import 'package:askme_humg/app/core/values/app_durations.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
 
 part 'feed_providers.freezed.dart';
@@ -80,7 +81,7 @@ Future<List<FeedItem>> userAnswers(Ref ref, String userId) =>
 class FeedNotifier extends _$FeedNotifier {
   @override
   Future<FeedState> build() async {
-    final page = await ref.read(getPublicFeedUseCaseProvider).call();
+    final page = await ref.watch(getPublicFeedUseCaseProvider).call();
     return FeedState(
       items: page.items,
       lastDocId: page.lastDocId,
@@ -233,15 +234,15 @@ class PostCommentNotifier extends _$PostCommentNotifier {
   @override
   FutureOr<void> build() {}
 
-  /// Returns a l10n error key string if validation fails, null on success.
-  Future<String?> post({
+  /// Returns a [Failure] if validation fails or the call errors, null on success.
+  Future<Failure?> post({
     required String answerId,
     required String content,
     required bool isAnonymous,
   }) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty) return 'errorCommentEmpty';
-    if (trimmed.length > 500) return 'errorCommentTooLong';
+    if (trimmed.isEmpty) return const ValidationFailure('errorCommentEmpty');
+    if (trimmed.length > 500) return const ValidationFailure('errorCommentTooLong');
 
     final uid = ref.read(authStateProvider).asData?.value?.uid;
 
@@ -262,7 +263,9 @@ class PostCommentNotifier extends _$PostCommentNotifier {
         error: result.error,
         stackTrace: result.stackTrace,
       );
-      return 'commonError';
+      return result.error is Failure
+          ? result.error as Failure
+          : UnknownFailure(result.error.toString());
     }
     return null;
   }

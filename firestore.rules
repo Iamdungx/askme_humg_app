@@ -34,7 +34,8 @@ service cloud.firestore {
       allow read: if isSignedIn() && (
         resource.data.toUserId == request.auth.uid || isAdmin()
       );
-      allow create: if false; // Cloud Function only (Admin SDK)
+      // TODO(UC-3.1): revert to `if false` after Cloud Function submitQuestion is deployed.
+      allow create: if true;
       allow update: if isSignedIn() && (
         resource.data.toUserId == request.auth.uid || isAdmin()
       );

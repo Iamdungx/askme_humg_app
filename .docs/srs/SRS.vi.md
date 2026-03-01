@@ -213,7 +213,7 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 **Mô tả:** Mỗi Host có thể tạo và chia sẻ một đường dẫn duy nhất – khi mở ra sẽ điều hướng thẳng đến trang hồ sơ của họ, nơi người khác có thể gửi câu hỏi ẩn danh.
 
 **Xử lý:**
-1. Hệ thống tạo URL duy nhất cho Host: `https://askme.humg.edu.vn/u/{userId}`
+1. Hệ thống tạo URL duy nhất cho Host: `https://askme-humg-app.web.app/user/{userId}`
 2. Host có thể chia sẻ link này hoặc xuất ra dạng ảnh card QR trực quan để đăng lên mạng xã hội (Facebook, Instagram Stories, v.v.)
 3. Khi người nhận mở link trên thiết bị đã cài ứng dụng, app sẽ mở thẳng đến trang hồ sơ của Host (xử lý bởi `app_links` + Android App Links / iOS Universal Links)
 4. Nếu chưa cài ứng dụng, link chuyển hướng đến trang tải ứng dụng hoặc trang web di động dự phòng
@@ -276,9 +276,9 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | **Firebase Storage** | Lưu trữ ảnh đại diện và media |
 | **Cloud Functions** | Rate limiting cho gửi ẩn danh, gửi OTP (Resend API), kiểm duyệt nội dung phía server |
 | **Firebase App Check** | Xác thực phiên bản ứng dụng hợp lệ cho các endpoint ẩn danh |
-| **Package `app_links`** | Xử lý deep link `askme.humg.edu.vn/u/{userId}` — thay thế Firebase Dynamic Links đã bị deprecated |
+| **Package `app_links`** | Xử lý deep link `askme-humg-app.web.app/user/{userId}` — thay thế Firebase Dynamic Links đã bị deprecated |
 
-> **Lưu ý:** Firebase Dynamic Links đã bị Google ngừng hỗ trợ từ tháng 8/2025. Ứng dụng dùng package `app_links` kết hợp cấu hình native (Android App Links / iOS Universal Links) trỏ đến `askme.humg.edu.vn`.
+> **Lưu ý:** Firebase Dynamic Links đã bị Google ngừng hỗ trợ từ tháng 8/2025. Ứng dụng dùng package `app_links` kết hợp cấu hình native (Android App Links / iOS Universal Links) trỏ đến `askme-humg-app.web.app`.
 
 ### Sơ đồ kiến trúc (Tổng quan)
 
@@ -290,7 +290,7 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
     ├── Cloud Firestore        (Lưu trữ dữ liệu · đồng bộ thời gian thực)
     ├── Firebase Storage       (Ảnh đại diện · media)
     ├── Cloud Functions        (Rate limiting · OTP · kiểm duyệt server)
-    └── app_links + native     (Deep link routing: askme.humg.edu.vn/u/{userId})
+    └── app_links + native     (Deep link routing: askme-humg-app.web.app/user/{userId})
 ```
 
 ---

@@ -5,6 +5,7 @@ import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_bottom_sheet.dart';
 import 'package:askme_humg/app/global_widgets/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/comment_tile.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -148,7 +149,7 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
 
     setState(() => _error = null);
 
-    final errorKey = await ref.read(postCommentProvider.notifier).post(
+    final failure = await ref.read(postCommentProvider.notifier).post(
           answerId: widget.answerId,
           content: _controller.text,
           isAnonymous: _isAnonymous,
@@ -156,19 +157,17 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
 
     if (!mounted) return;
 
-    if (errorKey == 'errorCommentEmpty') {
-      setState(() => _error = l10n.errorCommentEmpty);
+    if (failure is ValidationFailure) {
+      final msg = failure.message == 'errorCommentEmpty'
+          ? l10n.errorCommentEmpty
+          : l10n.errorCommentTooLong;
+      setState(() => _error = msg);
       return;
     }
-    if (errorKey == 'errorCommentTooLong') {
-      setState(() => _error = l10n.errorCommentTooLong);
-      return;
-    }
-    if (errorKey != null) {
-      final msg = errorKey == 'commonError' ? l10n.commonError : errorKey;
+    if (failure != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(msg),
+          content: Text(l10n.commonError),
           backgroundColor: cs.error,
         ),
       );
@@ -227,6 +226,8 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
                   minLines: 1,
                   maxLines: 4,
                   maxLength: 500,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
                   decoration: InputDecoration(
                     hintText: l10n.commentInputHint,
                     errorText: _error,

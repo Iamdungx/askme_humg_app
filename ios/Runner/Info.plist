@@ -32,6 +32,16 @@
 				<string>com.googleusercontent.apps.375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.humg.askmehumg</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>askme</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>

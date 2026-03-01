@@ -40,12 +40,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         title: const AppBrandWordmark(),
         centerTitle: false,
         actions: [
-          // TODO(phase-5): Search screen
+          // TODO(future): Search screen
           IconButton(
             icon: Icon(LucideIcons.search, color: cs.onSurface.withValues(alpha: 0.7)),
             onPressed: () {},
           ),
-          // TODO(phase-5): Notification screen
+          // TODO(future): Notification screen
           IconButton(
             icon: Icon(LucideIcons.bell, color: cs.onSurface.withValues(alpha: 0.7)),
             onPressed: () {},

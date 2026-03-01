@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/values/app_durations.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -15,35 +16,61 @@ import 'package:askme_humg/l10n/app_localizations.dart';
 /// Full-screen routes (Login, AnswerCompose, /u/:userId, Admin, Splash,
 /// /me/edit, /verify-humg) are declared outside the StatefulShellRoute
 /// and render without this shell.
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  bool _visible = true;
+
+  void _switchTab(int index) {
+    if (index == widget.navigationShell.currentIndex) {
+      widget.navigationShell.goBranch(index, initialLocation: true);
+      return;
+    }
+    // Fade out → switch → fade in
+    setState(() => _visible = false);
+    Future.delayed(AppDuration.fast, () {
+      if (!mounted) return;
+      widget.navigationShell.goBranch(index);
+      setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final isLoggedIn =
-        ref.watch(authStateProvider).asData?.value != null;
+    final isLoggedIn = ref.watch(authStateProvider).asData?.value != null;
+    final navigationShell = widget.navigationShell;
 
     // Unanswered count for Inbox badge — 0 when logged out or provider not ready.
     // asData is null when loading/error; parentheses make ?? 0 precedence explicit.
     final unansweredCount = isLoggedIn
         ? (ref
-              .watch(inboxProvider)
-              .asData
-              ?.value
-              .where((q) => q.status == 'unanswered')
-              .length ??
-            0)
+                  .watch(inboxProvider)
+                  .asData
+                  ?.value
+                  .where((q) => q.status == 'unanswered')
+                  .length ??
+              0)
         : 0;
 
     return Scaffold(
-      body: navigationShell,
+      body: AnimatedOpacity(
+        opacity: _visible ? 1.0 : 0.0,
+        duration: AppDuration.fast,
+        curve: Curves.easeInOut,
+        child: navigationShell,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => _onTabSelected(context, index),
+        onDestinationSelected: _switchTab,
         indicatorColor: cs.secondary.withValues(alpha: 0.15),
         destinations: [
           NavigationDestination(
@@ -82,14 +109,5 @@ class AppShell extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _onTabSelected(BuildContext context, int index) {
-    if (index == navigationShell.currentIndex) {
-      // Tapping active tab scrolls back to top (re-navigate to initial location).
-      navigationShell.goBranch(index, initialLocation: true);
-      return;
-    }
-    navigationShell.goBranch(index);
   }
 }
