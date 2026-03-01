@@ -25,14 +25,16 @@ class AppShell extends ConsumerWidget {
     final isLoggedIn =
         ref.watch(authStateProvider).asData?.value != null;
 
-    // Unanswered count for Inbox badge — 0 when logged out.
+    // Unanswered count for Inbox badge — 0 when logged out or provider not ready.
+    // asData is null when loading/error; parentheses make ?? 0 precedence explicit.
     final unansweredCount = isLoggedIn
-        ? ref
-            .watch(inboxProvider)
-            .asData
-            ?.value
-            .where((q) => q.status == 'unanswered')
-            .length ?? 0
+        ? (ref
+              .watch(inboxProvider)
+              .asData
+              ?.value
+              .where((q) => q.status == 'unanswered')
+              .length ??
+            0)
         : 0;
 
     return Scaffold(

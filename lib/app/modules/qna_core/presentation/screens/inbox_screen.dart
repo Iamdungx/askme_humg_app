@@ -136,16 +136,21 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
   }
 
   Future<void> _deleteQuestion(Question question) async {
+    final l10n = AppLocalizations.of(context);
     await ref
         .read(deleteQuestionProvider.notifier)
         .delete(question.questionId);
 
+    // Provider may have been disposed by the time the await returns
+    // (inbox stream fires immediately on deletion). Check mounted first.
+    if (!mounted) return;
+
+    // ref.read is safe here only if the provider is keepAlive=true.
     final state = ref.read(deleteQuestionProvider);
     if (state.hasError) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(state.error.toString()),
+          content: Text(l10n.commonError),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

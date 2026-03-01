@@ -88,16 +88,19 @@ class SubmitQuestionNotifier extends _$SubmitQuestionNotifier {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class DeleteQuestionNotifier extends _$DeleteQuestionNotifier {
   @override
   FutureOr<void> build() {}
 
   Future<void> delete(String questionId) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
+    final result = await AsyncValue.guard(
       () => ref.read(deleteQuestionUseCaseProvider).call(questionId),
     );
+    // Guard against provider being disposed after the inbox stream rebuilds
+    // in response to the deletion (the stream fires before this await returns).
+    if (ref.mounted) state = result;
   }
 }
 
