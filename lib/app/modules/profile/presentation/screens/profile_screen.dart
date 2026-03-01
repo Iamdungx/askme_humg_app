@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
@@ -14,7 +15,6 @@ import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_previ
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -236,7 +236,7 @@ class _OwnerActionSection extends StatelessWidget {
         OutlinedButton.icon(
           icon: Icon(LucideIcons.inbox, size: 18),
           label: Text(l10n.profileGoToInbox),
-          onPressed: () => const InboxRoute().go(context),
+          onPressed: () => context.go('/inbox'),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
             side: BorderSide(color: cs.outline),

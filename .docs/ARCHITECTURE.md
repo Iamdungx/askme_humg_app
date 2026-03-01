@@ -256,6 +256,103 @@ Auth guard: `/inbox` and `/admin` redirect to `/login` if unauthenticated. `/log
 
 ---
 
+## Shell Navigation (Bottom NavigationBar)
+
+### Why ShellRoute
+
+The app has a persistent 3-tab bottom nav (`Feed` / `Inbox` / `Profile`). GoRouter's `ShellRoute` wraps these 3 routes in a shared `AppShell` scaffold so:
+- The `NavigationBar` persists across tab switches
+- Each tab keeps its own scroll position and state (`IndexedStack`)
+- Full-screen routes (Login, AnswerCompose, deep-link Profile) render **outside** the shell — no bottom nav visible
+
+### Route tree
+
+```
+ShellRoute(builder: AppShell)
+├── GoRoute(path: '/')           → FeedScreen       [tab 0]
+├── GoRoute(path: '/inbox')      → InboxScreen      [tab 1]
+│   └── GoRoute(path: 'answer/:questionId') → AnswerComposeScreen (full-screen, inside shell stack)
+└── GoRoute(path: '/me')         → ProfileScreen(myUserId) [tab 2]
+
+GoRoute(path: '/splash')         → SplashScreen          (outside shell)
+GoRoute(path: '/login')          → LoginScreen            (outside shell)
+GoRoute(path: '/u/:userId')      → ProfileScreen(userId)  (outside shell — deep link / other user)
+GoRoute(path: '/admin')          → AdminDashboardScreen   (outside shell)
+```
+
+> **Key distinction:** `/me` (shell tab 2) always shows the **logged-in user's** own profile. `/u/:userId` is a full-screen push, used when tapping another user's avatar in the feed.
+
+### AppShell widget (`lib/app/core/widgets/app_shell.dart`)
+
+```dart
+class AppShell extends ConsumerWidget {
+  const AppShell({super.key, required this.navigationShell});
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).asData?.value;
+
+    return Scaffold(
+      body: navigationShell,  // renders current tab's screen
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (i) => navigationShell.goBranch(
+          i,
+          initialLocation: i == navigationShell.currentIndex,
+        ),
+        destinations: [
+          NavigationDestination(icon: Icon(LucideIcons.home),    label: l10n.navFeed),
+          NavigationDestination(icon: Icon(LucideIcons.mailbox), label: l10n.navInbox),
+          NavigationDestination(icon: Icon(LucideIcons.user),    label: l10n.navProfile),
+        ],
+      ),
+    );
+  }
+}
+```
+
+### Tab index mapping
+
+| Index | Route | Visibility |
+|-------|-------|------------|
+| 0 | `/` (Feed) | Always visible |
+| 1 | `/inbox` | Always visible; redirect to `/login` if unauthenticated |
+| 2 | `/me` (own Profile) | Always visible; shows sign-in prompt if unauthenticated |
+
+### Auth edge cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Guest taps Inbox tab | `_RouterNotifier.redirect` sends to `/login`; after login, GoRouter resumes `/inbox` |
+| Guest taps Profile tab | Shell renders Profile tab; `ProfileScreen` detects `user == null` and shows sign-in CTA instead of profile content |
+| Deep link `/u/{otherId}` | Navigates to full-screen `ProfileScreen` **outside** the shell (no bottom nav) |
+| Deep link `/u/{myId}` | Same as above — resolves to full-screen for consistency; alternatively `context.go('/me')` if IDs match |
+
+### Navigation conventions
+
+```dart
+// Switch tab (stays in shell)
+context.go('/');          // → Feed tab
+context.go('/inbox');     // → Inbox tab
+context.go('/me');        // → Profile tab
+
+// Push full-screen over shell (back button returns to shell)
+context.push('/u/$userId');                     // Other user profile
+context.push('/inbox/answer/$questionId');      // Answer compose
+```
+
+### Firestore index note
+
+The `answers` query powering the Feed tab requires a composite index:
+```
+Collection: answers
+Fields: isPublished ASC, createdAt DESC, __name__ DESC
+```
+This is declared in `firestore.indexes.json` and must be deployed with `firebase deploy --only firestore:indexes` before the Feed tab works.
+
+---
+
 ## Key Conventions
 
 | What | Convention |

@@ -208,6 +208,13 @@
     "placeholders": { "timeAgo": { "type": "String" } }
   },
 
+  "navFeed": "Feed",
+  "@navFeed": { "description": "Bottom navigation tab label for public feed" },
+  "navInbox": "Inbox",
+  "@navInbox": { "description": "Bottom navigation tab label for inbox" },
+  "navProfile": "Profile",
+  "@navProfile": { "description": "Bottom navigation tab label for own profile" },
+
   "feedTitle": "Feed",
   "@feedTitle": { "description": "AppBar title on feed screen" },
   "feedEmpty": "No posts yet. Be the first!",

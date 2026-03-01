@@ -204,6 +204,13 @@
   "questionErrorInappropriate": "Nội dung không phù hợp",
   "@questionErrorInappropriate": { "description": "Lỗi nội dung không phù hợp" },
 
+  "navFeed": "Feed",
+  "@navFeed": { "description": "Nhãn tab điều hướng dưới - feed công khai" },
+  "navInbox": "Hộp thư",
+  "@navInbox": { "description": "Nhãn tab điều hướng dưới - hộp thư" },
+  "navProfile": "Hồ sơ",
+  "@navProfile": { "description": "Nhãn tab điều hướng dưới - hồ sơ cá nhân" },
+
   "feedTitle": "Feed",
   "@feedTitle": { "description": "Tiêu đề màn feed công khai" },
   "feedEmpty": "Chưa có bài đăng nào. Hãy là người đầu tiên!",

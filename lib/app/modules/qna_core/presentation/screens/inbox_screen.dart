@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/empty_state.dart';
@@ -8,7 +9,6 @@ import 'package:askme_humg/app/global_widgets/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/question_card.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class InboxScreen extends ConsumerStatefulWidget {
@@ -71,7 +71,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
                 questions: unanswered,
                 showReply: true,
                 emptyMessage: l10n.inboxEmptyUnanswered,
-                onReply: (q) => AnswerComposeRoute(questionId: q.questionId).push(context),
+                onReply: (q) => context.push('/inbox/answer/${q.questionId}'),
                 onDelete: (q) => _deleteQuestion(q),
               ),
               _QuestionList(

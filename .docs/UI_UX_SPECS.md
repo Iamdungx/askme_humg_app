@@ -319,13 +319,24 @@ abstract final class AppRadius {
 
 ```
 Bottom Navigation Bar (3 tabs):
-├── [🏠] Feed          → /
-├── [📩] Inbox         → /inbox        (hidden if not logged in)
-└── [👤] Profile       → /u/{myUserId} (shows login button if not logged in)
+├── [🏠] Feed          → /      (tab 0 — always visible)
+├── [📩] Inbox         → /inbox (tab 1 — redirect to /login if unauthenticated)
+└── [👤] Profile       → /me    (tab 2 — shows sign-in CTA if unauthenticated)
 ```
 
 - Bottom nav uses `NavigationBar` (Material 3), `indicatorColor: AppColors.accent` with low opacity
 - Floating Action Button on Feed: `"Share my link"` — only visible when logged in
+- Full-screen routes rendered **outside** the shell (no bottom nav): `/login`, `/splash`, `/u/:userId` (other user), `/admin`, `/inbox/answer/:questionId`
+- Implementation: GoRouter `StatefulShellRoute` wrapping an `AppShell` widget (`lib/app/core/widgets/app_shell.dart`)
+- See `ARCHITECTURE.md` → "Shell Navigation" section for route tree and edge cases
+
+### L10n keys for navigation labels
+
+| Key | EN | VI | JA |
+|-----|----|----|-----|
+| `navFeed` | Feed | Feed | フィード |
+| `navInbox` | Inbox | Hộp thư | 受信箱 |
+| `navProfile` | Profile | Hồ sơ | プロフィール |
 
 ---
 

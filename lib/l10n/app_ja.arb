@@ -208,6 +208,13 @@
     "placeholders": { "timeAgo": { "type": "String" } }
   },
 
+  "navFeed": "フィード",
+  "@navFeed": { "description": "ボトムナビゲーションのフィードタブラベル" },
+  "navInbox": "受信箱",
+  "@navInbox": { "description": "ボトムナビゲーションの受信箱タブラベル" },
+  "navProfile": "プロフィール",
+  "@navProfile": { "description": "ボトムナビゲーションのプロフィールタブラベル" },
+
   "feedTitle": "フィード",
   "@feedTitle": { "description": "フィード画面のAppBarタイトル" },
   "feedEmpty": "まだ投稿がありません。最初に投稿しましょう！",

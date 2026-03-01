@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/generated/assets.gen.dart';
@@ -8,7 +9,6 @@ import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/app_brand_wordmark.dart';
 import 'package:askme_humg/app/global_widgets/app_button.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
-import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -64,7 +64,7 @@ class LoginScreen extends ConsumerWidget {
                     guestLabel: l10n.authContinueAsGuest,
                     onGoogleSignIn: () =>
                         ref.read(authProvider.notifier).signIn(),
-                    onContinueAsGuest: () => const FeedRoute().go(context),
+                    onContinueAsGuest: () => context.go('/'),
                   )
                   .animate()
                   .fadeIn(duration: 600.ms, delay: 200.ms)
