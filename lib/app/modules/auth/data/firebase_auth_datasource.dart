@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -20,11 +22,47 @@ class FirebaseAuthDatasource {
   // google_sign_in v7 uses a singleton — no need to inject
   GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
 
-  Stream<AuthUser?> get authStateChanges =>
-      _auth.authStateChanges().asyncExpand((user) {
-        if (user == null) return Stream.value(null);
-        return _userDocStream(user);
-      });
+  // Initialized once — never recreated for the lifetime of this datasource
+  // instance. Uses switchMap semantics: when FirebaseAuth emits a new user
+  // event (including null on sign-out), the previous Firestore snapshot
+  // subscription is cancelled immediately before the next one starts.
+  // This avoids the asyncExpand pitfall where the inner Firestore stream
+  // blocks the null event after sign-out.
+  late final Stream<AuthUser?> authStateChanges = _buildAuthStream();
+
+  Stream<AuthUser?> _buildAuthStream() {
+    StreamSubscription<AuthUser?>? innerSub;
+    StreamSubscription<User?>? outerSub;
+    late StreamController<AuthUser?> controller;
+
+    controller = StreamController<AuthUser?>(
+      onListen: () {
+        outerSub = _auth.authStateChanges().listen(
+          (user) {
+            innerSub?.cancel();
+            innerSub = null;
+
+            if (user == null) {
+              controller.add(null);
+            } else {
+              innerSub = _userDocStream(user).listen(
+                controller.add,
+                onError: controller.addError,
+              );
+            }
+          },
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+      },
+      onCancel: () {
+        innerSub?.cancel();
+        outerSub?.cancel();
+      },
+    );
+
+    return controller.stream;
+  }
 
   Stream<AuthUser?> _userDocStream(User user) async* {
     final snapshots = _firestore.collection('users').doc(user.uid).snapshots();

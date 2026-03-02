@@ -78,15 +78,8 @@ class _RouterNotifier extends ChangeNotifier {
     if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
     // UC-1.3 — Redirect to HUMG verification if not yet verified.
-    // Exception: /feed, /me, /settings, /verify-humg, /login, /splash are accessible.
-    if (isLoggedIn &&
-        user.isHumgVerified == false &&
-        path != AppRoutes.verifyHumg &&
-        path != AppRoutes.login &&
-        path != AppRoutes.splash &&
-        path != AppRoutes.feed &&
-        !path.startsWith(AppRoutes.me) &&
-        !path.startsWith(AppRoutes.settings)) {
+    // Exempt paths/prefixes are defined in app_routes.dart (isHumgVerifyExempt).
+    if (isLoggedIn && user.isHumgVerified == false && !isHumgVerifyExempt(path)) {
       return AppRoutes.verifyHumg;
     }
 
