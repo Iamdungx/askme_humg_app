@@ -15,6 +15,7 @@ class ModerationRepositoryImpl implements IModerationRepository {
     required String reportedBy,
     required String reason,
     required String content,
+    String? parentAnswerId,
   }) async {
     try {
       await _datasource.submitReport(
@@ -23,6 +24,7 @@ class ModerationRepositoryImpl implements IModerationRepository {
         reportedBy: reportedBy,
         reason: reason,
         content: content,
+        parentAnswerId: parentAnswerId,
       );
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);

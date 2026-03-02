@@ -17,6 +17,7 @@ class FirebaseModerationDatasource {
     required String reportedBy,
     required String reason,
     required String content,
+    String? parentAnswerId,
   }) async {
     try {
       await _firestore.collection('reports').add({
@@ -28,6 +29,7 @@ class FirebaseModerationDatasource {
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
         'resolvedAt': null,
+        'parentAnswerId': parentAnswerId,
       });
     } on FirebaseException catch (e, s) {
       logger.e('submitReport failed', error: e, stackTrace: s);

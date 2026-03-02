@@ -13,7 +13,9 @@ part 'auth_providers.g.dart';
 // Infrastructure providers
 // ---------------------------------------------------------------------------
 
-@riverpod
+// keepAlive: datasource owns the authStateChanges stream (late final field).
+// Disposing it would destroy the stream and break the router guard.
+@Riverpod(keepAlive: true)
 FirebaseAuthDatasource firebaseAuthDatasource(Ref ref) =>
     FirebaseAuthDatasource(
       firebaseAuth: ref.watch(firebaseAuthProvider),
@@ -25,7 +27,9 @@ OtpDatasource otpDatasource(Ref ref) => OtpDatasource(
   firestore: ref.watch(firestoreProvider),
 );
 
-@riverpod
+// keepAlive: authStateProvider (keepAlive) watches this — if it were
+// auto-disposed, authState would lose its stream on the next rebuild.
+@Riverpod(keepAlive: true)
 IAuthRepository authRepository(Ref ref) => AuthRepositoryImpl(
   ref.watch(firebaseAuthDatasourceProvider),
   ref.watch(otpDatasourceProvider),

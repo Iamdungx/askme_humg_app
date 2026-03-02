@@ -70,8 +70,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref.read(signOutProvider).call();
-    if (mounted) context.go(AppRoutes.login);
+    await ref.read(authProvider.notifier).signOut();
+    // GoRouter's refreshListenable handles navigation to /login automatically
+    // once authStateProvider emits null — no manual context.go needed here.
   }
 
   Future<void> _clearCache() async {

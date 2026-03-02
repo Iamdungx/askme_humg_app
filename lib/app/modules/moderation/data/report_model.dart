@@ -16,6 +16,7 @@ abstract class ReportModel with _$ReportModel {
     required DateTime createdAt,
     @Default('') String content,
     DateTime? resolvedAt,
+    String? parentAnswerId,
   }) = _ReportModel;
 
   factory ReportModel.fromFirestore(
@@ -35,6 +36,7 @@ abstract class ReportModel with _$ReportModel {
       createdAt: createdAtTs?.toDate() ?? DateTime.now(),
       content: data['content'] as String? ?? '',
       resolvedAt: resolvedAtTs?.toDate(),
+      parentAnswerId: data['parentAnswerId'] as String?,
     );
   }
 }
@@ -50,5 +52,6 @@ extension ReportModelX on ReportModel {
         createdAt: createdAt,
         content: content,
         resolvedAt: resolvedAt,
+        parentAnswerId: parentAnswerId,
       );
 }

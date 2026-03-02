@@ -34,6 +34,7 @@ class ReportCard extends ConsumerWidget {
             targetId: report.targetId,
             targetType: report.targetType,
             action: action,
+            parentAnswerId: report.parentAnswerId,
           );
 
       if (!context.mounted) return;

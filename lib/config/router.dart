@@ -77,16 +77,17 @@ class _RouterNotifier extends ChangeNotifier {
     // Authenticated → leave the login screen.
     if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
+    // UC-2.1 — Deep-link to own profile → redirect to /me tab (has bottom nav).
+    // /user/{userId} is a full-screen route without bottom nav; when the
+    // logged-in user scans their own QR code they'd see no back button and no
+    // shell navigation, so we bounce them to the /me shell tab instead.
+    if (isLoggedIn && state.pathParameters['userId'] == user.uid) {
+      return AppRoutes.me;
+    }
+
     // UC-1.3 — Redirect to HUMG verification if not yet verified.
-    // Exception: /feed, /me, /settings, /verify-humg, /login, /splash are accessible.
-    if (isLoggedIn &&
-        user.isHumgVerified == false &&
-        path != AppRoutes.verifyHumg &&
-        path != AppRoutes.login &&
-        path != AppRoutes.splash &&
-        path != AppRoutes.feed &&
-        !path.startsWith(AppRoutes.me) &&
-        !path.startsWith(AppRoutes.settings)) {
+    // Exempt paths/prefixes are defined in app_routes.dart (isHumgVerifyExempt).
+    if (isLoggedIn && user.isHumgVerified == false && !isHumgVerifyExempt(path)) {
       return AppRoutes.verifyHumg;
     }
 
@@ -108,6 +109,17 @@ GoRouter appRouter(Ref ref) {
     debugLogDiagnostics: kDebugMode,
     refreshListenable: notifier,
     redirect: notifier.redirect,
+    onException: (context, state, router) {
+      final uri = Uri.tryParse(state.uri.toString());
+      if (uri != null) {
+        final path = _resolveDeepLinkPath(uri);
+        if (path != null) {
+          router.go(path);
+          return;
+        }
+      }
+      router.go(AppRoutes.feed);
+    },
     routes: [
       // ── Outside shell (full-screen, no bottom nav) ──────────────────────
       GoRoute(
@@ -215,9 +227,6 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
     ],
-    errorBuilder: (_, state) => Scaffold(
-      body: Center(child: Text('Page not found: ${state.error}')),
-    ),
   );
 
   _initDeepLinks(router, ref);
@@ -248,7 +257,9 @@ void _initDeepLinks(GoRouter router, Ref ref) {
     if (initialUri != null) {
       logger.i('Deep link cold-start: $initialUri');
       final path = _resolveDeepLinkPath(initialUri);
-      if (path != null) router.go(path);
+      if (path != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => router.go(path));
+      }
     }
   }).catchError((Object e, StackTrace s) {
     logger.w('Failed to get initial deep link', error: e, stackTrace: s);

@@ -56,7 +56,11 @@ class _VerifyHumgScreenState extends ConsumerState<VerifyHumgScreen> {
     if (_step == _VerifyStep.otp) {
       setState(() => _step = _VerifyStep.email);
     } else {
-      Navigator.of(context).maybePop();
+      // /verify-humg is a full-screen GoRoute reached via router redirect
+      // (not Navigator.push), so maybePop() has no effect. Use go() to
+      // navigate to feed explicitly, which also resets the active shell tab
+      // to index 0 (feed), preventing an immediate re-redirect to verify-humg.
+      context.go(AppRoutes.feed);
     }
   }
 

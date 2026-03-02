@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '375989370735',
     projectId: 'askme-humg-app',
     storageBucket: 'askme-humg-app.firebasestorage.app',
-    iosBundleId: 'com.humg.askmehumg',
+    iosBundleId: 'com.askmehumg.app',
   );
 }

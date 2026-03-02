@@ -11,12 +11,15 @@ class ReportReasonSheet extends ConsumerStatefulWidget {
     required this.targetId,
     required this.targetType,
     required this.content,
+    this.parentAnswerId,
   });
 
   final String targetId;
   final String targetType;
   /// Snapshot of the reported content, stored in Firestore for admin review.
   final String content;
+  /// Required when [targetType] == 'comment' so admin resolve can decrement commentCount.
+  final String? parentAnswerId;
 
   @override
   ConsumerState<ReportReasonSheet> createState() => _ReportReasonSheetState();
@@ -34,6 +37,7 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
           targetType: widget.targetType,
           reason: reason,
           content: widget.content,
+          parentAnswerId: widget.parentAnswerId,
         );
 
     if (!mounted) return;

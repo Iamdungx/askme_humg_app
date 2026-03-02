@@ -4,6 +4,24 @@
 /// Routes that require authentication. GoRouter checks `startsWith`.
 const protectedLocationPrefixes = ['/inbox', '/me/edit', '/admin'];
 
+/// Paths that are exempt from the HUMG-verification redirect (UC-1.3).
+/// Exact-match paths — checked with Set.contains for O(1) lookup.
+const humgVerifyExemptPaths = <String>{
+  AppRoutes.verifyHumg,
+  AppRoutes.login,
+  AppRoutes.splash,
+  AppRoutes.feed,
+};
+
+/// Path prefixes that are exempt from the HUMG-verification redirect (UC-1.3).
+/// Checked with String.startsWith.
+const humgVerifyExemptPrefixes = <String>[AppRoutes.me, AppRoutes.settings];
+
+/// Returns true when [path] does not require HUMG verification to access.
+bool isHumgVerifyExempt(String path) =>
+    humgVerifyExemptPaths.contains(path) ||
+    humgVerifyExemptPrefixes.any(path.startsWith);
+
 /// Named path constants for all app routes.
 abstract final class AppRoutes {
   static const splash = '/splash';

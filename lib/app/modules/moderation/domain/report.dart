@@ -14,5 +14,6 @@ abstract class Report with _$Report {
     required DateTime createdAt,
     @Default('') String content,
     DateTime? resolvedAt,
+    String? parentAnswerId,
   }) = _Report;
 }

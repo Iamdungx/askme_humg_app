@@ -318,15 +318,6 @@ class _RecentAnswersSection extends ConsumerWidget {
                 color: cs.onSurface,
               ),
             ),
-            // TODO(future): Navigate to full published answers list screen
-            if (answerCount > 0)
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  l10n.profileViewAll,
-                  style: TextStyle(color: cs.primary),
-                ),
-              ),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
