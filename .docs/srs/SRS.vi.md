@@ -126,7 +126,7 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 **Xử lý (Tầng 2 — Xác minh HUMG):**
 1. Người dùng nhập địa chỉ email `@humg.edu.vn` trong màn hình Cài đặt
-2. Hệ thống gửi OTP đến email đó qua Cloud Functions (Resend API)
+2. Hệ thống gửi OTP 6 chữ số đến email đó qua Gmail SMTP (gói `mailer`, nội dung plain-text)
 3. Người dùng nhập OTP; hệ thống kiểm tra so với collection `otpRequests`
 4. Thành công → ghi `isHumgVerified: true` và `humgEmail` vào document `users`
 
@@ -369,16 +369,16 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | Trường | Kiểu dữ liệu | Mô tả |
 |---|---|---|
 | `email` | String | Địa chỉ email `@humg.edu.vn` được gửi OTP |
-| `otpHash` | String | Bcrypt hash của OTP (không lưu OTP dạng plaintext) |
+| `otpHash` | String | SHA-256 hash của OTP (không lưu OTP dạng plaintext) |
 | `expiresAt` | Timestamp | Thời điểm hết hạn OTP (10 phút kể từ khi tạo) |
-| `attempts` | Number | Số lần nhập sai (tối đa 5 lần trước khi khóa) |
+| `attempts` | Number | Số lần nhập sai (tối đa 3 lần trước khi khóa) |
 
 ---
 
 ## 7. Ràng buộc hệ thống
 
 - Yêu cầu kết nối Internet để sử dụng ứng dụng
-- Chỉ tài khoản Google có đuôi `@humg.edu.vn` mới được đăng ký làm Host
+- Bất kỳ tài khoản Google nào cũng có thể đăng nhập; tính năng Host (nhận câu hỏi, trả lời, đăng lên Feed) yêu cầu xác minh email `@humg.edu.vn` bổ sung (UC-1.3)
 - Không có tính năng nhắn tin trực tiếp giữa các người dùng
 - Không có hệ thống chat thời gian thực
 - Gửi câu hỏi ẩn danh bị giới hạn tốc độ ở mức **5 lần mỗi thiết bị mỗi giờ**

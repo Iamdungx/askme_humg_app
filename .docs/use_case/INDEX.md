@@ -22,9 +22,9 @@ Phase 5 – UC-5.1 → UC-5.2
 
 | UC | File | SRS FR | Priority | Trạng thái |
 |---|---|---|---|---|
-| UC-1.1 | [UC-1.1_google_sign_in.md](./UC-1.1_google_sign_in.md) | FR-02, NFR-03 | Critical | Pending |
-| UC-1.2 | [UC-1.2_logout.md](./UC-1.2_logout.md) | FR-02 | High | Pending |
-| UC-1.3 | [UC-1.3_verify_humg_email.md](./UC-1.3_verify_humg_email.md) | FR-02 | High | Pending |
+| UC-1.1 | [UC-1.1_google_sign_in.md](./UC-1.1_google_sign_in.md) | FR-02, NFR-03 | Critical | ✅ Done |
+| UC-1.2 | [UC-1.2_logout.md](./UC-1.2_logout.md) | FR-02 | High | ✅ Done |
+| UC-1.3 | [UC-1.3_verify_humg_email.md](./UC-1.3_verify_humg_email.md) | FR-02 | High | ✅ Done |
 
 **Dependency:** UC-1.1 phải hoàn thành trước tất cả UC còn lại (auth guard). UC-1.3 phụ thuộc UC-1.1.
 
@@ -34,8 +34,8 @@ Phase 5 – UC-5.1 → UC-5.2
 
 | UC | File | SRS FR | Priority | Trạng thái |
 |---|---|---|---|---|
-| UC-2.2 | [UC-2.2_view_profile.md](./UC-2.2_view_profile.md) | FR-10 | High | Pending |
-| UC-2.1 | [UC-2.1_generate_deep_link.md](./UC-2.1_generate_deep_link.md) | FR-11 | High | Pending |
+| UC-2.2 | [UC-2.2_view_profile.md](./UC-2.2_view_profile.md) | FR-10 | High | ✅ Done |
+| UC-2.1 | [UC-2.1_generate_deep_link.md](./UC-2.1_generate_deep_link.md) | FR-11 | High | ✅ Done |
 
 **Dependency:** UC-2.2 trước UC-2.1 (profile screen là landing page cho deep link).
 
@@ -45,9 +45,9 @@ Phase 5 – UC-5.1 → UC-5.2
 
 | UC | File | SRS FR | Priority | Trạng thái |
 |---|---|---|---|---|
-| UC-3.1 | [UC-3.1_submit_anonymous_question.md](./UC-3.1_submit_anonymous_question.md) | FR-01, NFR-01, NFR-03 | Critical | Pending |
-| UC-3.2 | [UC-3.2_manage_inbox.md](./UC-3.2_manage_inbox.md) | FR-03 | High | Pending |
-| UC-3.3 | [UC-3.3_answer_question.md](./UC-3.3_answer_question.md) | FR-04 | Critical | Pending |
+| UC-3.1 | [UC-3.1_submit_anonymous_question.md](./UC-3.1_submit_anonymous_question.md) | FR-01, NFR-01, NFR-03 | Critical | ⚠️ Partial (Cloud Function chưa deploy — chờ Blaze plan) |
+| UC-3.2 | [UC-3.2_manage_inbox.md](./UC-3.2_manage_inbox.md) | FR-03 | High | ✅ Done |
+| UC-3.3 | [UC-3.3_answer_question.md](./UC-3.3_answer_question.md) | FR-04 | Critical | ✅ Done |
 
 **Dependency:** UC-3.2 và UC-3.3 require UC-1.1 (auth). UC-3.3 output feeds UC-4.1.
 
@@ -57,9 +57,9 @@ Phase 5 – UC-5.1 → UC-5.2
 
 | UC | File | SRS FR | Priority | Trạng thái |
 |---|---|---|---|---|
-| UC-4.1 | [UC-4.1_view_public_feed.md](./UC-4.1_view_public_feed.md) | FR-05, NFR-02 | High | Pending |
-| UC-4.2 | [UC-4.2_like_answer.md](./UC-4.2_like_answer.md) | FR-06 | Medium | Pending |
-| UC-4.3 | [UC-4.3_comment_on_answer.md](./UC-4.3_comment_on_answer.md) | FR-07 | Medium | Pending |
+| UC-4.1 | [UC-4.1_view_public_feed.md](./UC-4.1_view_public_feed.md) | FR-05, NFR-02 | High | ✅ Done |
+| UC-4.2 | [UC-4.2_like_answer.md](./UC-4.2_like_answer.md) | FR-06 | Medium | ✅ Done |
+| UC-4.3 | [UC-4.3_comment_on_answer.md](./UC-4.3_comment_on_answer.md) | FR-07 | Medium | ✅ Done |
 
 **Dependency:** UC-4.1 trước UC-4.2 và UC-4.3. UC-4.2 và UC-4.3 require UC-1.1 (auth).
 
@@ -69,8 +69,8 @@ Phase 5 – UC-5.1 → UC-5.2
 
 | UC | File | SRS FR | Priority | Trạng thái |
 |---|---|---|---|---|
-| UC-5.1 | [UC-5.1_report_content.md](./UC-5.1_report_content.md) | FR-08, FR-09 | Medium | Pending |
-| UC-5.2 | [UC-5.2_admin_moderate.md](./UC-5.2_admin_moderate.md) | FR-09 | Medium | Pending |
+| UC-5.1 | [UC-5.1_report_content.md](./UC-5.1_report_content.md) | FR-08, FR-09 | Medium | ✅ Done |
+| UC-5.2 | [UC-5.2_admin_moderate.md](./UC-5.2_admin_moderate.md) | FR-09 | Medium | ✅ Done |
 
 **Dependency:** UC-5.1 require UC-1.1. UC-5.2 requires Admin Custom Claim setup.
 

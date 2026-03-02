@@ -1,0 +1,65 @@
+---
+description: Riverpod 3.x codegen provider naming rules — how class names map to generated provider variable names
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Riverpod 3.x Codegen — Provider Naming
+
+## How class name → provider variable name
+
+Riverpod codegen strips the `Notifier` suffix from the class name, then lowercases the first letter:
+
+| Class | Generated provider variable |
+|---|---|
+| `class FeedNotifier` | `feedProvider` |
+| `class AuthNotifier` | `authProvider` |
+| `class ReportNotifier` | `reportProvider` |
+| `class ResolveReportNotifier` | `resolveReportProvider` |
+| `class InboxNotifier` | `inboxProvider` |
+
+**NOT** `feedNotifierProvider`, `authNotifierProvider`, etc.
+
+## Accessing notifier methods
+
+```dart
+// ✅ CORRECT — call .notifier on the generated variable
+ref.read(feedProvider.notifier).refresh();
+ref.read(reportProvider.notifier).submit(...);
+ref.read(resolveReportProvider(reportId).notifier).resolve(...);
+
+// ❌ WRONG — these don't exist
+ref.read(feedNotifierProvider.notifier).refresh();
+ref.read(reportNotifierProvider.notifier).submit(...);
+```
+
+## Watching state
+
+```dart
+// ✅ CORRECT
+final feedAsync = ref.watch(feedProvider);
+final isLoading = ref.watch(reportProvider).isLoading;
+
+// Parameterized notifier (family)
+final resolveState = ref.watch(resolveReportProvider(reportId));
+```
+
+## Non-notifier providers (function-based)
+
+Function-based providers use the function name directly:
+
+```dart
+@riverpod
+FeedItem getFeedItem(Ref ref) => ...
+// → getFeedItemProvider
+
+@riverpod
+Stream<List<Report>> pendingReports(Ref ref) => ...
+// → pendingReportsProvider
+```
+
+## Quick check before writing any ref.watch/ref.read
+
+1. Find the class name in `<feature>_providers.dart`
+2. Remove `Notifier` suffix → lowercase first letter → append `Provider`
+3. If parameterized (`build(String id)`): it becomes a family → call as `xyzProvider(id)`
