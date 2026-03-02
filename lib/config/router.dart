@@ -77,6 +77,14 @@ class _RouterNotifier extends ChangeNotifier {
     // Authenticated → leave the login screen.
     if (isLoggedIn && path == AppRoutes.login) return AppRoutes.feed;
 
+    // UC-2.1 — Deep-link to own profile → redirect to /me tab (has bottom nav).
+    // /user/{userId} is a full-screen route without bottom nav; when the
+    // logged-in user scans their own QR code they'd see no back button and no
+    // shell navigation, so we bounce them to the /me shell tab instead.
+    if (isLoggedIn && state.pathParameters['userId'] == user.uid) {
+      return AppRoutes.me;
+    }
+
     // UC-1.3 — Redirect to HUMG verification if not yet verified.
     // Exempt paths/prefixes are defined in app_routes.dart (isHumgVerifyExempt).
     if (isLoggedIn && user.isHumgVerified == false && !isHumgVerifyExempt(path)) {
