@@ -126,7 +126,7 @@ The system follows a client-server architecture with real-time database support.
 
 **Processing (Tier 2 — HUMG Verification):**
 1. User submits their `@humg.edu.vn` email address in the Settings screen
-2. System sends an OTP to the submitted email via Cloud Functions (Resend API)
+2. System sends a 6-digit OTP to the submitted email via Gmail SMTP (`mailer` package, plain-text body)
 3. User enters the OTP; system validates against the `otpRequests` collection
 4. On success: `isHumgVerified: true` and `humgEmail` written to the `users` document
 
@@ -369,16 +369,16 @@ Managed entirely by Cloud Functions. Client has no direct read/write access.
 | Field | Type | Description |
 |---|---|---|
 | `email` | String | The `@humg.edu.vn` email the OTP was sent to |
-| `otpHash` | String | Bcrypt hash of the OTP (plain-text OTP never stored) |
+| `otpHash` | String | SHA-256 hash of the OTP (plain-text OTP never stored) |
 | `expiresAt` | Timestamp | OTP expiry time (10 minutes from generation) |
-| `attempts` | Number | Failed attempt count (max 5 before lockout) |
+| `attempts` | Number | Failed attempt count (max 3 before lockout) |
 
 ---
 
 ## 7. Constraints
 
 - Internet connection is required to use the application
-- Only Google accounts with the `@humg.edu.vn` domain may register as a Host
+- Any Google account may sign in; Host features (receiving questions, answering, publishing) require additional `@humg.edu.vn` HUMG email verification (UC-1.3)
 - No direct messaging feature between users
 - No real-time chat system
 - Anonymous question submissions are rate-limited to **5 per device per hour**

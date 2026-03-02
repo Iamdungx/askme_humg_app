@@ -18,7 +18,7 @@
 ## Trạng thái hiện tại
 
 ```
-Tổng tiến độ: ~90% █████████░
+Tổng tiến độ: ~97% █████████▉
 ```
 
 | Hạng mục | Trạng thái |
@@ -34,15 +34,17 @@ Tổng tiến độ: ~90% █████████░
 | Đăng nhập Google — UI + domain check + upsert Firestore | ✅ Xong |
 | Đăng xuất | ✅ Xong |
 | Router guard (auth redirect `/inbox`, `/me/edit`, `/admin`) | ✅ Xong |
+| HUMG email OTP verify (UC-1.3) + route guard → `/verify-humg` | ✅ Xong |
 | Trang cá nhân + deep link | ✅ Xong |
 | Hộp thư câu hỏi (Inbox) | ✅ Xong |
 | Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
 | Feed công khai | ✅ Xong |
+| Like / Comment + isHumgVerified guard | ✅ Xong |
 | Bottom Navigation Shell (ShellRoute, 4 tabs) | ✅ Xong |
 | Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
-| Edit Profile Screen (placeholder, full impl v2) | ✅ Xong |
-| Kiểm duyệt / báo cáo | ❌ Chưa làm |
-| Known issues (qna_repo_impl exception mapping, snackbar context) | ⚠️ Cần sửa |
+| Edit Profile Screen (placeholder, full impl → BACKLOG-02) | ✅ Xong (placeholder) |
+| Kiểm duyệt / báo cáo (UC-5.1, UC-5.2) | ✅ Xong |
+| App Check + Cloud Function rate limiting (UC-3.1) | ⚠️ Partial — chờ Blaze plan |
 
 ---
 
@@ -111,8 +113,16 @@ Feed công khai, like/unlike, bình luận đã implement. Composite Firestore i
 - Avatar upload lên Firebase Storage
 - Lưu `showRealName` vào Firestore `users` doc
 
-### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
-Báo cáo nội dung vi phạm, admin xem và xử lý các báo cáo.
+### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2) ✅ XONG
+
+**Đã implement:**
+- Domain: `Report` entity (Freezed) + `IModerationRepository` + 3 use cases (`SubmitReport`, `GetPendingReports`, `ResolveReport`)
+- Data: `ReportModel` + `FirebaseModerationDatasource` + `ModerationRepositoryImpl`
+- Presentation:
+  - `ReportReasonSheet` — bottom sheet chọn lý do báo cáo (4 options), tích hợp vào `FeedItemCard`, `CommentTile`, `ProfileScreen`
+  - `AdminDashboardScreen` (`/admin`) — danh sách pending reports với `ReportCard` (Dismiss / Remove)
+  - `ResolveReportNotifier` — per-report loading state (không block toàn bộ list)
+- Router guard `/admin` — yêu cầu Firebase Custom Claim `admin: true`
 
 ---
 
@@ -220,8 +230,21 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ## Bước tiếp theo ngay bây giờ
 
 ```
-Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
+Phase 5 đã xong. Version 1 gần hoàn thiện.
+Còn lại: các items trong BACKLOG + 1 bug cần sửa.
 ```
+
+### Các việc cần làm để hoàn thiện v1
+
+Xem `.docs/BACKLOG.md` để biết chi tiết đầy đủ.
+
+**P1 — cần cho production:** BACKLOG-01 (App Check + Cloud Function — chờ Blaze plan)
+
+**P2 — UX quan trọng:** BACKLOG-02 (Edit Profile), BACKLOG-03 (`showRealName` persist)
+
+**P3 — Nice-to-have:** BACKLOG-04 (Feed Share), BACKLOG-05 (Push Notifications), BACKLOG-06 (View All Answers), BACKLOG-07 (Like Optimistic UI)
+
+---
 
 ### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
 
@@ -253,5 +276,5 @@ Phase 4 + 4.5 đã xong. Tiến hành Phase 5: Kiểm duyệt
 
 > **Lưu ý quan trọng trước khi test end-to-end:**
 > - UC-3.1 (gửi câu hỏi ẩn danh): Cloud Function `submitQuestion` chưa deploy do chưa upgrade Blaze plan
-> - `isHumgVerified` guard (UC-1.3 OTP): chưa implement → Host features chưa bị khóa
-> - Settings → "HUMG Verification" hiện là placeholder; cần implement UC-1.3 để hoàn chỉnh
+> - UC-1.3 OTP + `isHumgVerified` guard: **Đã implement** — `VerifyHumgScreen` + router redirect `/verify-humg` đã hoạt động
+> - Provider naming bug trong moderation module cần fix trước khi build production
