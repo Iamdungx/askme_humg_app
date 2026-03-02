@@ -1,0 +1,92 @@
+import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
+import 'package:askme_humg/app/modules/qna_core/data/firebase_qna_datasource.dart';
+import 'package:askme_humg/app/modules/qna_core/domain/i_qna_repository.dart';
+import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
+
+class QnaRepositoryImpl implements IQnaRepository {
+  QnaRepositoryImpl(this._datasource);
+  final FirebaseQnaDatasource _datasource;
+
+  @override
+  Future<void> submitAnonymousQuestion({
+    required String toUserId,
+    required String content,
+  }) async {
+    try {
+      await _datasource.submitAnonymousQuestion(
+        toUserId: toUserId,
+        content: content,
+      );
+    } on RateLimitException {
+      throw const RateLimitFailure();
+    } on AppCheckException catch (e) {
+      throw NetworkFailure(e.message);
+    } on NetworkException catch (e) {
+      throw NetworkFailure(e.message);
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Stream<List<Question>> getInboxQuestions(String userId) =>
+      _datasource.getInboxQuestions(userId).handleError((Object e) {
+        if (e is FirestoreException) throw FirestoreFailure(e.message);
+        if (e is AppException) throw UnknownFailure(e.message);
+        throw UnknownFailure(e.toString());
+      });
+
+  @override
+  Future<Question?> getQuestionById(String questionId) async {
+    try {
+      return await _datasource.getQuestionById(questionId);
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> answerQuestion({
+    required String questionId,
+    required String userId,
+    required String content,
+    required bool isPublished,
+  }) async {
+    try {
+      await _datasource.answerQuestion(
+        questionId: questionId,
+        userId: userId,
+        content: content,
+        isPublished: isPublished,
+      );
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteQuestion(String questionId) async {
+    try {
+      await _datasource.deleteQuestion(questionId);
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+}

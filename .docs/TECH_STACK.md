@@ -1,6 +1,6 @@
 # AskmeHUMG – Tech Stack
 
-> **Flutter SDK:** 3.35.7 | **Dart SDK:** >=3.10.3 | **Updated:** 27-02-2026
+> **Flutter SDK:** 3.35.7 | **Dart SDK:** >=3.10.3 | **Updated:** 02-03-2026 — v1.0.0
 
 ---
 
@@ -62,6 +62,7 @@ Layer rules:
 | `logger` | ^2.5.0 | Structured logging |
 | `timeago` | ^3.7.0 | Relative timestamps |
 | `url_launcher` | ^6.3.1 | Open web links |
+| `package_info_plus` | ^8.3.0 | App version/build number |
 | `intl` | ^0.20.2 | l10n formatting |
 | `flutter_dotenv` | ^6.0.0 | .env config |
 | `flutter_svg` | ^2.2.3 | SVG rendering |
@@ -241,6 +242,6 @@ flutter gen-l10n                                          # after .arb changes
 
 | Package | Replacement |
 |---|---|
-| `firebase_dynamic_links` | `app_links ^6.x` + redirect at `askme.humg.edu.vn/u/{userId}` |
+| `firebase_dynamic_links` | `app_links ^6.x` + redirect at `askme-humg-app.web.app/user/{userId}` |
 | `image_gallery_saver` | `share_plus` |
 | `provider` / GetX | `flutter_riverpod` + `go_router` |

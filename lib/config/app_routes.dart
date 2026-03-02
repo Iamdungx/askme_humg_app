@@ -1,98 +1,43 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
-import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
+// Route path constants — used by _RouterNotifier and navigation callsites.
+// The actual GoRoute tree is declared in router.dart (StatefulShellRoute).
 
-part 'app_routes.g.dart';
+/// Routes that require authentication. GoRouter checks `startsWith`.
+const protectedLocationPrefixes = ['/inbox', '/me/edit', '/admin'];
 
-@TypedGoRoute<SplashRoute>(path: '/splash')
-@immutable
-class SplashRoute extends GoRouteData with $SplashRoute {
-  const SplashRoute();
+/// Paths that are exempt from the HUMG-verification redirect (UC-1.3).
+/// Exact-match paths — checked with Set.contains for O(1) lookup.
+const humgVerifyExemptPaths = <String>{
+  AppRoutes.verifyHumg,
+  AppRoutes.login,
+  AppRoutes.splash,
+  AppRoutes.feed,
+};
 
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const SplashScreen();
+/// Path prefixes that are exempt from the HUMG-verification redirect (UC-1.3).
+/// Checked with String.startsWith.
+const humgVerifyExemptPrefixes = <String>[AppRoutes.me, AppRoutes.settings];
+
+/// Returns true when [path] does not require HUMG verification to access.
+bool isHumgVerifyExempt(String path) =>
+    humgVerifyExemptPaths.contains(path) ||
+    humgVerifyExemptPrefixes.any(path.startsWith);
+
+/// Named path constants for all app routes.
+abstract final class AppRoutes {
+  static const splash = '/splash';
+  static const login = '/login';
+  static const feed = '/';
+  static const inbox = '/inbox';
+  static const me = '/me';
+  static const meEdit = '/me/edit';
+  static const settings = '/settings';
+  static const verifyHumg = '/verify-humg';
+  static const admin = '/admin';
+  static const userProfile = '/user';
 }
 
-@TypedGoRoute<FeedRoute>(path: '/')
-@immutable
-class FeedRoute extends GoRouteData with $FeedRoute {
-  const FeedRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const _PlaceholderScreen(title: 'Feed');
-}
-
-@TypedGoRoute<LoginRoute>(path: '/login')
-@immutable
-class LoginRoute extends GoRouteData with $LoginRoute {
-  const LoginRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const LoginScreen();
-}
-
-@TypedGoRoute<InboxRoute>(
-  path: '/inbox',
-  routes: [TypedGoRoute<AnswerComposeRoute>(path: 'answer/:questionId')],
-)
-@immutable
-class InboxRoute extends GoRouteData with $InboxRoute {
-  const InboxRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const _PlaceholderScreen(title: 'Inbox');
-}
-
-@immutable
-class AnswerComposeRoute extends GoRouteData with $AnswerComposeRoute {
-  const AnswerComposeRoute({required this.questionId});
-
-  final String questionId;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      _PlaceholderScreen(title: 'Answer: $questionId');
-}
-
-@TypedGoRoute<ProfileRoute>(path: '/u/:userId')
-@immutable
-class ProfileRoute extends GoRouteData with $ProfileRoute {
-  const ProfileRoute({required this.userId});
-
-  final String userId;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      _PlaceholderScreen(title: 'Profile: $userId');
-}
-
-@TypedGoRoute<AdminRoute>(path: '/admin')
-@immutable
-class AdminRoute extends GoRouteData with $AdminRoute {
-  const AdminRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const _PlaceholderScreen(title: 'Admin Dashboard');
-}
-
-/// Prefixes of routes that require authentication.
-const protectedLocationPrefixes = ['/inbox', '/admin'];
-
-// Placeholder — remove when feature screens are implemented
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title)),
-    body: Center(child: Text(title)),
-  );
+/// External URLs opened via url_launcher.
+abstract final class AppUrls {
+  static const String terms = 'https://askme-humg-app.web.app/terms';
+  static const String privacy = 'https://askme-humg-app.web.app/privacy';
 }

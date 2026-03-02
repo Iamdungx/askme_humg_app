@@ -134,7 +134,24 @@ Future<UserProfile> userProfile(Ref ref, String userId) =>
     ref.watch(getUserProfileProvider).call(userId);
 ```
 
-**Step 5 — Screen**
+**Step 5 — Localization strings**
+
+Every user-facing string must go through ARB. Never hardcode strings in widgets.
+
+Follow the `add-l10n-string` skill (`.cursor/skills/add-l10n-string/SKILL.md`) for full rules. Key points:
+
+- Add key to **all 3** files: `app_en.arb`, `app_vi.arb`, `app_ja.arb`
+- Every key requires an `@key` block with `description` — **no exceptions**
+- Strings with `{param}` require a `placeholders` entry in the `@` block in all 3 files
+- Run `flutter gen-l10n` after every ARB edit
+
+```json
+// Minimal correct entry (all 3 files)
+"myScreenEmpty": "Nothing here yet",
+"@myScreenEmpty": { "description": "Empty state on MyScreen" },
+```
+
+**Step 6 — Screen**
 
 ```dart
 class ProfileScreen extends ConsumerWidget {
@@ -166,7 +183,7 @@ class ProfileScreen extends ConsumerWidget {
 | Counter update | `FieldValue.increment(±1)` — never `.length` |
 | Error handling | Catch `FirebaseException` → throw typed `*Exception` from `core/error/exceptions.dart` |
 | State | `AsyncNotifier` for async mutations, `FutureProvider` / `StreamProvider` for reads |
-| Strings | `context.l10n.*` only — run `flutter gen-l10n` after adding ARB keys |
+| Strings | `context.l10n.*` only — add key to all 3 ARB files with `@key { "description": "..." }` block, then run `flutter gen-l10n` |
 | Colors | `AppColors.*` or `Theme.of(context).colorScheme.*` — no hex |
 | Logging | `logger.d/i/w/e` — no `print()` |
 | `withOpacity` | BANNED → `Color.withValues(alpha: x)` |

@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:askme_humg/app/core/utils/image_utils.dart';
+import 'package:askme_humg/generated/assets.gen.dart';
 
 class AppAvatar extends StatelessWidget {
   const AppAvatar({
     super.key,
     this.imageUrl,
+    this.localFile,
     this.name,
     this.size = 40,
     this.showRing = true,
@@ -13,6 +18,11 @@ class AppAvatar extends StatelessWidget {
   });
 
   final String? imageUrl;
+
+  /// Local [File] takes precedence over [imageUrl] when set.
+  /// Used by EditProfileScreen to preview a newly picked avatar.
+  final File? localFile;
+
   final String? name;
   final double size;
   final bool showRing;
@@ -42,7 +52,30 @@ class AppAvatar extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context) {
+    if (localFile != null) {
+      return Image.file(
+        localFile!,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _buildFallback(context),
+      );
+    }
     if (imageUrl != null && imageUrl!.isNotEmpty) {
+      // Handle base64 data URI stored in Firestore (temporary, until Storage is available).
+      if (isBase64DataUri(imageUrl)) {
+        final bytes = tryDecodeBase64Avatar(imageUrl);
+        if (bytes != null) {
+          return Image.memory(
+            bytes,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _buildFallback(context),
+          );
+        }
+        return _buildFallback(context);
+      }
       return CachedNetworkImage(
         imageUrl: imageUrl!,
         width: size,
@@ -57,14 +90,24 @@ class AppAvatar extends StatelessWidget {
 
   Widget _buildFallback(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final initial = (name != null && name!.isNotEmpty)
-        ? name![0].toUpperCase()
-        : '?';
+
+    // No name → show anonymous SVG instead of "?" initial
+    if (name == null || name!.isEmpty) {
+      return Container(
+        color: cs.surfaceContainerHigh,
+        padding: EdgeInsets.all(size * 0.15),
+        child: Assets.svgsAnonymous.svg(
+          fit: BoxFit.contain,
+          colorFilter: ColorFilter.mode(cs.onSurfaceVariant, BlendMode.srcIn),
+        ),
+      );
+    }
+
     return Container(
       color: cs.surfaceContainerHigh,
       alignment: Alignment.center,
       child: Text(
-        initial,
+        name![0].toUpperCase(),
         style: TextStyle(
           color: cs.primary,
           fontSize: size * 0.4,

@@ -17,6 +17,10 @@ class _EnvKeys {
   static const appEnv = 'APP_ENV';
   static const apiBaseUrl = 'API_BASE_URL';
   static const googleServerClientId = 'GOOGLE_SERVER_CLIENT_ID';
+  static const resendApiKey = 'RESEND_API_KEY';
+  static const resendFromEmail = 'RESEND_FROM_EMAIL';
+  static const gmailUser = 'GMAIL_USER';
+  static const gmailAppPassword = 'GMAIL_APP_PASSWORD';
 }
 
 class EnvReader {
@@ -57,6 +61,17 @@ class EnvReader {
   /// Get from: Firebase Console → Project Settings → General → Web app → Client ID
   static String get googleServerClientId =>
       _envOrEmpty(_EnvKeys.googleServerClientId);
+
+  /// Resend API key for sending OTP emails (UC-1.3).
+  static String get resendApiKey => _envOrEmpty(_EnvKeys.resendApiKey);
+
+  /// Resend sender email address (must be verified on resend.com).
+  static String get resendFromEmail =>
+      _envOr(_EnvKeys.resendFromEmail, 'onboarding@resend.dev');
+
+  /// Gmail SMTP — dùng khi chưa verify domain Resend.
+  static String get gmailUser => _envOrEmpty(_EnvKeys.gmailUser);
+  static String get gmailAppPassword => _envOrEmpty(_EnvKeys.gmailAppPassword);
 
   /// Reads a boolean flag: "true" / "1" / "yes" → true (case-insensitive).
   static bool flag(String key, {bool defaultValue = false}) {

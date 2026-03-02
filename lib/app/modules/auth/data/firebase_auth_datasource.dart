@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
@@ -19,18 +22,63 @@ class FirebaseAuthDatasource {
   // google_sign_in v7 uses a singleton — no need to inject
   GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
 
-  Stream<AuthUser?> get authStateChanges =>
-      _auth.authStateChanges().asyncMap((user) async {
-        if (user == null) return null;
+  // Initialized once — never recreated for the lifetime of this datasource
+  // instance. Uses switchMap semantics: when FirebaseAuth emits a new user
+  // event (including null on sign-out), the previous Firestore snapshot
+  // subscription is cancelled immediately before the next one starts.
+  // This avoids the asyncExpand pitfall where the inner Firestore stream
+  // blocks the null event after sign-out.
+  late final Stream<AuthUser?> authStateChanges = _buildAuthStream();
+
+  Stream<AuthUser?> _buildAuthStream() {
+    StreamSubscription<AuthUser?>? innerSub;
+    StreamSubscription<User?>? outerSub;
+    late StreamController<AuthUser?> controller;
+
+    controller = StreamController<AuthUser?>(
+      onListen: () {
+        outerSub = _auth.authStateChanges().listen(
+          (user) {
+            innerSub?.cancel();
+            innerSub = null;
+
+            if (user == null) {
+              controller.add(null);
+            } else {
+              innerSub = _userDocStream(user).listen(
+                controller.add,
+                onError: controller.addError,
+              );
+            }
+          },
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+      },
+      onCancel: () {
+        innerSub?.cancel();
+        outerSub?.cancel();
+      },
+    );
+
+    return controller.stream;
+  }
+
+  Stream<AuthUser?> _userDocStream(User user) async* {
+    final snapshots = _firestore.collection('users').doc(user.uid).snapshots();
+    await for (final doc in snapshots) {
+      if (!doc.exists) {
+        yield await AuthUserModel.fromFirebaseUserWithClaims(user);
+      } else {
         try {
-          final doc = await _firestore.collection('users').doc(user.uid).get();
-          if (!doc.exists) return AuthUserModel.fromFirebaseUser(user);
-          return AuthUserModel.fromFirestore(user, doc);
+          yield await AuthUserModel.fromFirestore(user, doc);
         } catch (e) {
-          logger.w('Failed to fetch user doc, falling back to Firebase user');
-          return AuthUserModel.fromFirebaseUser(user);
+          logger.w('Failed to parse user doc snapshot', error: e);
+          yield AuthUserModel.fromFirebaseUser(user);
         }
-      });
+      }
+    }
+  }
 
   AuthUser? get currentUser {
     final user = _auth.currentUser;
@@ -57,14 +105,34 @@ class FirebaseAuthDatasource {
       final user = userCredential.user;
       if (user == null) throw const AuthException('Sign-in returned null user');
 
-      await _upsertUserDoc(user);
+      try {
+        await _upsertUserDoc(user);
+      } on FirestoreException catch (e, s) {
+        logger.w(
+          'Firestore upsert failed (non-fatal, will retry on reconnect)',
+          error: e,
+          stackTrace: s,
+        );
+      }
     } on FirebaseAuthException catch (e, s) {
       logger.e('FirebaseAuth sign-in failed', error: e, stackTrace: s);
       throw AuthException(e.message ?? 'Sign-in failed');
+    } on PlatformException catch (e, s) {
+      if (e.code == 'canceled' || e.code == 'sign_in_canceled') {
+        logger.i('Google Sign-In canceled by user');
+        throw const AuthCanceledException();
+      }
+      logger.e('Google Sign-In platform error', error: e, stackTrace: s);
+      throw AuthException(e.message ?? 'Sign-in failed');
     } catch (e, s) {
       if (e is AuthException) rethrow;
+      final msg = e.toString();
+      if (msg.contains('canceled') || msg.contains('cancelled')) {
+        logger.i('Google Sign-In canceled by user');
+        throw const AuthCanceledException();
+      }
       logger.e('Unexpected sign-in error', error: e, stackTrace: s);
-      throw AuthException(e.toString());
+      throw AuthException(msg);
     }
   }
 

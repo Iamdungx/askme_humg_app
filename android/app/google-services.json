@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "375989370735-890gqof73k2c8gerl2thba22miqvbofk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.humg.askmehumg",
+            "certificate_hash": "09b60bde97424e11c3f4ffa8c8868535ff7019bc"
+          }
+        },
+        {
           "client_id": "375989370735-fqfv97e77vsoloophh6vso9grmttt7iv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

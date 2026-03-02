@@ -101,6 +101,11 @@ abstract final class AppSemanticColors {
   static const Color error = Color(0xFFEF4444);
   static const Color like = Color(0xFFEF4444);
   static const Color transparent = Colors.transparent;
+
+  // Opacity tokens — use with Color.withValues(alpha: AppSemanticColors.opacity*)
+  static const double opacityDisabled = 0.5;
+  static const double opacitySubtle = 0.6;
+  static const double opacityHint = 0.3;
 }
 
 // ---------------------------------------------------------------------------

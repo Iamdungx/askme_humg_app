@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
-import 'package:askme_humg/app/global_widgets/app_button.dart';
+import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
+import 'package:askme_humg/l10n/app_localizations.dart';
 
-class EmptyState extends StatelessWidget {
-  const EmptyState({
+class ErrorState extends StatelessWidget {
+  const ErrorState({
     super.key,
-    required this.message,
+    this.message,
     this.description,
     this.icon,
-    this.actionLabel,
-    this.onAction,
+    this.retryLabel,
+    this.onRetry,
   });
 
-  final String message;
+  final String? message;
   final String? description;
   final IconData? icon;
-  final String? actionLabel;
-  final VoidCallback? onAction;
+  final String? retryLabel;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon ?? LucideIcons.inbox,
-              size: 72,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
+            Icon(icon ?? LucideIcons.circleAlert, size: 72, color: cs.error),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              message,
+              message ?? l10n.commonError,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(color: cs.onSurface),
@@ -51,11 +49,12 @@ class EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
-            if (actionLabel != null && onAction != null) ...[
+            if (onRetry != null) ...[
               const SizedBox(height: AppSpacing.xl),
               AppButton(
-                label: actionLabel!,
-                onPressed: onAction,
+                label: retryLabel ?? l10n.commonRetry,
+                onPressed: onRetry,
+                variant: AppButtonVariant.secondary,
                 isFullWidth: false,
               ),
             ],

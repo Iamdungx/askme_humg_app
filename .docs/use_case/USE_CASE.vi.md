@@ -45,7 +45,7 @@
 * **Pre-condition:** Đã đăng nhập.
 * **Main Flow:**
   1. Người dùng vào màn hình Profile.
-  2. Hệ thống tạo một link duy nhất (qua Firebase Dynamic Links hoặc custom URL scheme) có dạng `askme.humg.edu.vn/u/{userId}`.
+  2. Hệ thống tạo một link duy nhất (qua Firebase Dynamic Links hoặc custom URL scheme) có dạng `askme-humg-app.web.app/user/{userId}`.
   3. Người dùng nhấn "Copy Link" hoặc "Share to Instagram/Facebook Story".
   4. Hệ thống tạo một ảnh thẻ (Card Image) chứa link/QR code để chia sẻ.
 * **Alternative Flow (Fallback):** Khi người khác bấm vào link:

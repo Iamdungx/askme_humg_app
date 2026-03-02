@@ -147,7 +147,7 @@ lib/
     │   ├── providers/          # ThemeModeNotifier, sharedPreferencesProvider
     │   ├── utils/              # logger (package:logger), Validators
     │   └── values/             # AppColors, AppTheme, AppSpacing, AppTypography
-    ├── global_widgets/         # AppButton, AppAvatar, EmptyState, ErrorState …
+    ├── global_widgets/         # states/ · input/ · layout/ · ui/ (barrel: global_widgets.dart)
     ├── modules/
     │   ├── auth/               # Google Sign-In → Firebase Auth → Firestore
     │   │   ├── domain/         # AuthUser (Freezed), IAuthRepository, use cases

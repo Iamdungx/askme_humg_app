@@ -1,6 +1,8 @@
 # AskmeHUMG — Tổng quan dự án
 
 > Đọc file này trước khi bắt đầu làm bất cứ thứ gì.
+>
+> **🏷️ Tag:** `v1.0.0` — Released 02-03-2026
 
 ---
 
@@ -15,10 +17,10 @@
 
 ---
 
-## Trạng thái hiện tại
+## Trạng thái hiện tại — v1.0.0 ✅ RELEASED
 
 ```
-Tổng tiến độ: ~30% ███░░░░░░░
+Tổng tiến độ: 100% ██████████  (v1.0.0 — 02-03-2026)
 ```
 
 | Hạng mục | Trạng thái |
@@ -33,12 +35,20 @@ Tổng tiến độ: ~30% ███░░░░░░░
 | Splash screen (auth-aware, navigate sau 2.8s) | ✅ Xong |
 | Đăng nhập Google — UI + domain check + upsert Firestore | ✅ Xong |
 | Đăng xuất | ✅ Xong |
-| Router guard (auth redirect `/inbox`, `/admin`) | ✅ Xong |
-| Trang cá nhân + deep link | ❌ Chưa làm |
-| Hộp thư câu hỏi (Inbox) | ❌ Chưa làm |
-| Gửi câu hỏi ẩn danh (App Check) | ❌ Chưa làm |
-| Feed công khai | ❌ Chưa làm |
-| Kiểm duyệt / báo cáo | ❌ Chưa làm |
+| Router guard (auth redirect `/inbox`, `/me/edit`, `/admin`) | ✅ Xong |
+| HUMG email OTP verify (UC-1.3) + route guard → `/verify-humg` | ✅ Xong |
+| Trang cá nhân + deep link | ✅ Xong |
+| Hộp thư câu hỏi (Inbox) | ✅ Xong |
+| Gửi câu hỏi ẩn danh (App Check) | ✅ Xong |
+| Feed công khai | ✅ Xong |
+| Like / Comment + isHumgVerified guard | ✅ Xong |
+| Bottom Navigation Shell (ShellRoute, 4 tabs) | ✅ Xong |
+| Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
+| Edit Profile Screen (avatar upload + display name) | ✅ Xong |
+| Kiểm duyệt / báo cáo (UC-5.1, UC-5.2) | ✅ Xong |
+| App Check + Cloud Function rate limiting (UC-3.1) | ⚠️ Deferred → v1.1 (chờ Blaze plan) |
+
+> **Known limitation:** Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan. Client hiện ghi thẳng vào Firestore với Firestore Security Rules là lớp bảo vệ. Xem `BACKLOG.md` → BACKLOG-01.
 
 ---
 
@@ -54,17 +64,64 @@ Firebase init, `firebase_options.dart`, error/failure classes, Riverpod provider
 ### Phase 1 — Đăng nhập (UC-1.1, UC-1.2) ✅ XONG
 Google Sign-In, chặn email không phải `@humg.edu.vn`, upsert document `users` trên Firestore, đăng xuất, auth guard router, Splash screen.
 
-### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2)
-Hiển thị profile (tên, avatar, số câu trả lời, tổng likes), tạo deep link `askme.humg.edu.vn/u/{userId}`, xuất ảnh card để share.
+### Phase 2 — Trang cá nhân (UC-2.1, UC-2.2) ✅ XONG
+ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, deep link `askme-humg-app.web.app/user/{userId}`, ShareCardWidget (QR + share image), native config (AndroidManifest + iOS Entitlements), cold-start + warm-start app_links listener.
 
-### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3)
-Gửi câu hỏi ẩn danh (tối đa 300 ký tự, có App Check chống bot), xem hộp thư 2 tab (chưa trả lời / đã trả lời), viết và đăng câu trả lời.
+### Phase 3 — Gửi câu hỏi & Hộp thư (UC-3.1, UC-3.2, UC-3.3) ✅ XONG
 
-### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3)
-Xem feed công khai (phân trang 20 bài), like/unlike câu trả lời, bình luận.
+**Đã implement:**
+- Domain: `Question`, `Answer` entity + `IQnaRepository` + 5 use cases
+- Data: `QuestionModel`, `AnswerModel` (fromFirestore, toDomain), `FirebaseQnaDatasource`, `QnaRepositoryImpl`
+- Presentation: `InboxScreen` (2 tab + badge đỏ), `AnswerComposeScreen`, `QuestionCard` (swipe-to-delete), `AnswerPublishToggle`
+- `AskQuestionSheet` tích hợp vào ProfileScreen (chỉ hiện khi xem profile người khác)
+- UC-3.3 WriteBatch atomic: `answers` create + `questions` status update
+- Rate limiting per-device: App Check token + Firebase Installations ID (FID)
+- Localization: timeago đa ngôn ngữ (vi/en/ja)
+- Cloud Function `submitQuestion` (TypeScript, `functions/`) — **chưa deploy** (xem note bên dưới)
 
-### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
-Báo cáo nội dung vi phạm, admin xem và xử lý các báo cáo.
+**⚠️ Known limitation — UC-3.1 chưa hoạt động đầy đủ:**
+Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan (pay-as-you-go). Khi nào có thẻ tín dụng quốc tế:
+1. Upgrade tại: `https://console.firebase.google.com/project/askme-humg-app/usage/details`
+2. Chạy: `firebase deploy --only functions`
+3. Lấy URL: `https://asia-southeast1-askme-humg-app.cloudfunctions.net`
+4. Cập nhật `.env`: `API_BASE_URL=https://asia-southeast1-askme-humg-app.cloudfunctions.net`
+
+**Fixes đã apply sau review:**
+- `content.trim()` trước validate + submit trong `AskQuestionSheet`
+- Swipe dismiss await delete thật, trả `false` nếu Firestore fail (tránh UI desync)
+- HTTP 401/403 → `AppCheckException` với l10n message riêng
+- `createdAt == null` trong Firestore → throw `FirestoreException` thay vì `DateTime.now()`
+- `_ReplyButton` dùng `l10n.inboxReplyButton` thay vì `answerComposeTitle`
+- Xóa field `questionId` thừa trong Firestore document write
+
+### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ✅ XONG
+Feed công khai, like/unlike, bình luận đã implement. Composite Firestore indexes đã deploy.
+
+### Phase 4.5 — Navigation Shell & Settings ✅ XONG
+
+**Đã implement:**
+- `AppShell` (`lib/app/core/widgets/app_shell.dart`) — 4 tabs: Feed / Inbox / Profile / Settings
+- `StatefulShellRoute` trong `router.dart` — tab state persist, scroll-to-top khi tap tab active
+- Badge đỏ trên Inbox tab hiển thị số câu hỏi chưa trả lời
+- `SettingsScreen` (`/settings`):
+  - Account: Edit Profile, HUMG verify status, Show real name toggle
+  - Notifications: placeholder — chờ FCM (BACKLOG-05)
+  - App: Language picker (vi/en/ja), Theme picker (light/dark/system), Clear cache
+  - About: Version (PackageInfo), Terms, Privacy
+  - Sign out với confirmation dialog
+- `EditProfileScreen` (`/me/edit`) — avatar upload (Firebase Storage, cooldown 7 ngày) + display name edit
+- Profile tab: nút ✏️ Edit trên AppBar của owner
+
+### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2) ✅ XONG
+
+**Đã implement:**
+- Domain: `Report` entity (Freezed) + `IModerationRepository` + 3 use cases (`SubmitReport`, `GetPendingReports`, `ResolveReport`)
+- Data: `ReportModel` + `FirebaseModerationDatasource` + `ModerationRepositoryImpl`
+- Presentation:
+  - `ReportReasonSheet` — bottom sheet chọn lý do báo cáo (4 options), tích hợp vào `FeedItemCard`, `CommentTile`, `ProfileScreen`
+  - `AdminDashboardScreen` (`/admin`) — danh sách pending reports với `ReportCard` (Dismiss / Remove)
+  - `ResolveReportNotifier` — per-report loading state (không block toàn bộ list)
+- Router guard `/admin` — yêu cầu Firebase Custom Claim `admin: true`
 
 ---
 
@@ -75,12 +132,15 @@ lib/
 ├── config/          ← router, DI, env, bootstrap
 ├── app/
 │   ├── core/        ← màu sắc, font, theme, logger, validator, error classes
-│   ├── global_widgets/  ← button, card, avatar, badge, shimmer...
+│   │   ├── providers/   ← theme_provider, locale_provider (shared_preferences)
+│   │   └── widgets/     ← app_shell.dart (bottom nav scaffold)
+│   ├── global_widgets/  ← states/ · input/ · layout/ · ui/
 │   └── modules/
 │       ├── auth/        ← Phase 1
 │       ├── profile/     ← Phase 2
 │       ├── qna_core/    ← Phase 3
 │       ├── feed/        ← Phase 4
+│       ├── settings/    ← Phase 4.5
 │       └── moderation/  ← Phase 5
 ```
 
@@ -166,17 +226,30 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ---
 
-## Bước tiếp theo ngay bây giờ
+## v1.0.0 — Release Notes (02-03-2026)
 
 ```
-Bắt đầu Phase 2: Profile & Deep Link
-
-1. Đọc .docs/use_case/UC-2.2_view_profile.md
-2. Domain layer: UserProfile entity + IProfileRepository
-3. Data layer: UserProfileModel (Freezed) + ProfileDatasource + ProfileRepositoryImpl
-4. Presentation: ProfileScreen (/u/:userId) + profileProvider
-5. Đọc .docs/use_case/UC-2.1_generate_deep_link.md
-6. Cấu hình app_links (AndroidManifest + Info.plist)
-7. ShareCardWidget (qr_flutter + share_plus)
-8. Kết nối ProfileRoute trong app_routes.dart
+Tất cả 5 Phase đã hoàn thành. App đã sẵn sàng cho TestFlight / Play Internal Testing.
 ```
+
+### Tính năng đã ship trong v1.0.0
+
+| Phase | Feature | UC |
+|---|---|---|
+| 0 | Firebase init, error/failure classes, Riverpod providers | — |
+| 1 | Google Sign-In, OTP HUMG verify, Logout, auth guard | UC-1.1, UC-1.2, UC-1.3 |
+| 2 | Profile page, deep link, QR share card, avatar upload | UC-2.1, UC-2.2 |
+| 3 | Inbox (2 tabs), Answer compose, Question submission | UC-3.1, UC-3.2, UC-3.3 |
+| 4 | Public Feed, Like/Unlike, Comments, verified badge | UC-4.1, UC-4.2, UC-4.3 |
+| 4.5 | Bottom nav shell, Settings (theme/lang/profile edit) | — |
+| 5 | Report content, Admin dashboard, resolve reports | UC-5.1, UC-5.2 |
+
+### Các việc cần làm cho v1.1+
+
+Xem `.docs/BACKLOG.md` để biết chi tiết đầy đủ.
+
+**P1 — cần cho production:** BACKLOG-01 (App Check + Cloud Function — chờ Blaze plan)
+
+**P2 — UX quan trọng:** BACKLOG-03 (`showRealName` persist Firestore), BACKLOG-06 (View All Answers)
+
+**P3 — Nice-to-have:** BACKLOG-04 (Feed Share), BACKLOG-05 (Push Notifications / FCM), BACKLOG-07 (Like Optimistic UI)

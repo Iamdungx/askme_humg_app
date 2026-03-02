@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:askme_humg/config/env_reader.dart';
 import 'package:askme_humg/firebase_options.dart';
 
@@ -14,6 +15,11 @@ class AppBootstrap {
   static Future<void> init() async {
     // Silently ignore missing .env (CI / machines without local file)
     await dotenv.load(fileName: '.env').catchError((_) {});
+
+    // Register timeago locale messages for all supported languages.
+    // Must run before any timeago.format() call.
+    timeago.setLocaleMessages('vi', timeago.ViMessages());
+    timeago.setLocaleMessages('ja', timeago.JaMessages());
 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

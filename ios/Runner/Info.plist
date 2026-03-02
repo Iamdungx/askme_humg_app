@@ -29,7 +29,17 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl</string>
+				<string>com.googleusercontent.apps.375989370735-377qe4ht26792jfpk8dfvnto9c9t5313</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.askmehumg.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>askme</string>
 			</array>
 		</dict>
 	</array>
@@ -81,5 +91,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to let you update your profile avatar.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to let you take a photo for your profile avatar.</string>
 </dict>
 </plist>

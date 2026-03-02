@@ -1,6 +1,6 @@
 # AskmeHUMG – Đặc Tả Yêu Cầu Phần Mềm (SRS)
 
-> **Phiên bản:** 2.0 | **Cập nhật lần cuối:** 26-02-2026
+> **Phiên bản:** 2.1 | **Cập nhật lần cuối:** 01-03-2026
 
 ---
 
@@ -112,16 +112,23 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 ### FR-02: Xác thực người dùng
 
-**Mô tả:** Chỉ sinh viên có tài khoản Google của trường mới được đăng ký và đăng nhập với vai trò Host.
+**Mô tả:** Bất kỳ tài khoản Google nào cũng có thể đăng nhập vào ứng dụng. Các tính năng Host đầy đủ (nhận câu hỏi, trả lời, đăng lên Feed) yêu cầu xác minh danh tính HUMG bổ sung.
 
-**Ràng buộc:** Hệ thống áp dụng **giới hạn tên miền email nghiêm ngặt**. Chỉ tài khoản Google có đuôi `@humg.edu.vn` mới được chấp nhận. Tài khoản sử dụng tên miền khác (ví dụ `@gmail.com`) sẽ bị từ chối ngay tại bước xác thực.
+**Mô hình xác thực hai tầng:**
+- **Tầng 1 — Đăng nhập Google:** Bất kỳ tài khoản Google nào đều có thể đăng nhập. Document `users` được tạo khi đăng nhập lần đầu. Người dùng có thể xem Feed và tương tác (thích, bình luận).
+- **Tầng 2 — Xác minh HUMG:** Để mở khóa tính năng Host, người dùng phải xác minh quyền sở hữu địa chỉ email `@humg.edu.vn`. Sau khi xác minh thành công, `isHumgVerified: true` và `humgEmail` được lưu vào document `users`.
 
-**Xử lý:**
+**Xử lý (Tầng 1):**
 1. Người dùng khởi tạo đăng nhập bằng Google
-2. Firebase Auth trả về email đã xác thực
-3. Hệ thống kiểm tra email có kết thúc bằng `@humg.edu.vn` không; nếu không, phiên đăng nhập bị hủy ngay và hiển thị thông báo lỗi
-4. Lần đầu đăng nhập → tạo document mới trong collection `users`
-5. Phiên đăng nhập được thiết lập, chuyển hướng đến màn hình chính
+2. Firebase Auth trả về tài khoản Google đã xác thực
+3. Lần đầu đăng nhập → tạo document mới trong collection `users` với `isHumgVerified: false`
+4. Phiên đăng nhập được thiết lập, chuyển hướng đến màn hình chính
+
+**Xử lý (Tầng 2 — Xác minh HUMG):**
+1. Người dùng nhập địa chỉ email `@humg.edu.vn` trong màn hình Cài đặt
+2. Hệ thống gửi OTP 6 chữ số đến email đó qua Gmail SMTP (gói `mailer`, nội dung plain-text)
+3. Người dùng nhập OTP; hệ thống kiểm tra so với collection `otpRequests`
+4. Thành công → ghi `isHumgVerified: true` và `humgEmail` vào document `users`
 
 ---
 
@@ -192,10 +199,12 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 ### FR-10: Hồ sơ người dùng
 
 **Mô tả:** Hiển thị thông tin công khai của Host:
-- Tên hiển thị
+- Tên hiển thị (hoặc danh xưng ẩn danh nếu người dùng tắt hiển thị tên thật)
 - Ảnh đại diện
 - Số câu hỏi đã trả lời và công bố
 - Tổng số lượt thích nhận được
+
+**Kiểm soát quyền riêng tư:** Host có thể bật/tắt "Hiển thị tên thật trên hồ sơ" trong Cài đặt. Khi tắt, tên thật được thay bằng tên định danh chung trên Feed công khai và trang hồ sơ. Tùy chọn này được lưu trong document `users` (trường `showRealName`).
 
 ---
 
@@ -204,9 +213,9 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 **Mô tả:** Mỗi Host có thể tạo và chia sẻ một đường dẫn duy nhất – khi mở ra sẽ điều hướng thẳng đến trang hồ sơ của họ, nơi người khác có thể gửi câu hỏi ẩn danh.
 
 **Xử lý:**
-1. Hệ thống tạo URL duy nhất cho Host bằng **Firebase Dynamic Links** (hoặc custom scheme), ví dụ: `https://askme.humg.edu.vn/u/{userId}`
-2. Host có thể chia sẻ link này hoặc xuất ra dạng ảnh card trực quan để đăng lên mạng xã hội (Facebook, Instagram Stories, v.v.)
-3. Khi người nhận mở link trên thiết bị đã cài ứng dụng, app sẽ mở thẳng đến trang hồ sơ của Host
+1. Hệ thống tạo URL duy nhất cho Host: `https://askme-humg-app.web.app/user/{userId}`
+2. Host có thể chia sẻ link này hoặc xuất ra dạng ảnh card QR trực quan để đăng lên mạng xã hội (Facebook, Instagram Stories, v.v.)
+3. Khi người nhận mở link trên thiết bị đã cài ứng dụng, app sẽ mở thẳng đến trang hồ sơ của Host (xử lý bởi `app_links` + Android App Links / iOS Universal Links)
 4. Nếu chưa cài ứng dụng, link chuyển hướng đến trang tải ứng dụng hoặc trang web di động dự phòng
 
 **Đầu ra:**
@@ -262,24 +271,26 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 | Dịch vụ | Vai trò |
 |---|---|
-| **Firebase Authentication** | Đăng nhập và xác thực danh tính, kiểm tra tên miền `@humg.edu.vn` |
+| **Firebase Authentication** | Đăng nhập và xác thực danh tính |
 | **Cloud Firestore** | Cơ sở dữ liệu NoSQL thời gian thực |
 | **Firebase Storage** | Lưu trữ ảnh đại diện và media |
-| **Cloud Functions** | Rate limiting cho gửi ẩn danh, kiểm duyệt nội dung phía server |
+| **Cloud Functions** | Rate limiting cho gửi ẩn danh, gửi OTP (Resend API), kiểm duyệt nội dung phía server |
 | **Firebase App Check** | Xác thực phiên bản ứng dụng hợp lệ cho các endpoint ẩn danh |
-| **Firebase Dynamic Links** | Tạo và định tuyến deep link hồ sơ Host có thể chia sẻ |
+| **Package `app_links`** | Xử lý deep link `askme-humg-app.web.app/user/{userId}` — thay thế Firebase Dynamic Links đã bị deprecated |
+
+> **Lưu ý:** Firebase Dynamic Links đã bị Google ngừng hỗ trợ từ tháng 8/2025. Ứng dụng dùng package `app_links` kết hợp cấu hình native (Android App Links / iOS Universal Links) trỏ đến `askme-humg-app.web.app`.
 
 ### Sơ đồ kiến trúc (Tổng quan)
 
 ```
 Ứng dụng Flutter (Riverpod)
     │
-    ├── Firebase Auth          (Đăng nhập · kiểm tra @humg.edu.vn)
+    ├── Firebase Auth          (Đăng nhập · bất kỳ tài khoản Google nào)
     ├── Firebase App Check     (Chống bot · gửi câu hỏi ẩn danh)
     ├── Cloud Firestore        (Lưu trữ dữ liệu · đồng bộ thời gian thực)
     ├── Firebase Storage       (Ảnh đại diện · media)
-    ├── Cloud Functions        (Rate limiting · kiểm duyệt server)
-    └── Firebase Dynamic Links (Deep link hồ sơ có thể chia sẻ)
+    ├── Cloud Functions        (Rate limiting · OTP · kiểm duyệt server)
+    └── app_links + native     (Deep link routing: askme-humg-app.web.app/user/{userId})
 ```
 
 ---
@@ -291,11 +302,15 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | Trường | Kiểu dữ liệu | Mô tả |
 |---|---|---|
 | `userId` | String | Mã định danh người dùng (Firebase Auth UID) |
-| `name` | String | Tên hiển thị |
+| `name` | String | Tên hiển thị (lấy từ tài khoản Google) |
 | `avatar` | String (URL) | Đường dẫn ảnh đại diện |
-| `email` | String | Email `@humg.edu.vn` đã được xác minh |
+| `email` | String | Email tài khoản Google (bất kỳ tên miền nào) |
+| `role` | String | `user` (mặc định) hoặc `admin` |
 | `createdAt` | Timestamp | Thời điểm tạo tài khoản |
 | `isBlocked` | Boolean | Tài khoản có bị Admin khóa không |
+| `isHumgVerified` | Boolean | Người dùng đã xác minh email `@humg.edu.vn` chưa |
+| `humgEmail` | String (nullable) | Địa chỉ email HUMG đã được xác minh |
+| `showRealName` | Boolean | Có hiển thị tên thật công khai không (mặc định: `true`) |
 
 ### Collection: `questions` (Câu hỏi)
 
@@ -318,9 +333,10 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | `createdAt` | Timestamp | Thời điểm trả lời |
 | `likeCount` | Number | Tổng số lượt thích (bộ đệm denormalized để hiển thị nhanh) |
 | `likedBy` | Array\<String\> | Danh sách `userId` đã thích – đảm bảo quy tắc một lượt thích mỗi người |
+| `commentCount` | Number | Tổng số bình luận (bộ đệm denormalized để hiển thị nhanh) |
 | `isPublished` | Boolean | Câu trả lời có được hiển thị công khai trên Feed không |
 
-> **Ghi chú thiết kế:** `likeCount` là bộ đệm denormalized được cập nhật nguyên tử cùng với mảng `likedBy` thông qua `FieldValue.increment()`. Cách tiếp cận này tránh việc phải đọc sub-collection để lấy số đếm mỗi khi render item trên Feed.
+> **Ghi chú thiết kế:** Cả `likeCount` và `commentCount` đều là bộ đệm denormalized được cập nhật nguyên tử qua `FieldValue.increment()`. Với lượt thích, mảng `likedBy` được cập nhật trong cùng thao tác. Cách này tránh việc đọc sub-collection để lấy số đếm mỗi khi render item trên Feed. Cả hai cập nhật đều dùng `WriteBatch` để đảm bảo tính nguyên tử.
 
 ### Collection: `comments` (Bình luận)
 
@@ -346,12 +362,23 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | `createdAt` | Timestamp | Thời điểm gửi báo cáo |
 | `resolvedAt` | Timestamp (nullable) | Thời điểm Admin xử lý báo cáo |
 
+### Collection: `otpRequests` (Yêu cầu OTP)
+
+Được quản lý hoàn toàn bởi Cloud Functions. Client không có quyền đọc/ghi trực tiếp.
+
+| Trường | Kiểu dữ liệu | Mô tả |
+|---|---|---|
+| `email` | String | Địa chỉ email `@humg.edu.vn` được gửi OTP |
+| `otpHash` | String | SHA-256 hash của OTP (không lưu OTP dạng plaintext) |
+| `expiresAt` | Timestamp | Thời điểm hết hạn OTP (10 phút kể từ khi tạo) |
+| `attempts` | Number | Số lần nhập sai (tối đa 3 lần trước khi khóa) |
+
 ---
 
 ## 7. Ràng buộc hệ thống
 
 - Yêu cầu kết nối Internet để sử dụng ứng dụng
-- Chỉ tài khoản Google có đuôi `@humg.edu.vn` mới được đăng ký làm Host
+- Bất kỳ tài khoản Google nào cũng có thể đăng nhập; tính năng Host (nhận câu hỏi, trả lời, đăng lên Feed) yêu cầu xác minh email `@humg.edu.vn` bổ sung (UC-1.3)
 - Không có tính năng nhắn tin trực tiếp giữa các người dùng
 - Không có hệ thống chat thời gian thực
 - Gửi câu hỏi ẩn danh bị giới hạn tốc độ ở mức **5 lần mỗi thiết bị mỗi giờ**
@@ -360,10 +387,17 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 ## 8. Hướng phát triển tương lai
 
+### Phiên bản 2 (Đã lên kế hoạch)
+
+- **Thông báo đẩy (Push notification)** khi nhận câu hỏi mới và khi có bình luận mới vào câu trả lời — qua Firebase Cloud Messaging (FCM). Giao diện placeholder đã có trong màn hình Cài đặt; implement backend chờ đến v2.
+- **Chỉnh sửa ảnh đại diện & tên hiển thị** — tải ảnh mới lên Firebase Storage và cập nhật `name` trong document `users`. Màn hình Edit Profile hiện là placeholder.
+- **Lưu `showRealName` vào Firestore** — hiện tại chỉ lưu trong bộ nhớ; v2 sẽ persist vào `users.showRealName`.
+
+### Phiên bản 3+ (Định hướng dài hạn)
+
 - Gợi ý câu trả lời bằng AI (tích hợp LLM API)
 - Bảng phân tích thống kê câu hỏi phổ biến và xu hướng nổi bật
 - Phân tích xu hướng theo khoa/bộ môn
-- Thông báo đẩy (push notification) khi nhận câu hỏi mới qua Firebase Cloud Messaging
 - Tích hợp với hệ thống thông tin sinh viên chính thức của HUMG
 
 ---

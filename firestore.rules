@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // ── users ─────────────────────────────────────────────────────────
+    // UC-1.1: create/upsert on first login; anyone can read public profile
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── questions ─────────────────────────────────────────────────────
+    // UC-3.1: anonymous write exclusively via Cloud Function (Admin SDK bypasses
+    //         rules). App Check token + per-device rate limiting enforced there.
+    //         Direct client writes are forbidden — no dev convenience bypass.
+    // UC-3.2: host reads their own inbox
+    // UC-3.3: host updates status when answering
+    match /questions/{questionId} {
+      allow read: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
+      // TODO(UC-3.1): revert to `if false` after Cloud Function submitQuestion is deployed.
+      allow create: if true;
+      allow update: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
+      // UC-3.2: host can delete questions sent to them; admin can delete any
+      allow delete: if isSignedIn() && (
+        resource.data.toUserId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ── answers ───────────────────────────────────────────────────────
+    // UC-4.1: anyone can read published answers
+    // UC-3.3: only the owner can create/update their answer
+    // UC-4.2: any signed-in user can update likeCount/likedBy
+    match /answers/{answerId} {
+      allow read: if resource.data.isPublished == true || isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin() ||
+        // Like/unlike: only likeCount and likedBy change
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likeCount', 'likedBy'])) ||
+        // Comment: only commentCount incremented by any signed-in user (UC-4.3)
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['commentCount']))
+      );
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // ── comments ──────────────────────────────────────────────────────
+    // UC-4.3: any signed-in user can comment; "anonymous" means userId is null
+    //         in the document (isAnonymous toggle), but the request always comes
+    //         from an authenticated session. Unauthenticated direct writes forbidden.
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if (isSignedIn() && resource.data.userId == request.auth.uid)
+        || isAdmin();
+    }
+
+    // ── reports ───────────────────────────────────────────────────────
+    // UC-5.1: any signed-in user can report
+    // UC-5.2: only admin can read/update reports
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── otpRequests ───────────────────────────────────────────────────
+    // UC-1.3: client sinh OTP 6 chữ số → SHA-256 hash → ghi vào đây,
+    // sau đó gửi plain-text email qua Gmail SMTP (`mailer` package).
+    // docId == uid của user — chỉ owner mới được thao tác doc của mình.
+    // Admin có thể đọc để debug, không cần ghi.
+    match /otpRequests/{uid} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+  }
+}

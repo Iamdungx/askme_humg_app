@@ -49,13 +49,21 @@
 6. On failure: revert optimistic update
 ```
 
-## 4. Alternative Flow – Unauthenticated User Taps Like
+## 4. Alternative Flow A – Unauthenticated User Taps Like
 
 ```
 A1. currentUser is null
-A2. Show bottom sheet or dialog: l10n.loginRequiredToLike
-A3. Option: "Sign In" button → navigate to /login
-A4. Like is NOT applied
+A2. Show snackbar: l10n.loginRequiredToLike
+A3. Like is NOT applied
+```
+
+## 4b. Alternative Flow B – Authenticated but Unverified User Taps Like
+
+```
+B1. currentUser != null BUT isHumgVerified == false
+B2. Show snackbar: l10n.verifyRequiredToLike
+B3. Like is NOT applied
+B4. User can navigate to /settings → HUMG Verification to verify
 ```
 
 ---
@@ -171,7 +179,8 @@ match /answers/{answerId} {
 
 ## 9. Acceptance Criteria (from SRS FR-06)
 
-- [ ] Unauthenticated user taps like → login prompt shown, no Firestore write
+- [ ] Unauthenticated user taps like → snackbar `loginRequiredToLike`, no Firestore write
+- [ ] Authenticated but unverified (HUMG) user taps like → snackbar `verifyRequiredToLike`, no Firestore write
 - [ ] Like: `arrayUnion([uid])` + `increment(1)` in single `update()` call
 - [ ] Unlike: `arrayRemove([uid])` + `increment(-1)` in single `update()` call
 - [ ] Tapping like twice → no net change (idempotent via arrayUnion)
