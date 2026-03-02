@@ -318,7 +318,6 @@ class _RecentAnswersSection extends ConsumerWidget {
                 color: cs.onSurface,
               ),
             ),
-            // TODO(future): Navigate to full published answers list screen
           ],
         ),
         const SizedBox(height: AppSpacing.md),

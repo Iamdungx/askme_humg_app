@@ -27,7 +27,7 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
   String? _inlineError;
   String _selectedDomain = '@student.humg.edu.vn';
 
-  static const _domains = ['@student.humg.edu.vn', '@teacher.humg.edu.vn', '@humg.edu.vn'];
+  static const _domains = ['@student.humg.edu.vn', '@humg.edu.vn'];
 
   @override
   void dispose() {
@@ -36,11 +36,28 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
   }
 
   static final _mssvRegex = RegExp(r'^\d+$');
+  static final _usernameRegex = RegExp(r'^[a-zA-Z0-9._-]+$');
 
   String get _fullEmail => '${_controller.text.trim()}$_selectedDomain';
 
-  bool _validate(String mssv, AppLocalizations l10n) {
-    if (mssv.isEmpty || !_mssvRegex.hasMatch(mssv)) {
+  void _cycleDomain() {
+    final idx = _domains.indexOf(_selectedDomain);
+    setState(() {
+      _selectedDomain = _domains[(idx + 1) % _domains.length];
+      _inlineError = null;
+      _controller.clear();
+    });
+  }
+
+  bool _validate(String input, AppLocalizations l10n) {
+    if (input.isEmpty) {
+      setState(() => _inlineError = l10n.otpErrorInvalidMssv);
+      return false;
+    }
+    final isValid = _selectedDomain == _domains.last
+        ? _usernameRegex.hasMatch(input)
+        : _mssvRegex.hasMatch(input);
+    if (!isValid) {
       setState(() => _inlineError = l10n.otpErrorInvalidMssv);
       return false;
     }
@@ -128,7 +145,9 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
           // MSSV + domain trong một field duy nhất
           TextField(
             controller: _controller,
-            keyboardType: TextInputType.number,
+            keyboardType: _selectedDomain == _domains.last
+                ? TextInputType.emailAddress
+                : TextInputType.number,
             textInputAction: TextInputAction.done,
             autocorrect: false,
             onSubmitted: (_) => _send(l10n),
@@ -145,11 +164,7 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
               prefixIcon: const Icon(LucideIcons.hash, size: 20),
               // Domain toggle button bên phải
               suffixIcon: GestureDetector(
-                onTap: () => setState(() {
-                  _selectedDomain = _selectedDomain == _domains[0]
-                      ? _domains[1]
-                      : _domains[0];
-                }),
+                onTap: _cycleDomain,
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(0, 6, 8, 6),
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
