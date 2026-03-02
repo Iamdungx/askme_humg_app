@@ -23,4 +23,42 @@ class ProfileRepositoryImpl implements IProfileRepository {
       throw UnknownFailure(e.toString());
     }
   }
+
+  @override
+  Future<void> updateProfile({
+    required String userId,
+    String? name,
+    String? avatarLocalPath,
+  }) async {
+    try {
+      await _datasource.updateProfile(
+        userId: userId,
+        name: name,
+        avatarLocalPath: avatarLocalPath,
+      );
+    } on AvatarCooldownException catch (e) {
+      throw AvatarCooldownFailure(e.nextAllowedAt);
+    } on StorageException catch (e) {
+      throw StorageFailure(e.message);
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e, st) {
+      logger.e('updateProfile unexpected error', error: e, stackTrace: st);
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<DateTime?> getAvatarUpdatedAt(String userId) async {
+    try {
+      return await _datasource.getAvatarUpdatedAt(userId);
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } catch (e, st) {
+      logger.e('getAvatarUpdatedAt unexpected error', error: e, stackTrace: st);
+      throw UnknownFailure(e.toString());
+    }
+  }
 }

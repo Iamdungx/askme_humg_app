@@ -69,16 +69,16 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     if (mode == ThemeMode.system) {
       Future.microtask(() async {
         try {
-          await prefs.setString(_kThemeModeKey, ThemeMode.dark.name);
+          await prefs.setString(_kThemeModeKey, ThemeMode.light.name);
         } catch (e, s) {
           logger.e(
-            'Failed to migrate theme pref to dark',
+            'Failed to migrate theme pref to light',
             error: e,
             stackTrace: s,
           );
         }
       });
-      return ThemeMode.dark;
+      return ThemeMode.light;
     }
     return mode;
   }

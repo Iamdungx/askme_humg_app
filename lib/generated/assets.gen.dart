@@ -26,6 +26,27 @@ class Assets {
   /// File path: assets/images/app_icon.png
   static const AssetGenImage imagesAppIcon = AssetGenImage('assets/images/app_icon.png');
 
+  /// File path: assets/images/shares/abstract_bg.png
+  static const AssetGenImage imagesSharesAbstractBg = AssetGenImage('assets/images/shares/abstract_bg.png');
+
+  /// File path: assets/images/shares/candy_bg.png
+  static const AssetGenImage imagesSharesCandyBg = AssetGenImage('assets/images/shares/candy_bg.png');
+
+  /// File path: assets/images/shares/darkcarbon_bg.png
+  static const AssetGenImage imagesSharesDarkcarbonBg = AssetGenImage('assets/images/shares/darkcarbon_bg.png');
+
+  /// File path: assets/images/shares/darkspace_bg.png
+  static const AssetGenImage imagesSharesDarkspaceBg = AssetGenImage('assets/images/shares/darkspace_bg.png');
+
+  /// File path: assets/images/shares/deepforest_1_bg.png
+  static const AssetGenImage imagesSharesDeepforest1Bg = AssetGenImage('assets/images/shares/deepforest_1_bg.png');
+
+  /// File path: assets/images/shares/deepforest_2_bg.png
+  static const AssetGenImage imagesSharesDeepforest2Bg = AssetGenImage('assets/images/shares/deepforest_2_bg.png');
+
+  /// File path: assets/images/shares/sunshine_bg.png
+  static const AssetGenImage imagesSharesSunshineBg = AssetGenImage('assets/images/shares/sunshine_bg.png');
+
   /// File path: assets/svgs/anonymous.svg
   static const SvgGenImage svgsAnonymous = SvgGenImage('assets/svgs/anonymous.svg');
 
@@ -36,7 +57,21 @@ class Assets {
   static const SvgGenImage svgsVerified = SvgGenImage('assets/svgs/verified.svg');
 
   /// List of all assets
-  static List<dynamic> get values => [aEnv, iconGitkeep, imagesAppIcon, svgsAnonymous, svgsGoogleLogo, svgsVerified];
+  static List<dynamic> get values => [
+    aEnv,
+    iconGitkeep,
+    imagesAppIcon,
+    imagesSharesAbstractBg,
+    imagesSharesCandyBg,
+    imagesSharesDarkcarbonBg,
+    imagesSharesDarkspaceBg,
+    imagesSharesDeepforest1Bg,
+    imagesSharesDeepforest2Bg,
+    imagesSharesSunshineBg,
+    svgsAnonymous,
+    svgsGoogleLogo,
+    svgsVerified,
+  ];
 }
 
 class AssetGenImage {

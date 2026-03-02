@@ -10,7 +10,9 @@ part 'profile_providers.g.dart';
 
 @riverpod
 FirebaseProfileDatasource profileDatasource(Ref ref) =>
-    FirebaseProfileDatasource(firestore: ref.watch(firestoreProvider));
+    FirebaseProfileDatasource(
+      firestore: ref.watch(firestoreProvider),
+    );
 
 @riverpod
 IProfileRepository profileRepository(Ref ref) =>
@@ -24,5 +26,16 @@ GetUserProfile getUserProfileUseCase(Ref ref) =>
 GenerateDeepLink generateDeepLinkUseCase(Ref ref) => const GenerateDeepLink();
 
 @riverpod
+UpdateProfile updateProfileUseCase(Ref ref) =>
+    UpdateProfile(ref.watch(profileRepositoryProvider));
+
+@riverpod
 Future<UserProfile> userProfile(Ref ref, String userId) =>
     ref.watch(getUserProfileUseCaseProvider).call(userId);
+
+/// Returns the last time [userId] changed their avatar, or null if never.
+/// Used by EditProfileScreen to enforce the 7-day cooldown before allowing
+/// the camera button to be tapped.
+@riverpod
+Future<DateTime?> avatarUpdatedAt(Ref ref, String userId) =>
+    ref.watch(profileRepositoryProvider).getAvatarUpdatedAt(userId);

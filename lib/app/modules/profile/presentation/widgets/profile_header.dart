@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
-import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
+import 'package:askme_humg/app/global_widgets/ui/profile_name_row.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -33,22 +33,7 @@ class ProfileHeader extends StatelessWidget {
           ringWidth: 2,
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              name,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            if (isHumgVerified) ...[
-              const SizedBox(width: AppSpacing.xs),
-              const VerifiedBadge(size: 20, inline: true),
-            ],
-          ],
-        ),
+        ProfileNameRow(name: name, isHumgVerified: isHumgVerified),
         if (!isHumgVerified) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(

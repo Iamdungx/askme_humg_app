@@ -67,10 +67,12 @@ dependencies:
   shared_preferences: ^2.5.4
   flutter_svg: ^2.2.3
   path_provider: ^2.1.5
+  image_picker: ^1.1.2
   app_links: ^7.0.0
   firebase_installations: ^16.3.6
   package_info_plus: ^9.0.0
   mailer: ^7.1.0
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -97,6 +99,7 @@ flutter:
     - .env
     - assets/icon/
     - assets/images/
+    - assets/images/shares/
     - assets/svgs/
   fonts:
     - family: Inter

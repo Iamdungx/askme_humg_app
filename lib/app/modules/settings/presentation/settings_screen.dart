@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/app/core/values/app_colors.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
 import 'package:askme_humg/app/core/values/app_typography.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/settings/data/cache_service.dart';
@@ -40,34 +40,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      logger.w('Could not launch $url');
-    }
-  }
-
   Future<void> _signOut() async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.settingsSignOut),
-        content: Text(l10n.settingsSignOutConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            child: Text(l10n.settingsSignOut),
-          ),
-        ],
-      ),
+      builder: (ctx) => _SignOutSheet(l10n: l10n),
     );
     if (confirmed != true || !mounted) return;
     await ref.read(authProvider.notifier).signOut();
@@ -259,14 +236,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SettingsTile(
             icon: LucideIcons.fileText,
             label: l10n.settingsTermsOfService,
-            trailing: Icon(LucideIcons.externalLink, size: AppIconSize.sm, color: cs.outline),
-            onTap: () => _launchUrl(AppUrls.terms),
+            trailing: Text(
+              l10n.settingsNotifComingSoon,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
+              ),
+            ),
+            onTap: null,
           ),
           _SettingsTile(
             icon: LucideIcons.shield,
             label: l10n.settingsPrivacyPolicy,
-            trailing: Icon(LucideIcons.externalLink, size: AppIconSize.sm, color: cs.outline),
-            onTap: () => _launchUrl(AppUrls.privacy),
+            trailing: Text(
+              l10n.settingsNotifComingSoon,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
+              ),
+            ),
+            onTap: null,
           ),
 
           // ── SIGN OUT ──────────────────────────────────────────────────
@@ -427,6 +414,87 @@ class _SettingsTile extends StatelessWidget {
       onTap: onTap,
       enabled: onTap != null ||
           (trailing is Switch && (trailing as Switch).onChanged != null),
+    );
+  }
+}
+
+class _SignOutSheet extends StatelessWidget {
+  const _SignOutSheet({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.xxl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppSemanticColors.error.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              LucideIcons.logOut,
+              size: 24,
+              color: AppSemanticColors.error,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            l10n.settingsSignOut,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.settingsSignOutConfirm,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: Text(l10n.commonCancel),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppSemanticColors.error,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: Text(l10n.settingsSignOut),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
