@@ -65,3 +65,12 @@ class OtpMaxAttemptsException extends AppException {
 class OtpSendException extends AppException {
   const OtpSendException(super.message);
 }
+
+/// Thrown when the user tries to change their avatar within the 7-day cooldown window.
+class AvatarCooldownException extends AppException {
+  const AvatarCooldownException(this.nextAllowedAt)
+      : super('Avatar can only be changed once every 7 days');
+
+  /// The earliest DateTime the user may change their avatar again.
+  final DateTime nextAllowedAt;
+}

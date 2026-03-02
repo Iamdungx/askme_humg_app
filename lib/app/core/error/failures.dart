@@ -64,3 +64,12 @@ final class OtpMaxAttemptsFailure extends Failure {
 final class OtpSendFailure extends Failure {
   const OtpSendFailure(super.message);
 }
+
+/// Surfaced to the presentation layer when the avatar 7-day cooldown is active.
+final class AvatarCooldownFailure extends Failure {
+  const AvatarCooldownFailure(this.nextAllowedAt)
+      : super('Avatar can only be changed once every 7 days');
+
+  /// The earliest DateTime the user may change their avatar again.
+  final DateTime nextAllowedAt;
+}
