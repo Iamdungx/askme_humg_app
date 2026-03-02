@@ -11,6 +11,7 @@ class SubmitReport {
     required String reportedBy,
     required String reason,
     required String content,
+    String? parentAnswerId,
   }) =>
       _repo.submitReport(
         targetId: targetId,
@@ -18,6 +19,7 @@ class SubmitReport {
         reportedBy: reportedBy,
         reason: reason,
         content: content,
+        parentAnswerId: parentAnswerId,
       );
 }
 

@@ -108,6 +108,17 @@ GoRouter appRouter(Ref ref) {
     debugLogDiagnostics: kDebugMode,
     refreshListenable: notifier,
     redirect: notifier.redirect,
+    onException: (context, state, router) {
+      final uri = Uri.tryParse(state.uri.toString());
+      if (uri != null) {
+        final path = _resolveDeepLinkPath(uri);
+        if (path != null) {
+          router.go(path);
+          return;
+        }
+      }
+      router.go(AppRoutes.feed);
+    },
     routes: [
       // ── Outside shell (full-screen, no bottom nav) ──────────────────────
       GoRoute(
@@ -215,9 +226,6 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
     ],
-    errorBuilder: (_, state) => Scaffold(
-      body: Center(child: Text('Page not found: ${state.error}')),
-    ),
   );
 
   _initDeepLinks(router, ref);
@@ -248,7 +256,9 @@ void _initDeepLinks(GoRouter router, Ref ref) {
     if (initialUri != null) {
       logger.i('Deep link cold-start: $initialUri');
       final path = _resolveDeepLinkPath(initialUri);
-      if (path != null) router.go(path);
+      if (path != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => router.go(path));
+      }
     }
   }).catchError((Object e, StackTrace s) {
     logger.w('Failed to get initial deep link', error: e, stackTrace: s);

@@ -95,6 +95,7 @@ class CommentTile extends ConsumerWidget {
                         targetId: comment.commentId,
                         targetType: 'comment',
                         content: comment.content,
+                        parentAnswerId: comment.answerId,
                       ),
                     ),
                 ],

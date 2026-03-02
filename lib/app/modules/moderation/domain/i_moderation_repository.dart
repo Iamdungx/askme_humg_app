@@ -9,6 +9,7 @@ abstract interface class IModerationRepository {
     required String reportedBy,
     required String reason,
     required String content,
+    String? parentAnswerId,
   });
 
   Stream<List<Report>> getPendingReports();

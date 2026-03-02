@@ -9,6 +9,7 @@ Future<void> showReportSheet(
   required String targetId,
   required String targetType,
   required String content,
+  String? parentAnswerId,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -19,6 +20,7 @@ Future<void> showReportSheet(
       targetId: targetId,
       targetType: targetType,
       content: content,
+      parentAnswerId: parentAnswerId,
     ),
   );
 }

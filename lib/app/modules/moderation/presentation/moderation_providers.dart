@@ -59,6 +59,7 @@ class ReportNotifier extends _$ReportNotifier {
     required String targetType,
     required String reason,
     required String content,
+    String? parentAnswerId,
   }) async {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (uid == null) return;
@@ -70,6 +71,7 @@ class ReportNotifier extends _$ReportNotifier {
             reportedBy: uid,
             reason: reason,
             content: content,
+            parentAnswerId: parentAnswerId,
           ),
     );
   }
