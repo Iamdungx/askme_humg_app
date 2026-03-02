@@ -26,6 +26,8 @@
   "@commonDelete": { "description": "Generic delete button label" },
   "commonShare": "Share",
   "@commonShare": { "description": "Generic share button label" },
+  "commonFeatureComingSoon": "This feature is coming soon",
+  "@commonFeatureComingSoon": { "description": "Snackbar shown when a feature is not yet implemented" },
   "commonLoading": "Loading...",
   "@commonLoading": { "description": "Generic loading indicator text" },
   "commonEmpty": "No data",

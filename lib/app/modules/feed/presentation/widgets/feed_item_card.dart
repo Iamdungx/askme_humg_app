@@ -213,7 +213,7 @@ class FeedItemCard extends ConsumerWidget {
   void _onShare(BuildContext context, AppLocalizations l10n) {
     // TODO(UC-2.1): Implement share via share_plus package
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.commonShare)),
+      SnackBar(content: Text(l10n.commonFeatureComingSoon)),
     );
   }
 }

@@ -1,6 +1,6 @@
 # AskmeHUMG – Tech Stack
 
-> **Flutter SDK:** 3.35.7 | **Dart SDK:** >=3.10.3 | **Updated:** 01-03-2026
+> **Flutter SDK:** 3.35.7 | **Dart SDK:** >=3.10.3 | **Updated:** 02-03-2026 — v1.0.0
 
 ---
 

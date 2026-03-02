@@ -1,10 +1,20 @@
 # AskmeHUMG — Backlog
 
-> Các tính năng và cải tiến chưa implement trong v1, sắp xếp theo mức độ ưu tiên.
+> Các tính năng và cải tiến chưa implement trong v1.0.0, sắp xếp theo mức độ ưu tiên.
+>
+> **v1.0.0 released:** 02-03-2026
 
 ---
 
-## 🔴 P1 — Cần thiết cho production
+## ✅ Đã hoàn thành trong v1.0.0
+
+| Item | Ghi chú |
+|---|---|
+| Edit Profile (BACKLOG-02) | Avatar upload Firebase Storage (cooldown 7 ngày) + display name edit — ✅ ship |
+
+---
+
+## 🔴 P1 — Cần thiết cho production (v1.1)
 
 ### BACKLOG-01: App Check + Cloud Function Rate Limiting (UC-3.1)
 
@@ -34,25 +44,13 @@
 
 ---
 
-## 🟡 P2 — Quan trọng cho UX
-
-### BACKLOG-02: Edit Profile (FR-10)
-
-**Scope:**
-- `/me/edit` screen hiện là placeholder (`EditProfileScreen`)
-- Implement: đổi display name, upload avatar mới lên Firebase Storage, cập nhật `users` doc
-
-**Files cần thay đổi:**
-- `lib/app/modules/settings/presentation/edit_profile_screen.dart`
-- Thêm `uploadAvatar` method vào profile datasource/repository
-
----
+## 🟡 P2 — Quan trọng cho UX (v1.1)
 
 ### BACKLOG-03: `showRealName` persist lên Firestore (FR-10)
 
 **Scope:**
-- Toggle "Hiển thị tên thật" trong Settings hiện chỉ lưu in-memory qua `showRealNameProvider`
-- Cần persist lên `users.showRealName` Firestore field
+- Toggle "Hiển thị tên thật" trong Settings hiện chỉ lưu local qua `SharedPreferences`
+- Cần persist lên `users.showRealName` Firestore field để đồng bộ đa thiết bị
 - Feed (`FeedItemCard`) và Profile (`ProfileHeader`) cần đọc field này để ẩn/hiện tên thật
 
 **Files cần thay đổi:**
@@ -62,7 +60,19 @@
 
 ---
 
-## 🟢 P3 — Nice-to-have
+### BACKLOG-06: "View All Answers" trên Profile (FR-10)
+
+**Scope:**
+- Button "Xem tất cả" trong `_RecentAnswersSection` hiện `onPressed: () {}`
+- Tạo màn hình `UserAnswersScreen` hiển thị toàn bộ published answers của một user với cursor pagination
+
+**Files cần thay đổi:**
+- `lib/app/modules/profile/presentation/screens/` — thêm `user_answers_screen.dart`
+- `lib/config/router.dart` — thêm route `/user/:userId/answers`
+
+---
+
+## 🟢 P3 — Nice-to-have (v2.0)
 
 ### BACKLOG-04: Feed Share Button (FR-11)
 
@@ -84,14 +94,6 @@
 - Lưu preference vào `SharedPreferences`
 
 **Prerequisite:** Blaze plan (BACKLOG-01).
-
----
-
-### BACKLOG-06: "View All Answers" trên Profile (FR-10)
-
-**Scope:**
-- Button "Xem tất cả" trong `_RecentAnswersSection` hiện `onPressed: () {}`
-- Tạo màn hình `UserAnswersScreen` hiển thị toàn bộ published answers của một user với pagination
 
 ---
 

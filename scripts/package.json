@@ -1,0 +1,17 @@
+{
+  "name": "askme-humg-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "seed": "GOOGLE_APPLICATION_CREDENTIALS=$(node -e \"const p=require('path'),os=require('os'),fs=require('fs');const cfg=JSON.parse(fs.readFileSync(p.join(os.homedir(),'.config/configstore/firebase-tools.json'),'utf8'));process.stdout.write('')\") ts-node seed.ts",
+    "seed:dev": "ts-node seed.ts"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
