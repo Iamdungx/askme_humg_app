@@ -28,6 +28,8 @@
   "@commonDelete": { "description": "Nút xóa chung" },
   "commonShare": "Chia sẻ",
   "@commonShare": { "description": "Nút chia sẻ chung" },
+  "commonFeatureComingSoon": "Tính năng đang được phát triển",
+  "@commonFeatureComingSoon": { "description": "Snackbar hiển thị khi tính năng chưa được triển khai" },
   "commonLoading": "Đang tải...",
   "@commonLoading": { "description": "Trạng thái đang tải" },
   "commonEmpty": "Không có dữ liệu",

@@ -1,6 +1,8 @@
 # AskmeHUMG — Tổng quan dự án
 
 > Đọc file này trước khi bắt đầu làm bất cứ thứ gì.
+>
+> **🏷️ Tag:** `v1.0.0` — Released 02-03-2026
 
 ---
 
@@ -15,10 +17,10 @@
 
 ---
 
-## Trạng thái hiện tại
+## Trạng thái hiện tại — v1.0.0 ✅ RELEASED
 
 ```
-Tổng tiến độ: ~97% █████████▉
+Tổng tiến độ: 100% ██████████  (v1.0.0 — 02-03-2026)
 ```
 
 | Hạng mục | Trạng thái |
@@ -42,9 +44,11 @@ Tổng tiến độ: ~97% █████████▉
 | Like / Comment + isHumgVerified guard | ✅ Xong |
 | Bottom Navigation Shell (ShellRoute, 4 tabs) | ✅ Xong |
 | Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
-| Edit Profile Screen (placeholder, full impl → BACKLOG-02) | ✅ Xong (placeholder) |
+| Edit Profile Screen (avatar upload + display name) | ✅ Xong |
 | Kiểm duyệt / báo cáo (UC-5.1, UC-5.2) | ✅ Xong |
-| App Check + Cloud Function rate limiting (UC-3.1) | ⚠️ Partial — chờ Blaze plan |
+| App Check + Cloud Function rate limiting (UC-3.1) | ⚠️ Deferred → v1.1 (chờ Blaze plan) |
+
+> **Known limitation:** Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan. Client hiện ghi thẳng vào Firestore với Firestore Security Rules là lớp bảo vệ. Xem `BACKLOG.md` → BACKLOG-01.
 
 ---
 
@@ -101,17 +105,12 @@ Feed công khai, like/unlike, bình luận đã implement. Composite Firestore i
 - Badge đỏ trên Inbox tab hiển thị số câu hỏi chưa trả lời
 - `SettingsScreen` (`/settings`):
   - Account: Edit Profile, HUMG verify status, Show real name toggle
-  - Notifications: placeholder với `// TODO(v2)` — chờ FCM
+  - Notifications: placeholder — chờ FCM (BACKLOG-05)
   - App: Language picker (vi/en/ja), Theme picker (light/dark/system), Clear cache
   - About: Version (PackageInfo), Terms, Privacy
   - Sign out với confirmation dialog
-- `EditProfileScreen` (`/me/edit`) — placeholder (avatar + name read-only), `// TODO(v2)` upload
-- Profile tab: thêm nút ✏️ Edit trên AppBar của owner
-
-**⚠️ TODO v2 (Version 2):**
-- FCM push notifications (cần `firebase_messaging` package)
-- Avatar upload lên Firebase Storage
-- Lưu `showRealName` vào Firestore `users` doc
+- `EditProfileScreen` (`/me/edit`) — avatar upload (Firebase Storage, cooldown 7 ngày) + display name edit
+- Profile tab: nút ✏️ Edit trên AppBar của owner
 
 ### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2) ✅ XONG
 
@@ -227,54 +226,30 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ---
 
-## Bước tiếp theo ngay bây giờ
+## v1.0.0 — Release Notes (02-03-2026)
 
 ```
-Phase 5 đã xong. Version 1 gần hoàn thiện.
-Còn lại: các items trong BACKLOG + 1 bug cần sửa.
+Tất cả 5 Phase đã hoàn thành. App đã sẵn sàng cho TestFlight / Play Internal Testing.
 ```
 
-### Các việc cần làm để hoàn thiện v1
+### Tính năng đã ship trong v1.0.0
+
+| Phase | Feature | UC |
+|---|---|---|
+| 0 | Firebase init, error/failure classes, Riverpod providers | — |
+| 1 | Google Sign-In, OTP HUMG verify, Logout, auth guard | UC-1.1, UC-1.2, UC-1.3 |
+| 2 | Profile page, deep link, QR share card, avatar upload | UC-2.1, UC-2.2 |
+| 3 | Inbox (2 tabs), Answer compose, Question submission | UC-3.1, UC-3.2, UC-3.3 |
+| 4 | Public Feed, Like/Unlike, Comments, verified badge | UC-4.1, UC-4.2, UC-4.3 |
+| 4.5 | Bottom nav shell, Settings (theme/lang/profile edit) | — |
+| 5 | Report content, Admin dashboard, resolve reports | UC-5.1, UC-5.2 |
+
+### Các việc cần làm cho v1.1+
 
 Xem `.docs/BACKLOG.md` để biết chi tiết đầy đủ.
 
 **P1 — cần cho production:** BACKLOG-01 (App Check + Cloud Function — chờ Blaze plan)
 
-**P2 — UX quan trọng:** BACKLOG-02 (Edit Profile), BACKLOG-03 (`showRealName` persist)
+**P2 — UX quan trọng:** BACKLOG-03 (`showRealName` persist Firestore), BACKLOG-06 (View All Answers)
 
-**P3 — Nice-to-have:** BACKLOG-04 (Feed Share), BACKLOG-05 (Push Notifications), BACKLOG-06 (View All Answers), BACKLOG-07 (Like Optimistic UI)
-
----
-
-### Phase 5 — Kiểm duyệt (UC-5.1, UC-5.2)
-
-1. Đọc `.docs/use_case/UC-5.1_report_content.md`
-2. Đọc `.docs/use_case/UC-5.2_admin_moderate.md`
-3. Domain layer: `Report` entity + `IReportRepository` + 2 use cases
-4. Data layer: `ReportModel` + `FirebaseReportDatasource` + `ReportRepositoryImpl`
-5. Presentation:
-   - `ReportBottomSheet` — hiển thị từ FeedScreen (3 chấm menu trên mỗi card)
-   - `AdminDashboardScreen` (`/admin`) — danh sách reports, approve/reject
-6. Security rules đã có trong `firestore.rules`; đảm bảo `reports` chỉ admin đọc được
-
-### Pre-Phase 5 — Fixes đã apply ✅
-
-| File | Fix | Mức độ |
-|---|---|---|
-| `config/app_routes.dart` | Thêm `/me/edit` vào `protectedLocationPrefixes` | P1-Security ✅ |
-| `profile/data/profile_repository_impl.dart` | Thêm try/catch → `FirestoreFailure` / `UnknownFailure` | P1-Architecture ✅ |
-| `profile/presentation/screens/profile_screen.dart` | Check `FirestoreFailure` thay vì `FirestoreException` | P1-Architecture ✅ |
-| `global_widgets/ui/anonymous_badge.dart` | Label nullable, fallback `l10n.anonymousBadgeLabel` | Minor ✅ |
-| `auth/presentation/auth_providers.dart` | `authStateProvider` thêm `keepAlive: true` | Minor ✅ |
-| `feed/presentation/feed_providers.dart` | `FeedNotifier.build()` dùng `ref.watch` | Minor ✅ |
-| `qna_core/data/qna_repository_impl.dart` | Exception mapping đầy đủ (đã fix Phase 3) | HIGH ✅ |
-| `profile/presentation/widgets/ask_question_sheet.dart` | Widget inline — không còn Navigator.pop() issue | MEDIUM ✅ |
-| `global_widgets/states/loading_shimmer.dart` | Implement đầy đủ 172 dòng skeleton | MEDIUM ✅ |
-
-**⚠️ Còn tồn đọng (không blocking):**
-- UC-3.1 App Check: Cloud Function `submitQuestion` chưa deploy — chờ Blaze plan (thẻ tín dụng)
-
-> **Lưu ý quan trọng trước khi test end-to-end:**
-> - UC-3.1 (gửi câu hỏi ẩn danh): Cloud Function `submitQuestion` chưa deploy do chưa upgrade Blaze plan
-> - UC-1.3 OTP + `isHumgVerified` guard: **Đã implement** — `VerifyHumgScreen` + router redirect `/verify-humg` đã hoạt động
-> - Provider naming bug trong moderation module cần fix trước khi build production
+**P3 — Nice-to-have:** BACKLOG-04 (Feed Share), BACKLOG-05 (Push Notifications / FCM), BACKLOG-07 (Like Optimistic UI)

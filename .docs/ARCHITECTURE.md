@@ -3,7 +3,7 @@
 > **Pattern:** Feature-First Clean Architecture
 > **State Management:** Riverpod (`riverpod_annotation` codegen)
 > **Routing:** GoRouter (Riverpod provider, `keepAlive: true`)
-> **Updated:** 27-02-2026
+> **Updated:** 02-03-2026 — v1.0.0
 
 ---
 
@@ -104,66 +104,80 @@ lib/
         │       └── screens/
         │           └── login_screen.dart
         │
-        ├── profile/                         # UC-2.1, UC-2.2 (pending)
-        │   ├── domain/
-        │   │   ├── user_profile.dart
-        │   │   ├── i_profile_repository.dart
-        │   │   └── profile_use_cases.dart   # GetUserProfile, GenerateDeepLink
-        │   ├── data/
-        │   │   ├── user_profile_model.dart
-        │   │   ├── profile_datasource.dart
-        │   │   └── profile_repository_impl.dart
-        │   └── presentation/
-        │       ├── profile_providers.dart
-        │       └── screens/
-        │           └── profile_screen.dart
-        │
-        ├── qna_core/                        # UC-3.1, UC-3.2, UC-3.3 (pending)
-        │   ├── domain/
-        │   │   ├── question.dart
-        │   │   ├── answer.dart
-        │   │   ├── i_qna_repository.dart
-        │   │   └── qna_use_cases.dart       # SubmitQuestion, GetInboxQuestions, AnswerQuestion
-        │   ├── data/
-        │   │   ├── question_model.dart
-        │   │   ├── answer_model.dart
-        │   │   ├── qna_datasource.dart
-        │   │   └── qna_repository_impl.dart
-        │   └── presentation/
-        │       ├── qna_providers.dart
-        │       └── screens/
-        │           ├── inbox_screen.dart
-        │           └── answer_compose_screen.dart
-        │
-        ├── feed/                            # UC-4.1, UC-4.2, UC-4.3 (pending)
-        │   ├── domain/
-        │   │   ├── feed_item.dart
-        │   │   ├── comment.dart
-        │   │   ├── i_feed_repository.dart
-        │   │   └── feed_use_cases.dart      # GetPublicFeed, ToggleLike, PostComment
-        │   ├── data/
-        │   │   ├── feed_item_model.dart
-        │   │   ├── comment_model.dart
-        │   │   ├── feed_datasource.dart
-        │   │   └── feed_repository_impl.dart
-        │   └── presentation/
-        │       ├── feed_providers.dart
-        │       └── screens/
-        │           └── feed_screen.dart
-        │
-        └── moderation/                      # UC-5.1, UC-5.2 (pending)
-            ├── domain/
-            │   ├── report.dart
-            │   ├── i_moderation_repository.dart
-            │   └── moderation_use_cases.dart  # SubmitReport, ResolveReport
-            ├── data/
-            │   ├── report_model.dart
-            │   ├── moderation_datasource.dart
-            │   └── moderation_repository_impl.dart
-            └── presentation/
-                ├── moderation_providers.dart
-                └── screens/
-                    └── admin_dashboard_screen.dart
+        ├── profile/                         # UC-2.1, UC-2.2
+│   ├── domain/
+│   │   ├── user_profile.dart
+│   │   ├── i_profile_repository.dart
+│   │   └── profile_use_cases.dart   # GetUserProfile, GenerateDeepLink, UpdateProfile
+│   ├── data/
+│   │   ├── user_profile_model.dart
+│   │   ├── profile_datasource.dart
+│   │   └── profile_repository_impl.dart
+│   └── presentation/
+│       ├── profile_providers.dart
+│       ├── screens/
+│       │   └── profile_screen.dart
+│       └── widgets/
+│           ├── ask_question_sheet.dart
+│           ├── share_card_widget.dart
+│           └── share_card_style.dart
+│
+├── qna_core/                        # UC-3.1, UC-3.2, UC-3.3
+│   ├── domain/
+│   │   ├── question.dart
+│   │   ├── answer.dart
+│   │   ├── i_qna_repository.dart
+│   │   └── qna_use_cases.dart       # SubmitQuestion, GetInboxQuestions, AnswerQuestion, DeleteQuestion
+│   ├── data/
+│   │   ├── question_model.dart
+│   │   ├── answer_model.dart
+│   │   ├── qna_datasource.dart
+│   │   └── qna_repository_impl.dart
+│   └── presentation/
+│       ├── qna_providers.dart
+│       └── screens/
+│           ├── inbox_screen.dart
+│           └── answer_compose_screen.dart
+│
+├── feed/                            # UC-4.1, UC-4.2, UC-4.3
+│   ├── domain/
+│   │   ├── feed_item.dart
+│   │   ├── comment.dart
+│   │   ├── i_feed_repository.dart
+│   │   └── feed_use_cases.dart      # GetPublicFeed, ToggleLike, PostComment, DeleteComment
+│   ├── data/
+│   │   ├── feed_item_model.dart
+│   │   ├── comment_model.dart
+│   │   ├── feed_datasource.dart
+│   │   └── feed_repository_impl.dart
+│   └── presentation/
+│       ├── feed_providers.dart
+│       ├── screens/
+│       │   └── feed_screen.dart
+│       └── widgets/
+│           ├── feed_item_card.dart
+│           └── comment_tile.dart
+│
+├── settings/                        # Phase 4.5
+│   └── presentation/
+│       ├── settings_screen.dart
+│       └── edit_profile_screen.dart  # avatar upload (Storage, cooldown 7d) + name edit
+│
+└── moderation/                      # UC-5.1, UC-5.2
+    ├── domain/
+    │   ├── report.dart
+    │   ├── i_moderation_repository.dart
+    │   └── moderation_use_cases.dart  # SubmitReport, GetPendingReports, ResolveReport
+    ├── data/
+    │   ├── report_model.dart
+    │   ├── moderation_datasource.dart
+    │   └── moderation_repository_impl.dart
+    └── presentation/
+        ├── moderation_providers.dart
+        ├── screens/
+        │   └── admin_dashboard_screen.dart
+        └── widgets/
+            └── report_reason_sheet.dart
 ```
 
 ---
