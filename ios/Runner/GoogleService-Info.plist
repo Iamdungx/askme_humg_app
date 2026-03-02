@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl.apps.googleusercontent.com</string>
+	<string>375989370735-377qe4ht26792jfpk8dfvnto9c9t5313.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl</string>
+	<string>com.googleusercontent.apps.375989370735-377qe4ht26792jfpk8dfvnto9c9t5313</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>375989370735-fqfv97e77vsoloophh6vso9grmttt7iv.apps.googleusercontent.com</string>
+	<string>375989370735-890gqof73k2c8gerl2thba22miqvbofk.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBd55GxswBHP4WZn5N5KUhaZ6j_77cC_2o</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.humg.askmehumg</string>
+	<string>com.askmehumg.app</string>
 	<key>PROJECT_ID</key>
 	<string>askme-humg-app</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:375989370735:ios:6159d5c6ed518f7b68329a</string>
+	<string>1:375989370735:ios:ea5fe4976a07d96368329a</string>
 </dict>
 </plist>

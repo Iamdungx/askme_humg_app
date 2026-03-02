@@ -29,14 +29,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.375989370735-vjs11ht7t8l1dfg7su6sakesgrjtlucl</string>
+				<string>com.googleusercontent.apps.375989370735-377qe4ht26792jfpk8dfvnto9c9t5313</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.humg.askmehumg</string>
+			<string>com.askmehumg.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>askme</string>
