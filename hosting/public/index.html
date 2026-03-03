@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,25 +9,31 @@
   <link rel="icon" type="image/png" href="/app_icon.png">
 
   <!-- Open Graph / iMessage / Zalo / Facebook link preview -->
-  <meta property="og:type"        content="website">
-  <meta property="og:site_name"   content="AskMe HUMG">
-  <meta property="og:title"       content="AskMe HUMG">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AskMe HUMG">
+  <meta property="og:title" content="AskMe HUMG">
   <meta property="og:description" content="Gửi câu hỏi ẩn danh đến bạn bè. Chia sẻ câu trả lời với cộng đồng HUMG.">
-  <meta property="og:image"       content="https://askme-humg-app.web.app/app_icon.png">
-  <meta property="og:image:width"  content="512">
+  <meta property="og:image" content="https://askme-humg-app.web.app/app_icon.png">
+  <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
-  <meta property="og:url"         content="https://askme-humg-app.web.app/">
-  <meta property="og:locale"      content="vi_VN">
+  <meta property="og:url" content="https://askme-humg-app.web.app/">
+  <meta property="og:locale" content="vi_VN">
 
   <!-- Twitter Card -->
-  <meta name="twitter:card"        content="summary">
-  <meta name="twitter:title"       content="AskMe HUMG">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AskMe HUMG">
   <meta name="twitter:description" content="Gửi câu hỏi ẩn danh đến bạn bè. Chia sẻ câu trả lời với cộng đồng HUMG.">
-  <meta name="twitter:image"       content="https://askme-humg-app.web.app/app_icon.png">
+  <meta name="twitter:image" content="https://askme-humg-app.web.app/app_icon.png">
 
   <!-- iOS TestFlight banner (no App Store ID yet — using TestFlight link instead) -->
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       min-height: 100svh;
@@ -42,13 +49,13 @@
 
     .card {
       background: #ffffff;
-      border: 1px solid rgba(0,0,0,0.08);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 28px;
       padding: 48px 40px 44px;
       max-width: 400px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     }
 
     .logo {
@@ -57,7 +64,7 @@
       border-radius: 24px;
       object-fit: cover;
       margin-bottom: 28px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
 
     h1 {
@@ -71,19 +78,19 @@
     .tagline {
       font-size: 15px;
       line-height: 1.65;
-      color: rgba(0,0,0,0.45);
+      color: rgba(0, 0, 0, 0.45);
       margin-bottom: 36px;
     }
 
     .divider {
       height: 1px;
-      background: rgba(0,0,0,0.08);
+      background: rgba(0, 0, 0, 0.08);
       margin-bottom: 28px;
     }
 
     .store-label {
       font-size: 12px;
-      color: rgba(0,0,0,0.35);
+      color: rgba(0, 0, 0, 0.35);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 16px;
@@ -101,7 +108,7 @@
       align-items: center;
       gap: 8px;
       background: #f5f5f7;
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 12px;
       padding: 10px 18px;
       font-size: 14px;
@@ -113,10 +120,12 @@
 
     .badge:hover {
       background: #e8e8ed;
-      border-color: rgba(0,0,0,0.18);
+      border-color: rgba(0, 0, 0, 0.18);
     }
 
-    .badge svg { flex-shrink: 0; }
+    .badge svg {
+      flex-shrink: 0;
+    }
 
     .badge-disabled {
       opacity: 0.45;
@@ -127,7 +136,7 @@
     .badge-soon {
       font-size: 10px;
       background: #e8e8ed;
-      color: rgba(0,0,0,0.45);
+      color: rgba(0, 0, 0, 0.45);
       border-radius: 4px;
       padding: 1px 5px;
       margin-left: 4px;
@@ -138,10 +147,11 @@
     footer {
       margin-top: 32px;
       font-size: 12px;
-      color: rgba(0,0,0,0.3);
+      color: rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
+
 <body>
   <div class="card">
     <img src="/app_icon.png" alt="AskMe HUMG" class="logo">
@@ -154,16 +164,28 @@
     <div class="badges">
       <a class="badge" href="https://testflight.apple.com/join/YGYs2VTb" target="_blank" rel="noopener">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          <path
+            d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
         </svg>
         TestFlight (iOS)
       </a>
+      <a class="badge" href="https://drive.google.com/file/d/1g-VzXTiRwM8pB74eL0Dkqv4kHN55JCUE/view?usp=sharing"
+        target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M3.18 23.76c.3.17.64.22.99.14l12.12-6.99-2.54-2.54-10.57 9.39zm-1.7-20.1C1.18 4 1 4.5 1 5.14v13.72c0 .64.18 1.14.49 1.48l.08.07 7.69-7.69v-.18L1.56 3.59l-.08.07zM20.49 10.46l-2.33-1.35-2.82 2.82 2.82 2.82 2.35-1.35c.67-.39.67-1.02-.02-1.94zM4.17.24L16.29 7.23l-2.54 2.54L3.18.38C3.53.3 3.87.35 4.17.24z" />
+        </svg>
+        Android APK (beta)
+      </a>
+      <!--
       <span class="badge badge-disabled">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3.18 23.76c.3.17.64.22.99.14l12.12-6.99-2.54-2.54-10.57 9.39zm-1.7-20.1C1.18 4 1 4.5 1 5.14v13.72c0 .64.18 1.14.49 1.48l.08.07 7.69-7.69v-.18L1.56 3.59l-.08.07zM20.49 10.46l-2.33-1.35-2.82 2.82 2.82 2.82 2.35-1.35c.67-.39.67-1.02-.02-1.94zM4.17.24L16.29 7.23l-2.54 2.54L3.18.38C3.53.3 3.87.35 4.17.24z"/>
+          <path
+            d="M3.18 23.76c.3.17.64.22.99.14l12.12-6.99-2.54-2.54-10.57 9.39zm-1.7-20.1C1.18 4 1 4.5 1 5.14v13.72c0 .64.18 1.14.49 1.48l.08.07 7.69-7.69v-.18L1.56 3.59l-.08.07zM20.49 10.46l-2.33-1.35-2.82 2.82 2.82 2.82 2.35-1.35c.67-.39.67-1.02-.02-1.94zM4.17.24L16.29 7.23l-2.54 2.54L3.18.38C3.53.3 3.87.35 4.17.24z" />
         </svg>
         Google Play <span class="badge-soon">Sắp ra mắt</span>
       </span>
+      -->
     </div>
   </div>
 
@@ -206,4 +228,5 @@
     }
   </script>
 </body>
+
 </html>
