@@ -83,3 +83,6 @@ scripts/clear.ts
 functions/node_modules/
 functions/lib/
 firepit-log.txt
+
+# Flutter iOS build artifacts
+ios/build/
