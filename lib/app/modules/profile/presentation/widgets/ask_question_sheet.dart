@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
-import 'package:askme_humg/app/core/utils/validator.dart';
+import 'package:askme_humg/app/core/network/firebase_providers.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/ui/anonymous_badge.dart';
 import 'package:askme_humg/app/global_widgets/ui/app_button.dart';
 import 'package:askme_humg/app/global_widgets/input/app_text_input.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
+import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
+import 'package:askme_humg/app/core/utils/validator.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 /// UC-3.1 — Anonymous question submission with App Check + Cloud Function.
@@ -24,6 +26,8 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
   final _controller = TextEditingController();
   int _charCount = 0;
   String? _validationError;
+  String? _lastSubmittedToUserId;
+  String? _lastSubmittedContent;
 
   static const int _maxChars = 300;
 
@@ -53,11 +57,17 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
     ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
         if (!context.mounted) return;
-        // Widget is inline (not a modal) — reset form instead of popping.
+        final toUserId = _lastSubmittedToUserId;
+        final content = _lastSubmittedContent ?? '';
+        if (toUserId != null && content.isNotEmpty) {
+          _triggerNotifyNewQuestion(ref, toUserId, content);
+        }
         _controller.clear();
         setState(() {
           _charCount = 0;
           _validationError = null;
+          _lastSubmittedToUserId = null;
+          _lastSubmittedContent = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.questionSubmitSuccess)),
@@ -137,9 +147,22 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
       return;
     }
 
+    setState(() {
+      _lastSubmittedToUserId = widget.toUserId;
+      _lastSubmittedContent = content;
+    });
     await ref.read(submitQuestionProvider.notifier).submit(
       toUserId: widget.toUserId,
       content: content,
     );
+  }
+
+  Future<void> _triggerNotifyNewQuestion(WidgetRef ref, String toUserId, String content) async {
+    final client = ref.read(notifyWebhookClientProvider);
+    if (!client.isAvailable) return;
+    final auth = ref.read(firebaseAuthProvider);
+    final token = await auth.currentUser?.getIdToken(true);
+    if (token == null) return;
+    await client.sendNewQuestion(idToken: token, toUserId: toUserId, content: content);
   }
 }

@@ -135,6 +135,23 @@ class FirebaseProfileDatasource {
     return bytes;
   }
 
+  /// Cập nhật preference thông báo (webhook OneSignal đọc từ đây khi chưa có Blaze).
+  Future<void> updateNotificationPrefs({
+    required String userId,
+    required bool notifNewQuestion,
+    required bool notifNewComment,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'notifNewQuestion': notifNewQuestion,
+        'notifNewComment': notifNewComment,
+      });
+    } on FirebaseException catch (e, s) {
+      logger.e('updateNotificationPrefs failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore update failed');
+    }
+  }
+
   /// Returns the DateTime when the user last changed their avatar,
   /// or null if they have never changed it.
   Future<DateTime?> getAvatarUpdatedAt(String userId) async {

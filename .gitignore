@@ -86,3 +86,9 @@ firepit-log.txt
 
 # Flutter iOS build artifacts
 ios/build/
+.vercel
+# Draw.io
+.docs/use_case/diagrams/
+.docs/report_use_cases/
+.docs/report_sequence_diagrams/
+.docs/report_activity_diagrams/

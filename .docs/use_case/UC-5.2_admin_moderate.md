@@ -4,6 +4,7 @@
 > **SRS Reference:** FR-09
 > **Actor:** Admin
 > **Priority:** Medium
+> **Use-case diagram:** [diagrams/UC-5.2_admin_moderate.drawio](./diagrams/UC-5.2_admin_moderate.drawio) (mở bằng draw.io / diagrams.net để chỉnh sửa)
 
 ---
 

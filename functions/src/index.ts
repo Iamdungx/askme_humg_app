@@ -1,11 +1,16 @@
 import * as admin from "firebase-admin";
 import { onRequest } from "firebase-functions/v2/https";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { setGlobalOptions } from "firebase-functions/v2";
 
 admin.initializeApp();
 setGlobalOptions({ region: "asia-southeast1" });
 
 const db = admin.firestore();
+
+// FCM topic names (phải khớp với client: notification_service.dart)
+const topicNewQuestion = (userId: string) => `user_${userId}_questions`;
+const topicNewComment = (userId: string) => `user_${userId}_comments`;
 
 // ---------------------------------------------------------------------------
 // Rate limiting — 5 questions per device per hour (UC-3.1)
@@ -106,5 +111,65 @@ export const submitQuestion = onRequest(
     });
 
     res.status(201).json({ questionId: docRef.id });
+  }
+);
+
+// ---------------------------------------------------------------------------
+// FCM: gửi thông báo khi có câu hỏi mới (client subscribe topic user_<uid>_questions)
+// ---------------------------------------------------------------------------
+export const onQuestionCreated = onDocumentCreated(
+  { document: "questions/{questionId}" },
+  async (event) => {
+    const snap = event?.data;
+    if (!snap) return;
+    const data = snap.data();
+    const toUserId = data?.toUserId as string | undefined;
+    const content = (data?.content as string) ?? "";
+    if (!toUserId) return;
+    const topic = topicNewQuestion(toUserId);
+    const title = "Câu hỏi mới";
+    const body = content.length > 60 ? content.slice(0, 57) + "..." : content;
+    try {
+      await admin.messaging().send({
+        topic,
+        notification: { title, body },
+        android: { priority: "high" as const },
+        apns: { payload: { aps: { sound: "default" } } },
+      });
+    } catch (e) {
+      console.warn("FCM onQuestionCreated failed", e);
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// FCM: gửi thông báo khi có comment mới (client subscribe topic user_<uid>_comments)
+// ---------------------------------------------------------------------------
+export const onCommentCreated = onDocumentCreated(
+  { document: "comments/{commentId}" },
+  async (event) => {
+    const snap = event?.data;
+    if (!snap) return;
+    const data = snap.data();
+    const answerId = data?.answerId as string | undefined;
+    if (!answerId) return;
+    const answerSnap = await db.collection("answers").doc(answerId).get();
+    const answerData = answerSnap.data();
+    const userId = answerData?.userId as string | undefined;
+    if (!userId) return;
+    const topic = topicNewComment(userId);
+    const content = (data?.content as string) ?? "";
+    const title = "Bình luận mới";
+    const body = content.length > 60 ? content.slice(0, 57) + "..." : content;
+    try {
+      await admin.messaging().send({
+        topic,
+        notification: { title, body },
+        android: { priority: "high" as const },
+        apns: { payload: { aps: { sound: "default" } } },
+      });
+    } catch (e) {
+      console.warn("FCM onCommentCreated failed", e);
+    }
   }
 );

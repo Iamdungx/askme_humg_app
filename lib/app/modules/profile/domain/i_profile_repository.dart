@@ -11,4 +11,11 @@ abstract interface class IProfileRepository {
 
   /// Returns the last time the user changed their avatar, or null if never.
   Future<DateTime?> getAvatarUpdatedAt(String userId);
+
+  /// Cập nhật preference thông báo (OneSignal webhook đọc từ Firestore).
+  Future<void> updateNotificationPrefs({
+    required String userId,
+    required bool notifNewQuestion,
+    required bool notifNewComment,
+  });
 }

@@ -8,8 +8,10 @@ import 'package:askme_humg/app/global_widgets/input/app_comment_input.dart';
 import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
+import 'package:askme_humg/app/core/network/firebase_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/comment_tile.dart';
+import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 /// Opens the comments bottom sheet for a given answer.
@@ -172,8 +174,20 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
       return;
     }
 
+    final content = _controller.text;
     _controller.clear();
     setState(() => _error = null);
+
+    await _triggerNotifyNewComment(ref, widget.answerId, content);
+  }
+
+  Future<void> _triggerNotifyNewComment(WidgetRef ref, String answerId, String content) async {
+    final client = ref.read(notifyWebhookClientProvider);
+    if (!client.isAvailable) return;
+    final auth = ref.read(firebaseAuthProvider);
+    final token = await auth.currentUser?.getIdToken(true);
+    if (token == null) return;
+    await client.sendNewComment(idToken: token, answerId: answerId, content: content);
   }
 
   @override

@@ -1,6 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/app/modules/profile/presentation/profile_providers.dart';
 import 'package:askme_humg/app/modules/settings/data/cache_service.dart';
+import 'package:askme_humg/app/modules/settings/data/notification_service.dart';
+import 'package:askme_humg/app/modules/settings/data/notify_webhook_client.dart';
 
 part 'settings_providers.g.dart';
 
@@ -18,6 +21,53 @@ class ShowRealNameNotifier extends _$ShowRealNameNotifier {
 
   void toggle(bool value) => state = value;
 }
+
+// ---------------------------------------------------------------------------
+// Notification preferences — two separate toggles, persisted + FCM topics
+// ---------------------------------------------------------------------------
+
+const _kNotifNewQuestionKey = 'notif_new_question';
+const _kNotifNewCommentKey = 'notif_new_comment';
+
+@Riverpod(keepAlive: true)
+class NotifNewQuestionNotifier extends _$NotifNewQuestionNotifier {
+  @override
+  bool build() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.getBool(_kNotifNewQuestionKey) ?? false;
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kNotifNewQuestionKey, value);
+  }
+}
+
+@Riverpod(keepAlive: true)
+class NotifNewCommentNotifier extends _$NotifNewCommentNotifier {
+  @override
+  bool build() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.getBool(_kNotifNewCommentKey) ?? false;
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kNotifNewCommentKey, value);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// NotificationService — FCM topic subscribe/unsubscribe
+// ---------------------------------------------------------------------------
+
+@riverpod
+NotificationService notificationService(Ref ref) => NotificationService();
+
+@riverpod
+NotifyWebhookClient notifyWebhookClient(Ref ref) => NotifyWebhookClient();
 
 // ---------------------------------------------------------------------------
 // CacheService DI
