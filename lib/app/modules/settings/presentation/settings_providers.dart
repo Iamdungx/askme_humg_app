@@ -64,10 +64,23 @@ class NotifNewCommentNotifier extends _$NotifNewCommentNotifier {
 // ---------------------------------------------------------------------------
 
 @riverpod
-NotificationService notificationService(Ref ref) => NotificationService();
+NotificationService notificationService(Ref ref) => NotificationService.instance;
 
 @riverpod
 NotifyWebhookClient notifyWebhookClient(Ref ref) => NotifyWebhookClient();
+
+@Riverpod(keepAlive: true)
+Future<void> notificationBootstrap(Ref ref) async {
+  await ref.read(notificationServiceProvider).init();
+}
+
+@riverpod
+Stream<Map<String, dynamic>> notificationTaps(Ref ref) =>
+    ref.watch(notificationServiceProvider).tapStream;
+
+@riverpod
+Stream<ForegroundNotificationEvent> notificationForegrounds(Ref ref) =>
+    ref.watch(notificationServiceProvider).foregroundStream;
 
 // ---------------------------------------------------------------------------
 // CacheService DI

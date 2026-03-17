@@ -35,8 +35,22 @@ class NotifyWebhookClient {
           'content': content,
         },
       );
+    } on DioException catch (e, s) {
+      logger.w(
+        'NotifyWebhook sendNewQuestion failed',
+        error: {
+          'url': e.requestOptions.uri.toString(),
+          'status': e.response?.statusCode,
+          'data': e.response?.data,
+        },
+        stackTrace: s,
+      );
     } catch (e, s) {
-      logger.w('NotifyWebhook sendNewQuestion failed', error: e, stackTrace: s);
+      logger.w(
+        'NotifyWebhook sendNewQuestion failed',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 
@@ -58,8 +72,22 @@ class NotifyWebhookClient {
           'content': content,
         },
       );
+    } on DioException catch (e, s) {
+      logger.w(
+        'NotifyWebhook sendNewComment failed',
+        error: {
+          'url': e.requestOptions.uri.toString(),
+          'status': e.response?.statusCode,
+          'data': e.response?.data,
+        },
+        stackTrace: s,
+      );
     } catch (e, s) {
-      logger.w('NotifyWebhook sendNewComment failed', error: e, stackTrace: s);
+      logger.w(
+        'NotifyWebhook sendNewComment failed',
+        error: e,
+        stackTrace: s,
+      );
     }
   }
 }
