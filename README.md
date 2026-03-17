@@ -220,6 +220,33 @@ ProfileRoute(userId: userId).go(context);
 
 ---
 
+## First-run Onboarding & In-app Hints
+
+The app includes a **first-run onboarding** and **one-time tab hints** to help new users understand the value of the app quickly.
+
+- **Onboarding route**: `/onboarding` (carousel with Skip/Next/Done)
+- **First-run redirect**: if onboarding is not completed, GoRouter redirects to `/onboarding`
+- **Tab hints (one-time, dismissible)**:
+  - Feed (`/`)
+  - Inbox (`/inbox`)
+  - Profile (`/me`, owner only)
+  - Settings (`/settings`)
+- **Re-open guide**: Settings → **User guide** → opens `/onboarding`
+
+### Persistence keys (SharedPreferences)
+
+- `onboarding_completed`
+- `hint_feed_seen`
+- `hint_inbox_seen`
+- `hint_profile_seen`
+- `hint_settings_seen`
+
+### Resetting for testing
+
+- Uninstall/reinstall the app, or clear app storage (Android), to reset onboarding + hints.
+
+---
+
 ## Localization
 
 Strings live in `lib/l10n/*.arb`. Vietnamese (`app_vi.arb`) is the template.

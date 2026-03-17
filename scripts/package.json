@@ -7,6 +7,7 @@
     "seed:dev": "ts-node seed.ts"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
     "firebase-admin": "^13.7.0"
   },
   "devDependencies": {

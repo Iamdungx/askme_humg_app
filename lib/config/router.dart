@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/core/values/app_colors.dart';
@@ -13,6 +14,9 @@ import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dart';
+import 'package:askme_humg/app/modules/feed/presentation/screens/answer_detail_screen.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/onboarding_providers.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
@@ -21,7 +25,6 @@ import 'package:askme_humg/app/modules/settings/presentation/settings_screen.dar
 import 'package:askme_humg/app/modules/moderation/presentation/screens/admin_dashboard_screen.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/verify_humg_screen.dart';
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
-import 'package:askme_humg/config/app_routes.dart';
 
 part 'router.g.dart';
 
@@ -52,6 +55,16 @@ class _RouterNotifier extends ChangeNotifier {
 
     if (authAsync.isLoading) return null;
     if (path == AppRoutes.splash) return null;
+
+    final onboardingCompleted = _ref.read(onboardingCompletedProvider);
+    final isDeepLinkProfile = path.startsWith(AppRoutes.userProfile);
+    final isDeepLinkAnswer = path.startsWith(AppRoutes.answer);
+    if (!onboardingCompleted &&
+        path != AppRoutes.onboarding &&
+        !isDeepLinkProfile &&
+        !isDeepLinkAnswer) {
+      return AppRoutes.onboarding;
+    }
 
     final user = authAsync.asData?.value;
     final isLoggedIn = user != null;
@@ -127,6 +140,10 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
@@ -135,6 +152,12 @@ GoRouter appRouter(Ref ref) {
         path: '${AppRoutes.userProfile}/:userId',
         builder: (context, state) =>
             ProfileScreen(userId: state.pathParameters['userId']!),
+      ),
+      // Deep-link answer detail — full-screen, no bottom nav.
+      GoRoute(
+        path: '${AppRoutes.answer}/:answerId',
+        builder: (context, state) =>
+            AnswerDetailScreen(answerId: state.pathParameters['answerId']!),
       ),
       // AnswerCompose is full-screen — no bottom nav visible while composing.
       GoRoute(
@@ -279,7 +302,88 @@ class _MeTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authStateProvider).asData?.value;
     if (user == null) return const _ProfileLoginPrompt();
+    if (user.isAdmin == true) {
+      return _AdminMeWrapper(userId: user.uid);
+    }
     return ProfileScreen(userId: user.uid);
+  }
+}
+
+class _AdminMeWrapper extends StatelessWidget {
+  const _AdminMeWrapper({required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.sm,
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: cs.secondary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: cs.secondary.withValues(alpha: 0.25)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.shieldCheck, color: cs.secondary, size: 20),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.adminEntryTitle,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.onSurface,
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            l10n.adminEntrySubtitle,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => context.push(AppRoutes.admin),
+                      child: Text(l10n.adminEntryButton),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(child: ProfileScreen(userId: userId)),
+          ],
+        ),
+      ),
+    );
   }
 }
 

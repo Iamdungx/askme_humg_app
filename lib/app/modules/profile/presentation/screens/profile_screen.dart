@@ -19,6 +19,8 @@ import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_head
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
+import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/widgets/onboarding_hint_banner.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -146,11 +148,24 @@ class _ProfileContent extends ConsumerWidget {
       ),
       body: profile.isBlocked
           ? _BlockedUserView(message: l10n.profileBlockedUser)
-          : _ProfileBody(
-              profile: profile,
-              isOwner: isOwner,
-              deepLink: deepLink,
-              l10n: l10n,
+          : Column(
+              children: [
+                if (isOwner)
+                  OnboardingHintBanner(
+                    hint: OnboardingHint.profile,
+                    title: l10n.onboardingHintProfileTitle,
+                    message: l10n.onboardingHintProfileBody,
+                    icon: LucideIcons.share2,
+                  ),
+                Expanded(
+                  child: _ProfileBody(
+                    profile: profile,
+                    isOwner: isOwner,
+                    deepLink: deepLink,
+                    l10n: l10n,
+                  ),
+                ),
+              ],
             ),
     );
   }

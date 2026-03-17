@@ -47,6 +47,41 @@ class FirebaseFeedDatasource {
     }
   }
 
+  /// Fetch a single published answer by id for deep-link viewing.
+  Future<FeedItemModel?> getPublishedAnswerById(String answerId) async {
+    try {
+      final doc = await _firestore.collection('answers').doc(answerId).get();
+      if (!doc.exists || doc.data() == null) return null;
+      final data = doc.data()!;
+      if ((data['isPublished'] as bool?) != true) return null;
+      final createdAtTs = data['createdAt'] as Timestamp?;
+      if (createdAtTs == null) {
+        throw FirestoreException('createdAt is null for answer ${doc.id}');
+      }
+      return FeedItemModel(
+        answerId: doc.id,
+        questionId: data['questionId'] as String? ?? '',
+        questionContent: data['questionContent'] as String? ?? '',
+        answerContent: data['content'] as String? ?? '',
+        hostUserId: data['userId'] as String? ?? '',
+        hostName: data['hostName'] as String? ?? '',
+        hostAvatar: data['hostAvatar'] as String? ?? '',
+        createdAt: createdAtTs.toDate(),
+        likeCount: data['likeCount'] as int? ?? 0,
+        likedBy: List<String>.from(data['likedBy'] as List? ?? []),
+        commentCount: data['commentCount'] as int? ?? 0,
+        isPublished: data['isPublished'] as bool? ?? false,
+        hostIsHumgVerified: data['hostIsHumgVerified'] as bool? ?? false,
+      );
+    } on FirebaseException catch (e, s) {
+      logger.e('getPublishedAnswerById failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore read failed');
+    } catch (e, s) {
+      logger.e('getPublishedAnswerById unexpected error', error: e, stackTrace: s);
+      throw FirestoreException(e.toString());
+    }
+  }
+
   /// UC-4.2: Single update() — NOT batch (spec requirement).
   Future<void> toggleLike({
     required String answerId,

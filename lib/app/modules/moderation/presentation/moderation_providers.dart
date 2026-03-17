@@ -95,14 +95,20 @@ class ResolveReportNotifier extends _$ResolveReportNotifier {
     String? parentAnswerId,
   }) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(resolveReportUseCaseProvider).call(
+    try {
+      await ref.read(resolveReportUseCaseProvider).call(
             reportId: reportId,
             targetId: targetId,
             targetType: targetType,
             action: action,
             parentAnswerId: parentAnswerId,
-          ),
-    );
+          );
+      if (!ref.mounted) return;
+      state = const AsyncData(null);
+    } catch (e, s) {
+      if (!ref.mounted) return;
+      state = AsyncError(e, s);
+      rethrow;
+    }
   }
 }

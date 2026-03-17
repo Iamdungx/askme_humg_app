@@ -9,6 +9,8 @@ import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/comments_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/feed_item_card.dart';
 import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
+import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/widgets/onboarding_hint_banner.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
@@ -53,62 +55,74 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      body: feedAsync.when(
-        loading: () => const ShimmerList(),
-        error: (e, _) => ErrorState(
-          message: l10n.feedErrorLoad,
-          onRetry: () => ref.read(feedProvider.notifier).refresh(),
-        ),
-        data: (feedState) {
-          if (feedState.items.isEmpty) {
-            return EmptyState(
-              icon: LucideIcons.messageCircle,
-              message: l10n.feedEmpty,
-              actionLabel: l10n.commonRetry,
-              onAction: () => ref.read(feedProvider.notifier).refresh(),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification is ScrollUpdateNotification &&
-                    notification.metrics.extentAfter < 400) {
-                  _triggerLoadMore();
-                }
-                return false;
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.only(
-                  top: AppSpacing.sm,
-                  bottom: AppSpacing.xxl,
-                ),
-                itemCount: feedState.items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == feedState.items.length) {
-                    return _FeedListFooter(
-                      isLoadingMore: feedState.isLoadingMore,
-                      hasReachedEnd: feedState.hasReachedEnd,
-                      l10n: l10n,
-                      tt: tt,
-                      cs: cs,
-                    );
-                  }
-                  final item = feedState.items[index];
-                  return FeedItemCard(
-                    item: item,
-                    onCommentTap: () => showCommentsSheet(
-                      context,
-                      answerId: item.answerId,
-                      commentCount: item.commentCount,
-                    ),
-                  );
-                },
+      body: Column(
+        children: [
+          OnboardingHintBanner(
+            hint: OnboardingHint.feed,
+            title: l10n.onboardingHintFeedTitle,
+            message: l10n.onboardingHintFeedBody,
+            icon: LucideIcons.sparkles,
+          ),
+          Expanded(
+            child: feedAsync.when(
+              loading: () => const ShimmerList(),
+              error: (e, _) => ErrorState(
+                message: l10n.feedErrorLoad,
+                onRetry: () => ref.read(feedProvider.notifier).refresh(),
               ),
+              data: (feedState) {
+                if (feedState.items.isEmpty) {
+                  return EmptyState(
+                    icon: LucideIcons.messageCircle,
+                    message: l10n.feedEmpty,
+                    actionLabel: l10n.commonRetry,
+                    onAction: () => ref.read(feedProvider.notifier).refresh(),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () => ref.read(feedProvider.notifier).refresh(),
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification &&
+                          notification.metrics.extentAfter < 400) {
+                        _triggerLoadMore();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(
+                        top: AppSpacing.sm,
+                        bottom: AppSpacing.xxl,
+                      ),
+                      itemCount: feedState.items.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == feedState.items.length) {
+                          return _FeedListFooter(
+                            isLoadingMore: feedState.isLoadingMore,
+                            hasReachedEnd: feedState.hasReachedEnd,
+                            l10n: l10n,
+                            tt: tt,
+                            cs: cs,
+                          );
+                        }
+                        final item = feedState.items[index];
+                        return FeedItemCard(
+                          item: item,
+                          onCommentTap: () => showCommentsSheet(
+                            context,
+                            answerId: item.answerId,
+                            commentCount: item.commentCount,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

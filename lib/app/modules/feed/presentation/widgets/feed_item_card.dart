@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
@@ -10,6 +11,7 @@ import 'package:askme_humg/app/global_widgets/layout/app_card.dart';
 import 'package:askme_humg/app/global_widgets/layout/left_accent_block.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -174,7 +176,7 @@ class FeedItemCard extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
-                onPressed: () => _onShare(context, l10n),
+                onPressed: () => _onShare(context, l10n, ref),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -210,11 +212,31 @@ class FeedItemCard extends ConsumerWidget {
     );
   }
 
-  void _onShare(BuildContext context, AppLocalizations l10n) {
-    // TODO(UC-2.1): Implement share via share_plus package
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.commonFeatureComingSoon)),
-    );
+  Future<void> _onShare(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+  ) async {
+    final deepLink =
+        ref.read(generateAnswerDeepLinkUseCaseProvider).call(item.answerId);
+
+    final parts = <String>[
+      if (item.questionContent.trim().isNotEmpty) '"${item.questionContent}"',
+      if (item.answerContent.trim().isNotEmpty) item.answerContent.trim(),
+      deepLink,
+    ];
+    final text = parts.join('\n\n');
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(text: text),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.commonError)),
+      );
+    }
   }
 }
 

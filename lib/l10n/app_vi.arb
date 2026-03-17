@@ -113,7 +113,7 @@
   "@profileLinkCopied": { "description": "Thông báo đã copy link profile" },
   "profileShareCardTitle": "Hãy hỏi tôi bất cứ điều gì!",
   "@profileShareCardTitle": { "description": "Tiêu đề thẻ chia sẻ profile" },
-  "profileShareCardTagline": "Hỏi tui đi 👀\nKhông biết ai đâu mà lo",
+  "profileShareCardTagline": "Hãy hỏi tôi bất cứ điều gì 👀\nBạn có thể hỏi ẩn danh",
   "@profileShareCardTagline": { "description": "Tagline kích thích tò mò trên thẻ chia sẻ profile" },
   "profileShareCardStyleLabel": "Đổi style",
   "@profileShareCardStyleLabel": { "description": "Nhãn nút mở style picker trên share card" },
@@ -216,6 +216,8 @@
   "@feedLoadMore": { "description": "Nút tải thêm bài trong feed" },
   "feedErrorLoad": "Không tải được feed. Thử lại?",
   "@feedErrorLoad": { "description": "Lỗi tải feed" },
+  "feedAnswerNotFound": "Bài viết không tồn tại hoặc đã bị ẩn",
+  "@feedAnswerNotFound": { "description": "Trạng thái khi mở link bài trả lời nhưng bài không tồn tại hoặc chưa được công khai" },
   "feedReachedEnd": "Bạn đã xem hết bài đăng",
   "@feedReachedEnd": { "description": "Thông báo cuối danh sách feed" },
 
@@ -367,6 +369,9 @@
   "settingsPrivacyPolicy": "Chính sách bảo mật",
   "@settingsPrivacyPolicy": { "description": "Mục cài đặt: chuyển đến trang chính sách bảo mật" },
 
+  "settingsUserGuide": "Hướng dẫn sử dụng",
+  "@settingsUserGuide": { "description": "Mục cài đặt: mở lại hướng dẫn/onboarding" },
+
   "settingsSignOut": "Đăng xuất",
   "@settingsSignOut": { "description": "Cài đặt: nút đăng xuất" },
   "settingsSignOutConfirm": "Bạn có chắc muốn đăng xuất không?",
@@ -482,5 +487,51 @@
   "editProfilePickerUnavailable": "Trình chọn ảnh không khả dụng trên thiết bị này.",
   "@editProfilePickerUnavailable": { "description": "Snackbar khi camera/gallery không khả dụng (vd: iOS Simulator)" },
   "editProfilePickerPermissionDenied": "Quyền truy cập bị từ chối. Vui lòng cho phép trong Cài đặt.",
-  "@editProfilePickerPermissionDenied": { "description": "Snackbar khi quyền camera hoặc thư viện ảnh bị từ chối vĩnh viễn" }
+  "@editProfilePickerPermissionDenied": { "description": "Snackbar khi quyền camera hoặc thư viện ảnh bị từ chối vĩnh viễn" },
+
+  "onboardingSkip": "Bỏ qua",
+  "@onboardingSkip": { "description": "Nút onboarding: bỏ qua intro" },
+  "onboardingNext": "Tiếp",
+  "@onboardingNext": { "description": "Nút onboarding: chuyển sang slide tiếp theo" },
+  "onboardingDone": "Bắt đầu",
+  "@onboardingDone": { "description": "Nút onboarding: hoàn tất intro" },
+  "onboardingFootnote": "Bạn có thể thay đổi các cài đặt này bất cứ lúc nào.",
+  "@onboardingFootnote": { "description": "Ghi chú nhỏ dưới onboarding" },
+
+  "onboardingSlide1Title": "Hỏi đáp ẩn danh cho HUMG",
+  "@onboardingSlide1Title": { "description": "Tiêu đề slide 1 onboarding" },
+  "onboardingSlide1Body": "Cho phép mọi người hỏi bạn ẩn danh. Bạn quyết định trả lời và công khai.",
+  "@onboardingSlide1Body": { "description": "Nội dung slide 1 onboarding" },
+  "onboardingSlide2Title": "Chia sẻ link, nhận câu hỏi",
+  "@onboardingSlide2Title": { "description": "Tiêu đề slide 2 onboarding" },
+  "onboardingSlide2Body": "Chia sẻ link hồ sơ. Bất kỳ ai cũng có thể gửi câu hỏi mà không cần đăng nhập.",
+  "@onboardingSlide2Body": { "description": "Nội dung slide 2 onboarding" },
+  "onboardingSlide3Title": "Tương tác cho sinh viên đã xác minh",
+  "@onboardingSlide3Title": { "description": "Tiêu đề slide 3 onboarding" },
+  "onboardingSlide3Body": "Xác minh HUMG để mở like và bình luận, giúp cộng đồng đáng tin cậy hơn.",
+  "@onboardingSlide3Body": { "description": "Nội dung slide 3 onboarding" },
+
+  "onboardingHintFeedTitle": "Khám phá Bảng tin",
+  "@onboardingHintFeedTitle": { "description": "Tiêu đề hint lần đầu ở tab Feed" },
+  "onboardingHintFeedBody": "Xem các câu trả lời được công khai. Like và bình luận cần xác minh HUMG.",
+  "@onboardingHintFeedBody": { "description": "Nội dung hint lần đầu ở tab Feed" },
+  "onboardingHintInboxTitle": "Hộp thư của bạn",
+  "@onboardingHintInboxTitle": { "description": "Tiêu đề hint lần đầu ở tab Inbox" },
+  "onboardingHintInboxBody": "Câu hỏi gửi tới bạn sẽ nằm ở đây. Trả lời để có thể đăng lên Bảng tin.",
+  "@onboardingHintInboxBody": { "description": "Nội dung hint lần đầu ở tab Inbox" },
+  "onboardingHintProfileTitle": "Chia sẻ link hồ sơ",
+  "@onboardingHintProfileTitle": { "description": "Tiêu đề hint lần đầu ở tab Profile" },
+  "onboardingHintProfileBody": "Nhấn Chia sẻ để copy link và nhận câu hỏi ẩn danh.",
+  "@onboardingHintProfileBody": { "description": "Nội dung hint lần đầu ở tab Profile" },
+  "onboardingHintSettingsTitle": "Thông báo & xác minh",
+  "@onboardingHintSettingsTitle": { "description": "Tiêu đề hint lần đầu ở tab Settings" },
+  "onboardingHintSettingsBody": "Bật thông báo và hoàn tất xác minh HUMG để mở các tính năng host.",
+  "@onboardingHintSettingsBody": { "description": "Nội dung hint lần đầu ở tab Settings" }
+
+  ,"adminEntryTitle": "Admin Dashboard"
+  ,"@adminEntryTitle": { "description": "Tiêu đề banner entry Admin hiển thị ở tab Hồ sơ khi user là admin" }
+  ,"adminEntrySubtitle": "Xem và xử lý các báo cáo nội dung đang chờ."
+  ,"@adminEntrySubtitle": { "description": "Mô tả ngắn cho banner entry Admin: việc cần làm của admin" }
+  ,"adminEntryButton": "Mở"
+  ,"@adminEntryButton": { "description": "Nhãn nút điều hướng admin đến /admin" }
 }
