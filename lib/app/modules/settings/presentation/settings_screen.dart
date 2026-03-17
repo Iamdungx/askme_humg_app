@@ -10,7 +10,6 @@ import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
 import 'package:askme_humg/app/core/values/app_typography.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
-import 'package:askme_humg/app/modules/profile/presentation/profile_providers.dart';
 import 'package:askme_humg/app/modules/settings/data/cache_service.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
 import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
@@ -47,30 +46,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await svc.syncTags(notifNewQuestion: notifQuestion, notifNewComment: notifComment);
   }
 
-  Future<void> _onNotifNewQuestionChanged(String userId, bool value, bool notifComment) async {
-    await ref.read(notifNewQuestionProvider.notifier).set(value);
-    final svc = ref.read(notificationServiceProvider);
-    if (svc.isAvailable) {
-      await svc.syncTags(notifNewQuestion: value, notifNewComment: notifComment);
-    }
-    await ref.read(profileRepositoryProvider).updateNotificationPrefs(
-      userId: userId,
-      notifNewQuestion: value,
-      notifNewComment: notifComment,
-    );
+  Future<void> _onNotifNewQuestionChanged(
+    String userId,
+    bool value,
+    bool notifComment,
+  ) async {
+    await ref.read(notificationPrefsUpdaterProvider.notifier).setPrefs(
+          userId: userId,
+          notifNewQuestion: value,
+          notifNewComment: notifComment,
+        );
   }
 
-  Future<void> _onNotifNewCommentChanged(String userId, bool value, bool notifQuestion) async {
-    await ref.read(notifNewCommentProvider.notifier).set(value);
-    final svc = ref.read(notificationServiceProvider);
-    if (svc.isAvailable) {
-      await svc.syncTags(notifNewQuestion: notifQuestion, notifNewComment: value);
-    }
-    await ref.read(profileRepositoryProvider).updateNotificationPrefs(
-      userId: userId,
-      notifNewQuestion: notifQuestion,
-      notifNewComment: value,
-    );
+  Future<void> _onNotifNewCommentChanged(
+    String userId,
+    bool value,
+    bool notifQuestion,
+  ) async {
+    await ref.read(notificationPrefsUpdaterProvider.notifier).setPrefs(
+          userId: userId,
+          notifNewQuestion: notifQuestion,
+          notifNewComment: value,
+        );
   }
 
   Future<void> _loadVersion() async {
@@ -116,6 +113,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final showRealName = ref.watch(showRealNameProvider);
     final notifNewQuestion = ref.watch(notifNewQuestionProvider);
     final notifNewComment = ref.watch(notifNewCommentProvider);
+    final notifUpdateAsync = ref.watch(notificationPrefsUpdaterProvider);
+    final notifUpdateLoading = notifUpdateAsync.isLoading;
+
+    ref.listen<AsyncValue<void>>(notificationPrefsUpdaterProvider, (_, next) {
+      if (next is AsyncError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.commonError)),
+        );
+      }
+    });
     final cacheSizeAsync = ref.watch(cacheSizeProvider);
 
     return Scaffold(
@@ -194,7 +201,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: l10n.settingsNotifNewQuestion,
               trailing: Switch(
                 value: notifNewQuestion,
-                onChanged: (v) => _onNotifNewQuestionChanged(user.uid, v, notifNewComment),
+                onChanged: notifUpdateLoading
+                    ? null
+                    : (v) => _onNotifNewQuestionChanged(
+                          user.uid,
+                          v,
+                          notifNewComment,
+                        ),
               ),
             ),
             _SettingsTile(
@@ -202,7 +215,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: l10n.settingsNotifNewComment,
               trailing: Switch(
                 value: notifNewComment,
-                onChanged: (v) => _onNotifNewCommentChanged(user.uid, v, notifNewQuestion),
+                onChanged: notifUpdateLoading
+                    ? null
+                    : (v) => _onNotifNewCommentChanged(
+                          user.uid,
+                          v,
+                          notifNewQuestion,
+                        ),
               ),
             ),
           ],

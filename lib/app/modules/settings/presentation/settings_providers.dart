@@ -60,6 +60,45 @@ class NotifNewCommentNotifier extends _$NotifNewCommentNotifier {
 }
 
 // ---------------------------------------------------------------------------
+// Persist notification prefs (Firestore) + sync local + OneSignal
+// ---------------------------------------------------------------------------
+
+@riverpod
+class NotificationPrefsUpdater extends _$NotificationPrefsUpdater {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> setPrefs({
+    required String userId,
+    required bool notifNewQuestion,
+    required bool notifNewComment,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      // 1) Persist to backend first (source of truth for next login + webhook).
+      await ref.read(profileRepositoryProvider).updateNotificationPrefs(
+            userId: userId,
+            notifNewQuestion: notifNewQuestion,
+            notifNewComment: notifNewComment,
+          );
+
+      // 2) Update local prefs only after backend success.
+      await ref.read(notifNewQuestionProvider.notifier).set(notifNewQuestion);
+      await ref.read(notifNewCommentProvider.notifier).set(notifNewComment);
+
+      // 3) Sync OneSignal tags (best-effort; does not throw).
+      final svc = ref.read(notificationServiceProvider);
+      if (svc.isAvailable) {
+        await svc.syncTags(
+          notifNewQuestion: notifNewQuestion,
+          notifNewComment: notifNewComment,
+        );
+      }
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // NotificationService — FCM topic subscribe/unsubscribe
 // ---------------------------------------------------------------------------
 
