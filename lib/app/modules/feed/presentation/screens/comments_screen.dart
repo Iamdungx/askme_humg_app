@@ -50,7 +50,7 @@ class _CommentsSheetContent extends ConsumerWidget {
 
     return Column(
       children: [
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -70,7 +70,11 @@ class _CommentsSheetContent extends ConsumerWidget {
             ],
           ),
         ),
-        Divider(color: cs.outline.withValues(alpha: 0.3)),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: cs.outline.withValues(alpha: 0.3),
+        ),
 
         // Comment list
         Expanded(
