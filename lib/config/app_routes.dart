@@ -29,6 +29,7 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const onboarding = '/onboarding';
   static const feed = '/';
+  static const answer = '/answer';
   static const inbox = '/inbox';
   static const me = '/me';
   static const meEdit = '/me/edit';

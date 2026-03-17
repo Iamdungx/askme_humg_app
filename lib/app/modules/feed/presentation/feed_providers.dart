@@ -50,6 +50,14 @@ GetPublicFeed getPublicFeedUseCase(Ref ref) =>
     GetPublicFeed(ref.watch(feedRepositoryProvider));
 
 @riverpod
+GetPublishedAnswerById getPublishedAnswerByIdUseCase(Ref ref) =>
+    GetPublishedAnswerById(ref.watch(feedRepositoryProvider));
+
+@riverpod
+GenerateAnswerDeepLink generateAnswerDeepLinkUseCase(Ref ref) =>
+    const GenerateAnswerDeepLink();
+
+@riverpod
 ToggleLike toggleLikeUseCase(Ref ref) =>
     ToggleLike(ref.watch(feedRepositoryProvider));
 
@@ -72,6 +80,10 @@ GetUserAnswers getUserAnswersUseCase(Ref ref) =>
 @riverpod
 Future<List<FeedItem>> userAnswers(Ref ref, String userId) =>
     ref.watch(getUserAnswersUseCaseProvider).call(userId: userId);
+
+@riverpod
+Future<FeedItem?> publishedAnswerById(Ref ref, String answerId) =>
+    ref.watch(getPublishedAnswerByIdUseCaseProvider).call(answerId);
 
 // ---------------------------------------------------------------------------
 // Feed notifier — UC-4.1 cursor pagination

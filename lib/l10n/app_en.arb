@@ -222,6 +222,8 @@
   "@feedLoadMore": { "description": "Load more button label (currently unused — auto-load via scroll)" },
   "feedErrorLoad": "Failed to load feed. Try again?",
   "@feedErrorLoad": { "description": "Error state message on feed screen" },
+  "feedAnswerNotFound": "This post is unavailable",
+  "@feedAnswerNotFound": { "description": "Empty state message when an answer deep link points to a missing/unpublished post" },
   "feedReachedEnd": "You've seen all posts",
   "@feedReachedEnd": { "description": "Footer message when all feed items have been loaded" },
 

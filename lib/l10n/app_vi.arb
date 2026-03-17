@@ -216,6 +216,8 @@
   "@feedLoadMore": { "description": "Nút tải thêm bài trong feed" },
   "feedErrorLoad": "Không tải được feed. Thử lại?",
   "@feedErrorLoad": { "description": "Lỗi tải feed" },
+  "feedAnswerNotFound": "Bài viết không tồn tại hoặc đã bị ẩn",
+  "@feedAnswerNotFound": { "description": "Trạng thái khi mở link bài trả lời nhưng bài không tồn tại hoặc chưa được công khai" },
   "feedReachedEnd": "Bạn đã xem hết bài đăng",
   "@feedReachedEnd": { "description": "Thông báo cuối danh sách feed" },
 

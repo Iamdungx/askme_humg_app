@@ -14,6 +14,7 @@ import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 import 'package:askme_humg/app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dart';
+import 'package:askme_humg/app/modules/feed/presentation/screens/answer_detail_screen.dart';
 import 'package:askme_humg/app/modules/onboarding/presentation/onboarding_providers.dart';
 import 'package:askme_humg/app/modules/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
@@ -57,9 +58,11 @@ class _RouterNotifier extends ChangeNotifier {
 
     final onboardingCompleted = _ref.read(onboardingCompletedProvider);
     final isDeepLinkProfile = path.startsWith(AppRoutes.userProfile);
+    final isDeepLinkAnswer = path.startsWith(AppRoutes.answer);
     if (!onboardingCompleted &&
         path != AppRoutes.onboarding &&
-        !isDeepLinkProfile) {
+        !isDeepLinkProfile &&
+        !isDeepLinkAnswer) {
       return AppRoutes.onboarding;
     }
 
@@ -149,6 +152,12 @@ GoRouter appRouter(Ref ref) {
         path: '${AppRoutes.userProfile}/:userId',
         builder: (context, state) =>
             ProfileScreen(userId: state.pathParameters['userId']!),
+      ),
+      // Deep-link answer detail — full-screen, no bottom nav.
+      GoRoute(
+        path: '${AppRoutes.answer}/:answerId',
+        builder: (context, state) =>
+            AnswerDetailScreen(answerId: state.pathParameters['answerId']!),
       ),
       // AnswerCompose is full-screen — no bottom nav visible while composing.
       GoRoute(

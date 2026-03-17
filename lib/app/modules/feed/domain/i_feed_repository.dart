@@ -5,6 +5,8 @@ import 'package:askme_humg/app/modules/feed/domain/feed_page.dart';
 abstract class IFeedRepository {
   Future<FeedPage> getPublicFeed({String? lastDocId});
 
+  Future<FeedItem?> getPublishedAnswerById(String answerId);
+
   Future<void> toggleLike({
     required String answerId,
     required String userId,

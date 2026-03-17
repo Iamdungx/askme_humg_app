@@ -222,6 +222,8 @@
   "@feedLoadMore": { "description": "もっと読むボタン（現在未使用 — スクロールで自動読み込み）" },
   "feedErrorLoad": "フィードの読み込みに失敗しました。再試行しますか？",
   "@feedErrorLoad": { "description": "フィード画面のエラー状態メッセージ" },
+  "feedAnswerNotFound": "この投稿は表示できません",
+  "@feedAnswerNotFound": { "description": "回答のディープリンクが存在しない／未公開の投稿を指している場合の空状態メッセージ" },
   "feedReachedEnd": "すべての投稿を見ました",
   "@feedReachedEnd": { "description": "全フィードアイテム読み込み完了時のフッターメッセージ" },
 

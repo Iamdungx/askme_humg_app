@@ -11,6 +11,19 @@ class GetPublicFeed {
       _repo.getPublicFeed(lastDocId: lastDocId);
 }
 
+class GetPublishedAnswerById {
+  const GetPublishedAnswerById(this._repo);
+  final IFeedRepository _repo;
+
+  Future<FeedItem?> call(String answerId) => _repo.getPublishedAnswerById(answerId);
+}
+
+class GenerateAnswerDeepLink {
+  const GenerateAnswerDeepLink();
+
+  String call(String answerId) => 'https://askme-humg-app.web.app/answer/$answerId';
+}
+
 class ToggleLike {
   const ToggleLike(this._repo);
   final IFeedRepository _repo;

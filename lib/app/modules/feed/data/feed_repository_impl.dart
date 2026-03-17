@@ -30,6 +30,20 @@ class FeedRepositoryImpl implements IFeedRepository {
   }
 
   @override
+  Future<FeedItem?> getPublishedAnswerById(String answerId) async {
+    try {
+      final model = await _datasource.getPublishedAnswerById(answerId);
+      return model?.toDomain();
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
   Future<void> toggleLike({
     required String answerId,
     required String userId,
