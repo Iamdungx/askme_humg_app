@@ -11,6 +11,7 @@
 | Item | Ghi chú |
 |---|---|
 | Edit Profile (BACKLOG-02) | Avatar upload Firebase Storage (cooldown 7 ngày) + display name edit — ✅ ship |
+| Feed Share Button (BACKLOG-04) | Share bài trả lời qua `share_plus` + deep link `/answer/:answerId` + màn `AnswerDetailScreen` — ✅ ship |
 
 ---
 
@@ -74,14 +75,24 @@
 
 ## 🟢 P3 — Nice-to-have (v2.0)
 
-### BACKLOG-04: Feed Share Button (FR-11)
+### BACKLOG-04: Feed Share Button (FR-11) — ✅ Done
 
 **Scope:**
-- `FeedItemCard._onShare()` hiện chỉ show snackbar
-- Implement gọi `share_plus` để share URL `askme-humg-app.web.app/user/{userId}?answer={answerId}`
+- `FeedItemCard._onShare()` trước đây chỉ show snackbar
+- Implement gọi `share_plus` để share **deep link bài trả lời**: `askme-humg-app.web.app/answer/{answerId}`
+- Thêm màn `AnswerDetailScreen` + route `/answer/:answerId` để mở bài từ link (chỉ load `isPublished == true`)
+- Onboarding redirect không chặn deep link `/answer/:answerId` (giống `/user/:id`)
 
 **Files cần thay đổi:**
 - `lib/app/modules/feed/presentation/widgets/feed_item_card.dart`
+- `lib/app/modules/feed/presentation/screens/answer_detail_screen.dart`
+- `lib/config/app_routes.dart`
+- `lib/config/router.dart`
+- `lib/app/modules/feed/data/firebase_feed_datasource.dart`
+- `lib/app/modules/feed/data/feed_repository_impl.dart`
+- `lib/app/modules/feed/domain/i_feed_repository.dart`
+- `lib/app/modules/feed/domain/feed_use_cases.dart`
+- `lib/app/modules/feed/presentation/feed_providers.dart`
 
 ---
 
