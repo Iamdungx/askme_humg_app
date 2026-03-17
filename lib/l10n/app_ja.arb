@@ -111,7 +111,7 @@
   "@profileLinkCopied": { "description": "プロフィールリンクコピー後のスナックバー" },
   "profileShareCardTitle": "何でも聞いてください！",
   "@profileShareCardTitle": { "description": "シェア用プロフィールカード画像のタイトル" },
-  "profileShareCardTagline": "聞いてみて 👀\n誰が送ったかわからないから安心して",
+  "profileShareCardTagline": "何でも聞いてね 👀\n匿名で質問できます",
   "@profileShareCardTagline": { "description": "シェアカードの好奇心を刺激するタグライン" },
   "profileShareCardStyleLabel": "スタイル変更",
   "@profileShareCardStyleLabel": { "description": "シェアカードのスタイル選択ボタンラベル" },

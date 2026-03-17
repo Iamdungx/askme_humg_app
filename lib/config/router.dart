@@ -56,7 +56,10 @@ class _RouterNotifier extends ChangeNotifier {
     if (path == AppRoutes.splash) return null;
 
     final onboardingCompleted = _ref.read(onboardingCompletedProvider);
-    if (!onboardingCompleted && path != AppRoutes.onboarding) {
+    final isDeepLinkProfile = path.startsWith(AppRoutes.userProfile);
+    if (!onboardingCompleted &&
+        path != AppRoutes.onboarding &&
+        !isDeepLinkProfile) {
       return AppRoutes.onboarding;
     }
 

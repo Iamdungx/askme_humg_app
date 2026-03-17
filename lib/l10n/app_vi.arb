@@ -113,7 +113,7 @@
   "@profileLinkCopied": { "description": "Thông báo đã copy link profile" },
   "profileShareCardTitle": "Hãy hỏi tôi bất cứ điều gì!",
   "@profileShareCardTitle": { "description": "Tiêu đề thẻ chia sẻ profile" },
-  "profileShareCardTagline": "Hỏi tui đi 👀\nKhông biết ai đâu mà lo",
+  "profileShareCardTagline": "Hãy hỏi tôi bất cứ điều gì 👀\nBạn có thể hỏi ẩn danh",
   "@profileShareCardTagline": { "description": "Tagline kích thích tò mò trên thẻ chia sẻ profile" },
   "profileShareCardStyleLabel": "Đổi style",
   "@profileShareCardStyleLabel": { "description": "Nhãn nút mở style picker trên share card" },
