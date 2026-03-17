@@ -11,6 +11,7 @@ const humgVerifyExemptPaths = <String>{
   AppRoutes.login,
   AppRoutes.splash,
   AppRoutes.feed,
+  AppRoutes.onboarding,
 };
 
 /// Path prefixes that are exempt from the HUMG-verification redirect (UC-1.3).
@@ -26,6 +27,7 @@ bool isHumgVerifyExempt(String path) =>
 abstract final class AppRoutes {
   static const splash = '/splash';
   static const login = '/login';
+  static const onboarding = '/onboarding';
   static const feed = '/';
   static const inbox = '/inbox';
   static const me = '/me';

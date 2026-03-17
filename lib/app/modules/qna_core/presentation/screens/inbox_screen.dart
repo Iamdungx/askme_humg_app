@@ -9,6 +9,8 @@ import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/question_card.dart';
+import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/widgets/onboarding_hint_banner.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class InboxScreen extends ConsumerStatefulWidget {
@@ -52,39 +54,51 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
           },
         ),
       ),
-      body: inboxAsync.when(
-        loading: () => const LoadingShimmer(),
-        error: (error, _) => ErrorState(
-          message: error.toString(),
-          onRetry: () => ref.invalidate(inboxProvider),
-        ),
-        data: (questions) {
-          final unanswered =
-              questions.where((q) => q.status == 'unanswered').toList();
-          final answered =
-              questions.where((q) => q.status == 'answered').toList();
-
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _QuestionList(
-                questions: unanswered,
-                showReply: true,
-                emptyMessage: l10n.inboxEmptyUnanswered,
-                onReply: (q) => context.push('/inbox/answer/${q.questionId}'),
-                onDelete: (q) => _deleteQuestion(q),
+      body: Column(
+        children: [
+          OnboardingHintBanner(
+            hint: OnboardingHint.inbox,
+            title: l10n.onboardingHintInboxTitle,
+            message: l10n.onboardingHintInboxBody,
+            icon: LucideIcons.mailbox,
+          ),
+          Expanded(
+            child: inboxAsync.when(
+              loading: () => const LoadingShimmer(),
+              error: (error, _) => ErrorState(
+                message: error.toString(),
+                onRetry: () => ref.invalidate(inboxProvider),
               ),
-              _QuestionList(
-                questions: answered,
-                showReply: false,
-                emptyMessage: l10n.inboxEmptyAnswered,
-                emptyIcon: LucideIcons.circleCheck,
-                onDelete: (q) => _deleteQuestion(q),
-              ),
+              data: (questions) {
+                final unanswered =
+                    questions.where((q) => q.status == 'unanswered').toList();
+                final answered =
+                    questions.where((q) => q.status == 'answered').toList();
 
-            ],
-          );
-        },
+                return TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _QuestionList(
+                      questions: unanswered,
+                      showReply: true,
+                      emptyMessage: l10n.inboxEmptyUnanswered,
+                      onReply: (q) =>
+                          context.push('/inbox/answer/${q.questionId}'),
+                      onDelete: (q) => _deleteQuestion(q),
+                    ),
+                    _QuestionList(
+                      questions: answered,
+                      showReply: false,
+                      emptyMessage: l10n.inboxEmptyAnswered,
+                      emptyIcon: LucideIcons.circleCheck,
+                      onDelete: (q) => _deleteQuestion(q),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

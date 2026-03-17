@@ -82,6 +82,7 @@ class FeedNotifier extends _$FeedNotifier {
   @override
   Future<FeedState> build() async {
     final page = await ref.watch(getPublicFeedUseCaseProvider).call();
+
     return FeedState(
       items: page.items,
       lastDocId: page.lastDocId,
@@ -160,6 +161,20 @@ class FeedNotifier extends _$FeedNotifier {
         likedBy: newLikedBy,
         likeCount: item.likeCount + (isCurrentlyLiked ? -1 : 1),
       );
+    }).toList();
+
+    state = AsyncData(current.copyWith(items: updatedItems));
+  }
+
+  /// Local update — called after posting a comment so the feed card reflects
+  /// the latest comment count without requiring a refresh.
+  void incrementItemCommentCount(String answerId) {
+    final current = state.asData?.value;
+    if (current == null) return;
+
+    final updatedItems = current.items.map((item) {
+      if (item.answerId != answerId) return item;
+      return item.copyWith(commentCount: item.commentCount + 1);
     }).toList();
 
     state = AsyncData(current.copyWith(items: updatedItems));
@@ -267,6 +282,9 @@ class PostCommentNotifier extends _$PostCommentNotifier {
           ? result.error as Failure
           : UnknownFailure(result.error.toString());
     }
+
+    // Keep the feed card in sync (commentCount) without forcing a full refresh.
+    ref.read(feedProvider.notifier).incrementItemCommentCount(answerId);
     return null;
   }
 }

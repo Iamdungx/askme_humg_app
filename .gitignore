@@ -78,6 +78,9 @@ Thumbs.db
 scripts/node_modules/
 scripts/lib/
 scripts/clear.ts
+scripts/*serviceAccount*.json
+scripts/*adminsdk*.json
+scripts/serviceAccount.json
 
 # Cloud Functions
 functions/node_modules/

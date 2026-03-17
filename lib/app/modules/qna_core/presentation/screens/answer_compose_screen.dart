@@ -11,6 +11,7 @@ import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/answer_publish_toggle.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class AnswerComposeScreen extends ConsumerStatefulWidget {
@@ -46,6 +47,10 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
     ref.listen(answerProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
         if (!context.mounted) return;
+        if (_isPublished) {
+          // Ensure the newly published answer appears in the public feed.
+          ref.read(feedProvider.notifier).refresh();
+        }
         final msg = _isPublished ? l10n.answerPublishSuccess : l10n.answerSaved;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),

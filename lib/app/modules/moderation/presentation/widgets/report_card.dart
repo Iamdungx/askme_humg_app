@@ -28,24 +28,21 @@ class ReportCard extends ConsumerWidget {
       // Capture messenger before async gap.
       final messenger = ScaffoldMessenger.of(context);
 
-      await ref
-          .read(resolveReportProvider(report.reportId).notifier)
-          .resolve(
-            targetId: report.targetId,
-            targetType: report.targetType,
-            action: action,
-            parentAnswerId: report.parentAnswerId,
-          );
-
-      if (!context.mounted) return;
-      final result = ref.read(resolveReportProvider(report.reportId));
-      if (result is AsyncError) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.commonError)),
-        );
-      } else {
+      try {
+        await ref.read(resolveReportProvider(report.reportId).notifier).resolve(
+              targetId: report.targetId,
+              targetType: report.targetType,
+              action: action,
+              parentAnswerId: report.parentAnswerId,
+            );
+        if (!context.mounted) return;
         messenger.showSnackBar(
           SnackBar(content: Text(l10n.adminResolved)),
+        );
+      } catch (_) {
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.commonError)),
         );
       }
     }
@@ -67,13 +64,14 @@ class ReportCard extends ConsumerWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.primaryContainer,
+                  // Keep strong contrast in both light/dark themes.
+                  color: cs.primary,
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
                   typeLabel,
                   style: tt.labelSmall?.copyWith(
-                    color: cs.primary,
+                    color: cs.onPrimary,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
                   ),

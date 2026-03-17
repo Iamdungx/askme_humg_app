@@ -13,6 +13,8 @@ import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/profile/presentation/profile_providers.dart';
 import 'package:askme_humg/app/modules/settings/data/cache_service.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
+import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/widgets/onboarding_hint_banner.dart';
 import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
@@ -127,8 +129,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               )
             : null,
       ),
-      body: ListView(
+      body: Column(
         children: [
+          OnboardingHintBanner(
+            hint: OnboardingHint.settings,
+            title: l10n.onboardingHintSettingsTitle,
+            message: l10n.onboardingHintSettingsBody,
+            icon: LucideIcons.settings,
+          ),
+          Expanded(
+            child: ListView(
+              children: [
           // ── ACCOUNT (only when logged in) ─────────────────────────────
           if (isLoggedIn) ...[
             _SectionHeader(label: l10n.settingsSectionAccount),
@@ -198,6 +209,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           // ── APP ───────────────────────────────────────────────────────
           _SectionHeader(label: l10n.settingsSectionApp),
+          _SettingsTile(
+            icon: LucideIcons.circleQuestionMark,
+            label: l10n.settingsUserGuide,
+            trailing: const Icon(LucideIcons.chevronRight, size: AppIconSize.md),
+            onTap: () => context.push(AppRoutes.onboarding),
+          ),
           _SettingsTile(
             icon: LucideIcons.languages,
             label: l10n.settingsLanguage,
@@ -323,6 +340,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
+        ],
+            ),
+          ),
         ],
       ),
     );

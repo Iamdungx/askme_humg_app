@@ -373,6 +373,9 @@
   "settingsPrivacyPolicy": "Privacy Policy",
   "@settingsPrivacyPolicy": { "description": "Settings item: navigate to privacy policy" },
 
+  "settingsUserGuide": "User guide",
+  "@settingsUserGuide": { "description": "Settings item: re-open onboarding/user guide" },
+
   "settingsSignOut": "Sign out",
   "@settingsSignOut": { "description": "Settings: sign out button" },
   "settingsSignOutConfirm": "Are you sure you want to sign out?",
@@ -479,5 +482,51 @@
   "editProfilePickerUnavailable": "Image picker is not available on this device.",
   "@editProfilePickerUnavailable": { "description": "Snackbar when camera/gallery is unavailable (e.g. iOS Simulator)" },
   "editProfilePickerPermissionDenied": "Permission denied. Please allow access in Settings.",
-  "@editProfilePickerPermissionDenied": { "description": "Snackbar when camera or photo library permission is permanently denied" }
+  "@editProfilePickerPermissionDenied": { "description": "Snackbar when camera or photo library permission is permanently denied" },
+
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": { "description": "Onboarding button: skip the intro carousel" },
+  "onboardingNext": "Next",
+  "@onboardingNext": { "description": "Onboarding button: go to next slide" },
+  "onboardingDone": "Get started",
+  "@onboardingDone": { "description": "Onboarding button: finish the intro carousel" },
+  "onboardingFootnote": "You can change these settings anytime later.",
+  "@onboardingFootnote": { "description": "Small footer note under onboarding actions" },
+
+  "onboardingSlide1Title": "Anonymous Q&A for HUMG",
+  "@onboardingSlide1Title": { "description": "Onboarding slide 1 title" },
+  "onboardingSlide1Body": "Let others ask you questions anonymously. You choose what to answer and publish.",
+  "@onboardingSlide1Body": { "description": "Onboarding slide 1 body" },
+  "onboardingSlide2Title": "Share your link, receive questions",
+  "@onboardingSlide2Title": { "description": "Onboarding slide 2 title" },
+  "onboardingSlide2Body": "Share your profile link. Anyone can send a question without logging in.",
+  "@onboardingSlide2Body": { "description": "Onboarding slide 2 body" },
+  "onboardingSlide3Title": "Verified actions for students",
+  "@onboardingSlide3Title": { "description": "Onboarding slide 3 title" },
+  "onboardingSlide3Body": "HUMG verification unlocks likes and comments to keep the community trusted.",
+  "@onboardingSlide3Body": { "description": "Onboarding slide 3 body" },
+
+  "onboardingHintFeedTitle": "Explore the Feed",
+  "@onboardingHintFeedTitle": { "description": "First-run hint title on Feed tab" },
+  "onboardingHintFeedBody": "Browse published answers. Likes and comments require HUMG verification.",
+  "@onboardingHintFeedBody": { "description": "First-run hint body on Feed tab" },
+  "onboardingHintInboxTitle": "Your Inbox",
+  "@onboardingHintInboxTitle": { "description": "First-run hint title on Inbox tab" },
+  "onboardingHintInboxBody": "Questions sent to you appear here. Reply to publish an answer to the Feed.",
+  "@onboardingHintInboxBody": { "description": "First-run hint body on Inbox tab" },
+  "onboardingHintProfileTitle": "Share your profile link",
+  "@onboardingHintProfileTitle": { "description": "First-run hint title on Profile tab" },
+  "onboardingHintProfileBody": "Use Share to copy your link and let anyone ask you anonymously.",
+  "@onboardingHintProfileBody": { "description": "First-run hint body on Profile tab" },
+  "onboardingHintSettingsTitle": "Notifications & verification",
+  "@onboardingHintSettingsTitle": { "description": "First-run hint title on Settings tab" },
+  "onboardingHintSettingsBody": "Enable notifications and complete HUMG verification to unlock host features.",
+  "@onboardingHintSettingsBody": { "description": "First-run hint body on Settings tab" }
+
+  ,"adminEntryTitle": "Admin Dashboard"
+  ,"@adminEntryTitle": { "description": "Title for the admin entry banner shown on the Profile tab for admins" }
+  ,"adminEntrySubtitle": "Review and resolve pending content reports."
+  ,"@adminEntrySubtitle": { "description": "Subtitle for the admin entry banner explaining what admins should do" }
+  ,"adminEntryButton": "Open"
+  ,"@adminEntryButton": { "description": "Button label that navigates admins to /admin" }
 }

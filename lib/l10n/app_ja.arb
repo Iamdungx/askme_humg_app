@@ -373,6 +373,9 @@
   "settingsPrivacyPolicy": "プライバシーポリシー",
   "@settingsPrivacyPolicy": { "description": "設定項目: プライバシーポリシーページへ移動" },
 
+  "settingsUserGuide": "使い方ガイド",
+  "@settingsUserGuide": { "description": "設定項目: オンボーディング/使い方ガイドを再表示" },
+
   "settingsSignOut": "サインアウト",
   "@settingsSignOut": { "description": "設定: サインアウトボタン" },
   "settingsSignOutConfirm": "サインアウトしてもよろしいですか？",
@@ -479,5 +482,51 @@
   "editProfilePickerUnavailable": "このデバイスでは画像ピッカーを使用できません。",
   "@editProfilePickerUnavailable": { "description": "iOSシミュレーターなどでカメラ/ギャラリーが使用できない場合のSnackbar" },
   "editProfilePickerPermissionDenied": "アクセスが拒否されました。設定からアクセスを許可してください。",
-  "@editProfilePickerPermissionDenied": { "description": "カメラまたはフォトライブラリのアクセス権限が永久に拒否された場合のSnackbar" }
+  "@editProfilePickerPermissionDenied": { "description": "カメラまたはフォトライブラリのアクセス権限が永久に拒否された場合のSnackbar" },
+
+  "onboardingSkip": "スキップ",
+  "@onboardingSkip": { "description": "オンボーディング: スキップボタン" },
+  "onboardingNext": "次へ",
+  "@onboardingNext": { "description": "オンボーディング: 次へボタン" },
+  "onboardingDone": "開始",
+  "@onboardingDone": { "description": "オンボーディング: 完了ボタン" },
+  "onboardingFootnote": "これらの設定は後からいつでも変更できます。",
+  "@onboardingFootnote": { "description": "オンボーディング下部の注記" },
+
+  "onboardingSlide1Title": "HUMG向け匿名Q&A",
+  "@onboardingSlide1Title": { "description": "オンボーディング スライド1 タイトル" },
+  "onboardingSlide1Body": "匿名で質問を受け取り、回答や公開はあなたが選べます。",
+  "@onboardingSlide1Body": { "description": "オンボーディング スライド1 本文" },
+  "onboardingSlide2Title": "リンクを共有して質問を受け取る",
+  "@onboardingSlide2Title": { "description": "オンボーディング スライド2 タイトル" },
+  "onboardingSlide2Body": "プロフィールリンクを共有。ログインなしで質問できます。",
+  "@onboardingSlide2Body": { "description": "オンボーディング スライド2 本文" },
+  "onboardingSlide3Title": "認証で安全な交流",
+  "@onboardingSlide3Title": { "description": "オンボーディング スライド3 タイトル" },
+  "onboardingSlide3Body": "HUMG認証で「いいね」とコメントが解放され、信頼できる場になります。",
+  "@onboardingSlide3Body": { "description": "オンボーディング スライド3 本文" },
+
+  "onboardingHintFeedTitle": "フィードをチェック",
+  "@onboardingHintFeedTitle": { "description": "初回ヒント: フィードのタイトル" },
+  "onboardingHintFeedBody": "公開された回答を閲覧できます。いいね/コメントにはHUMG認証が必要です。",
+  "@onboardingHintFeedBody": { "description": "初回ヒント: フィードの本文" },
+  "onboardingHintInboxTitle": "受信箱",
+  "@onboardingHintInboxTitle": { "description": "初回ヒント: 受信箱のタイトル" },
+  "onboardingHintInboxBody": "あなた宛の質問がここに届きます。返信してフィードに公開できます。",
+  "@onboardingHintInboxBody": { "description": "初回ヒント: 受信箱の本文" },
+  "onboardingHintProfileTitle": "プロフィールを共有",
+  "@onboardingHintProfileTitle": { "description": "初回ヒント: プロフィールのタイトル" },
+  "onboardingHintProfileBody": "共有からリンクをコピーして、匿名の質問を受け取れます。",
+  "@onboardingHintProfileBody": { "description": "初回ヒント: プロフィールの本文" },
+  "onboardingHintSettingsTitle": "通知と認証",
+  "@onboardingHintSettingsTitle": { "description": "初回ヒント: 設定のタイトル" },
+  "onboardingHintSettingsBody": "通知を有効にし、HUMG認証でホスト機能を解放します。",
+  "@onboardingHintSettingsBody": { "description": "初回ヒント: 設定の本文" }
+
+  ,"adminEntryTitle": "管理ダッシュボード"
+  ,"@adminEntryTitle": { "description": "管理者向けにプロフィールタブに表示する管理画面エントリーバナーのタイトル" }
+  ,"adminEntrySubtitle": "保留中のコンテンツ報告を確認して対応します。"
+  ,"@adminEntrySubtitle": { "description": "管理者向けエントリーバナーのサブタイトル（対応すべき内容の説明）" }
+  ,"adminEntryButton": "開く"
+  ,"@adminEntryButton": { "description": "管理者を /admin に遷移させるボタンのラベル" }
 }
