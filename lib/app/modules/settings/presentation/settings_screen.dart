@@ -37,7 +37,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// OneSignal: login + đồng bộ tag khi mở Settings (user đã đăng nhập).
   Future<void> _syncNotificationIfLoggedIn() async {
     final user = ref.read(authStateProvider).asData?.value;
-    if (user == null || !mounted) return;
+    if (!mounted || user == null) return;
     final svc = ref.read(notificationServiceProvider);
     if (!svc.isAvailable) return;
     await svc.login(user.uid);
@@ -148,7 +148,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: ListView(
               children: [
           // ── ACCOUNT (only when logged in) ─────────────────────────────
-          if (isLoggedIn) ...[
+          if (user case final currentUser?) ...[
             _SectionHeader(label: l10n.settingsSectionAccount),
             _SettingsTile(
               icon: LucideIcons.userPen,
@@ -159,7 +159,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SettingsTile(
               icon: LucideIcons.badgeCheck,
               label: l10n.settingsHumgVerification,
-              trailing: user.isHumgVerified == true
+              trailing: currentUser.isHumgVerified == true
                   ? Text(
                       l10n.settingsHumgVerified,
                       style: tt.bodySmall?.copyWith(color: cs.primary),
@@ -175,7 +175,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Icon(LucideIcons.circleAlert, size: AppIconSize.md, color: cs.error),
                       ],
                     ),
-              onTap: user.isHumgVerified == true
+              onTap: currentUser.isHumgVerified == true
                   ? null
                   : () => context.push(AppRoutes.verifyHumg),
             ),
@@ -194,7 +194,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
 
           // ── NOTIFICATIONS (logged in only, FCM) ─────────────────────────
-          if (isLoggedIn) ...[
+          if (user case final currentUser?) ...[
             _SectionHeader(label: l10n.settingsSectionNotifications),
             _SettingsTile(
               icon: LucideIcons.bellRing,
@@ -204,7 +204,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: notifUpdateLoading
                     ? null
                     : (v) => _onNotifNewQuestionChanged(
-                          user.uid,
+                          currentUser.uid,
                           v,
                           notifNewComment,
                         ),
@@ -218,7 +218,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: notifUpdateLoading
                     ? null
                     : (v) => _onNotifNewCommentChanged(
-                          user.uid,
+                          currentUser.uid,
                           v,
                           notifNewQuestion,
                         ),

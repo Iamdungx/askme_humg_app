@@ -12,12 +12,18 @@ class QuestionCard extends StatelessWidget {
     required this.question,
     this.onReply,
     this.onDelete,
+    this.onPublish,
+    this.isPublished = true,
+    this.isPublishing = false,
     this.showReply = true,
   });
 
   final Question question;
   final VoidCallback? onReply;
   final Future<void> Function()? onDelete;
+  final Future<void> Function()? onPublish;
+  final bool isPublished;
+  final bool isPublishing;
   final bool showReply;
 
   @override
@@ -105,6 +111,24 @@ class QuestionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
+                  ],
+                  if (!showReply && !isPublished && onPublish != null) ...[
+                    AppButton(
+                      label: l10n.answerPublishButton,
+                      variant: AppButtonVariant.primary,
+                      leading: Icon(
+                        LucideIcons.send,
+                        size: 16,
+                        color: cs.onPrimary,
+                      ),
+                      isLoading: isPublishing,
+                      isFullWidth: false,
+                      minimumHeight: 40,
+                      onPressed: () async {
+                        if (!isPublishing) await onPublish!();
+                      },
+                    ),
+                    if (onDelete != null) const SizedBox(width: AppSpacing.md),
                   ],
                   if (onDelete != null)
                     AppButton(

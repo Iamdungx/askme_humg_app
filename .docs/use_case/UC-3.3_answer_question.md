@@ -52,9 +52,22 @@ B4. Show error snackbar + log via logger.e()
 B5. Host can retry
 ```
 
+## 5. Alternative Flow C – Publish Saved Answer Later
+
+```
+C1. Host previously answered with isPublished == false ("saved privately")
+C2. Host opens Inbox → Answered tab
+C3. System detects that the answer for this question is still private
+C4. Host taps "Publish" action
+C5. System updates answers/{answerId}.isPublished = true
+C6. On success:
+    - Show success snackbar
+    - Answer becomes visible on public Feed (UC-4.1 query)
+```
+
 ---
 
-## 5. Database Impact
+## 6. Database Impact
 
 ### MANDATORY: WriteBatch (both operations in one commit)
 
@@ -101,9 +114,26 @@ await batch.commit();
 |---|---|
 | `status` | `'answered'` |
 
+### Additional update for Alternative Flow C
+
+```dart
+// Find host's answer for this question
+final query = await firestore
+  .collection('answers')
+  .where('questionId', isEqualTo: questionId)
+  .where('userId', isEqualTo: currentUser.uid)
+  .limit(1)
+  .get();
+
+// Publish previously saved private answer
+await query.docs.first.reference.update({
+  'isPublished': true,
+});
+```
+
 ---
 
-## 6. Files to Create / Modify
+## 7. Files to Create / Modify
 
 ```
 lib/app/modules/qna_core/
@@ -122,7 +152,7 @@ lib/config/router.dart                               [MODIFY] ensure /inbox/answ
 
 ---
 
-## 7. Key Code Contracts
+## 8. Key Code Contracts
 
 ### Entity: `answer.dart`
 ```dart
@@ -194,7 +224,7 @@ class AnswerNotifier extends _$AnswerNotifier {
 
 ---
 
-## 8. AnswerComposeScreen Layout Spec
+## 9. AnswerComposeScreen Layout Spec
 
 ```
 AppBar: "Reply"  [← back]
@@ -219,7 +249,7 @@ AppBar: "Reply"  [← back]
 
 ---
 
-## 9. Acceptance Criteria (from SRS FR-04)
+## 10. Acceptance Criteria (from SRS FR-04)
 
 - [ ] WriteBatch is ALWAYS used — never two separate writes
 - [ ] If batch fails, NEITHER `answers` nor `questions` is modified
@@ -229,3 +259,4 @@ AppBar: "Reply"  [← back]
 - [ ] If `isPublished == true`, answer is visible on Feed (UC-4.1 query will pick it up)
 - [ ] Empty answer → submit blocked with inline error
 - [ ] Success → navigate back to inbox with snackbar confirmation
+- [ ] Saved-private answers can be published later from Inbox → Answered tab

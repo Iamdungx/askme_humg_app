@@ -194,16 +194,20 @@
 
   <script>
     const path = window.location.pathname;
-    const match = path.match(/^\/user\/(.+)$/);
-    if (match) {
-      const userId = match[1];
-      const customSchemeUrl = `askme://user/${userId}`;
+    const userMatch = path.match(/^\/user\/(.+)$/);
+    const answerMatch = path.match(/^\/answer\/(.+)$/);
+
+    if (userMatch || answerMatch) {
+      const type = userMatch ? 'user' : 'answer';
+      const id = (userMatch ?? answerMatch)[1];
+      const customSchemeUrl = `askme://${type}/${id}`;
 
       // No App Store banner — using TestFlight
 
       // Update tagline
-      document.querySelector('.tagline').innerHTML =
-        'Mở ứng dụng để xem trang hồ sơ này<br>và gửi câu hỏi ẩn danh.';
+      document.querySelector('.tagline').innerHTML = type === 'user'
+        ? 'Mở ứng dụng để xem trang hồ sơ này<br>và gửi câu hỏi ẩn danh.'
+        : 'Mở ứng dụng để xem bài trả lời này<br>và tham gia thảo luận.';
 
       // Try opening app via custom scheme; if not installed, stay on page.
       const tryOpen = () => {

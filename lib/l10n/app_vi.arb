@@ -220,6 +220,10 @@
   "@feedAnswerNotFound": { "description": "Trạng thái khi mở link bài trả lời nhưng bài không tồn tại hoặc chưa được công khai" },
   "feedReachedEnd": "Bạn đã xem hết bài đăng",
   "@feedReachedEnd": { "description": "Thông báo cuối danh sách feed" },
+  "commonCopyLink": "Sao chép link",
+  "@commonCopyLink": { "description": "Nút sao chép đường link vào clipboard" },
+  "feedShareAnswerPill": "CHIA SẺ CÂU TRẢ LỜI",
+  "@feedShareAnswerPill": { "description": "Nhãn pill nhỏ trên ảnh share bài trả lời" },
 
   "loginRequiredToLike": "Đăng nhập để thích câu trả lời này",
   "@loginRequiredToLike": { "description": "Snackbar khi khách thích bài" },

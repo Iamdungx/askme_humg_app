@@ -39,6 +39,14 @@ AnswerQuestion answerQuestionUseCase(Ref ref) =>
     AnswerQuestion(ref.watch(qnaRepositoryProvider));
 
 @riverpod
+GetAnswerPublishStates getAnswerPublishStatesUseCase(Ref ref) =>
+    GetAnswerPublishStates(ref.watch(qnaRepositoryProvider));
+
+@riverpod
+PublishSavedAnswer publishSavedAnswerUseCase(Ref ref) =>
+    PublishSavedAnswer(ref.watch(qnaRepositoryProvider));
+
+@riverpod
 DeleteQuestion deleteQuestionUseCase(Ref ref) =>
     DeleteQuestion(ref.watch(qnaRepositoryProvider));
 
@@ -63,6 +71,13 @@ Stream<List<Question>> inbox(Ref ref) {
   final uid = ref.watch(authStateProvider).asData?.value?.uid;
   if (uid == null) return Stream.value([]);
   return ref.watch(getInboxQuestionsUseCaseProvider).call(uid);
+}
+
+@riverpod
+Stream<Map<String, bool>> answerPublishStates(Ref ref) {
+  final uid = ref.watch(authStateProvider).asData?.value?.uid;
+  if (uid == null) return Stream.value(const <String, bool>{});
+  return ref.watch(getAnswerPublishStatesUseCaseProvider).call(uid);
 }
 
 // ---------------------------------------------------------------------------
@@ -129,6 +144,32 @@ class AnswerNotifier extends _$AnswerNotifier {
         userId: uid,
         content: content,
         isPublished: isPublished,
+      ),
+    );
+  }
+}
+
+@riverpod
+class PublishSavedAnswerNotifier extends _$PublishSavedAnswerNotifier {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> submit({
+    required String questionId,
+  }) async {
+    state = const AsyncLoading();
+    final uid = ref.read(authStateProvider).asData?.value?.uid;
+    if (uid == null) {
+      state = AsyncError(
+        Exception('Not authenticated'),
+        StackTrace.current,
+      );
+      return;
+    }
+    state = await AsyncValue.guard(
+      () => ref.read(publishSavedAnswerUseCaseProvider).call(
+        questionId: questionId,
+        userId: uid,
       ),
     );
   }

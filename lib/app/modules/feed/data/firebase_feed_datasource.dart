@@ -89,11 +89,29 @@ class FirebaseFeedDatasource {
     required bool isCurrentlyLiked,
   }) async {
     try {
-      await _firestore.collection('answers').doc(answerId).update({
-        'likedBy': isCurrentlyLiked
-            ? FieldValue.arrayRemove([userId])
-            : FieldValue.arrayUnion([userId]),
-        'likeCount': FieldValue.increment(isCurrentlyLiked ? -1 : 1),
+      final answerRef = _firestore.collection('answers').doc(answerId);
+      await _firestore.runTransaction((tx) async {
+        final snap = await tx.get(answerRef);
+        if (!snap.exists) {
+          throw const FirestoreException('Answer not found');
+        }
+
+        final data = snap.data();
+        final currentLikedBy = List<String>.from(data?['likedBy'] as List? ?? []);
+        final isLikedOnServer = currentLikedBy.contains(userId);
+        if (isLikedOnServer != isCurrentlyLiked) {
+          logger.w(
+            'toggleLike client/server mismatch for $answerId: '
+            'client=$isCurrentlyLiked server=$isLikedOnServer',
+          );
+        }
+
+        tx.update(answerRef, {
+          'likedBy': isLikedOnServer
+              ? FieldValue.arrayRemove([userId])
+              : FieldValue.arrayUnion([userId]),
+          'likeCount': FieldValue.increment(isLikedOnServer ? -1 : 1),
+        });
       });
     } on FirebaseException catch (e, s) {
       logger.e('toggleLike failed', error: e, stackTrace: s);

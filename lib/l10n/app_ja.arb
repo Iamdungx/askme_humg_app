@@ -226,6 +226,10 @@
   "@feedAnswerNotFound": { "description": "回答のディープリンクが存在しない／未公開の投稿を指している場合の空状態メッセージ" },
   "feedReachedEnd": "すべての投稿を見ました",
   "@feedReachedEnd": { "description": "全フィードアイテム読み込み完了時のフッターメッセージ" },
+  "commonCopyLink": "リンクをコピー",
+  "@commonCopyLink": { "description": "リンクをクリップボードにコピーする汎用ボタンラベル" },
+  "feedShareAnswerPill": "この回答をシェア",
+  "@feedShareAnswerPill": { "description": "回答シェアカード画像の小さなピルラベル" },
 
   "loginRequiredToLike": "この回答にいいねするにはサインインしてください",
   "@loginRequiredToLike": { "description": "未認証ユーザーがいいねタップ時のスナックバー" },

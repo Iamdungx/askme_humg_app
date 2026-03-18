@@ -7,6 +7,7 @@ import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
 import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/question_card.dart';
 import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
@@ -23,6 +24,7 @@ class InboxScreen extends ConsumerStatefulWidget {
 class _InboxScreenState extends ConsumerState<InboxScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  String? _publishingQuestionId;
 
   @override
   void initState() {
@@ -40,6 +42,29 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final inboxAsync = ref.watch(inboxProvider);
+    final answerPublishStatesAsync = ref.watch(answerPublishStatesProvider);
+
+    ref.listen(publishSavedAnswerProvider, (_, next) {
+      if (next.isLoading) return;
+      if (!mounted) return;
+
+      setState(() => _publishingQuestionId = null);
+
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.commonError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        return;
+      }
+
+      ref.read(feedProvider.notifier).refresh();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.answerPublishSuccess)));
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -91,6 +116,9 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
                       showReply: false,
                       emptyMessage: l10n.inboxEmptyAnswered,
                       emptyIcon: LucideIcons.circleCheck,
+                      publishStates: answerPublishStatesAsync.asData?.value,
+                      publishingQuestionId: _publishingQuestionId,
+                      onPublish: _publishSavedAnswer,
                       onDelete: (q) => _deleteQuestion(q),
                     ),
                   ],
@@ -171,6 +199,13 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
       throw state.error!;
     }
   }
+
+  Future<void> _publishSavedAnswer(Question question) async {
+    setState(() => _publishingQuestionId = question.questionId);
+    await ref
+        .read(publishSavedAnswerProvider.notifier)
+        .submit(questionId: question.questionId);
+  }
 }
 
 class _QuestionList extends StatelessWidget {
@@ -179,7 +214,10 @@ class _QuestionList extends StatelessWidget {
     required this.showReply,
     required this.emptyMessage,
     this.emptyIcon,
+    this.publishStates,
+    this.publishingQuestionId,
     this.onReply,
+    this.onPublish,
     this.onDelete,
   });
 
@@ -187,7 +225,10 @@ class _QuestionList extends StatelessWidget {
   final bool showReply;
   final String emptyMessage;
   final IconData? emptyIcon;
+  final Map<String, bool>? publishStates;
+  final String? publishingQuestionId;
   final void Function(Question)? onReply;
+  final Future<void> Function(Question)? onPublish;
   final Future<void> Function(Question)? onDelete;
 
   @override
@@ -208,7 +249,10 @@ class _QuestionList extends StatelessWidget {
         return QuestionCard(
           question: question,
           showReply: showReply,
+          isPublished: publishStates?[question.questionId] ?? true,
+          isPublishing: publishingQuestionId == question.questionId,
           onReply: onReply != null ? () => onReply!(question) : null,
+          onPublish: onPublish != null ? () => onPublish!(question) : null,
           onDelete: onDelete != null ? () => onDelete!(question) : null,
         );
       },

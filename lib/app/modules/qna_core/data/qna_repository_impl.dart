@@ -78,6 +78,33 @@ class QnaRepositoryImpl implements IQnaRepository {
   }
 
   @override
+  Stream<Map<String, bool>> getAnswerPublishStates(String userId) =>
+      _datasource.getAnswerPublishStates(userId).handleError((Object e) {
+        if (e is FirestoreException) throw FirestoreFailure(e.message);
+        if (e is AppException) throw UnknownFailure(e.message);
+        throw UnknownFailure(e.toString());
+      });
+
+  @override
+  Future<void> publishSavedAnswer({
+    required String questionId,
+    required String userId,
+  }) async {
+    try {
+      await _datasource.publishSavedAnswer(
+        questionId: questionId,
+        userId: userId,
+      );
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteQuestion(String questionId) async {
     try {
       await _datasource.deleteQuestion(questionId);

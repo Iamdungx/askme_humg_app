@@ -226,6 +226,10 @@
   "@feedAnswerNotFound": { "description": "Empty state message when an answer deep link points to a missing/unpublished post" },
   "feedReachedEnd": "You've seen all posts",
   "@feedReachedEnd": { "description": "Footer message when all feed items have been loaded" },
+  "commonCopyLink": "Copy link",
+  "@commonCopyLink": { "description": "Generic button label to copy a link to clipboard" },
+  "feedShareAnswerPill": "SHARE THIS ANSWER",
+  "@feedShareAnswerPill": { "description": "Small pill label on answer share card image" },
 
   "loginRequiredToLike": "Sign in to like this answer",
   "@loginRequiredToLike": { "description": "Snackbar when unauthenticated user taps like" },

@@ -42,6 +42,27 @@ class AnswerQuestion {
   );
 }
 
+class GetAnswerPublishStates {
+  const GetAnswerPublishStates(this._repo);
+  final IQnaRepository _repo;
+
+  Stream<Map<String, bool>> call(String userId) =>
+      _repo.getAnswerPublishStates(userId);
+}
+
+class PublishSavedAnswer {
+  const PublishSavedAnswer(this._repo);
+  final IQnaRepository _repo;
+
+  Future<void> call({
+    required String questionId,
+    required String userId,
+  }) => _repo.publishSavedAnswer(
+    questionId: questionId,
+    userId: userId,
+  );
+}
+
 class DeleteQuestion {
   const DeleteQuestion(this._repo);
   final IQnaRepository _repo;

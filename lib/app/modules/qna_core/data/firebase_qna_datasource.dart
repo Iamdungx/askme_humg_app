@@ -130,6 +130,56 @@ class FirebaseQnaDatasource {
     }
   }
 
+  /// Tracks published/private state of answers keyed by questionId for a host.
+  Stream<Map<String, bool>> getAnswerPublishStates(String userId) {
+    return _firestore
+        .collection('answers')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snap) {
+          final states = <String, bool>{};
+          for (final doc in snap.docs) {
+            final data = doc.data();
+            final questionId = data['questionId'] as String?;
+            if (questionId == null || questionId.isEmpty) continue;
+            states[questionId] = data['isPublished'] as bool? ?? false;
+          }
+          return states;
+        });
+  }
+
+  /// Publishes a previously saved private answer for a question.
+  Future<void> publishSavedAnswer({
+    required String questionId,
+    required String userId,
+  }) async {
+    try {
+      final snap = await _firestore
+          .collection('answers')
+          .where('questionId', isEqualTo: questionId)
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (snap.docs.isEmpty) {
+        throw FirestoreException(
+          'publishSavedAnswer: answer for question $questionId not found',
+        );
+      }
+
+      final answerDoc = snap.docs.first;
+      final isPublished = answerDoc.data()['isPublished'] as bool? ?? false;
+      if (isPublished) return;
+
+      await answerDoc.reference.update({
+        'isPublished': true,
+      });
+    } on FirebaseException catch (e, s) {
+      logger.e('publishSavedAnswer failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore update failed');
+    }
+  }
+
   Future<void> deleteQuestion(String questionId) async {
     try {
       await _firestore.collection('questions').doc(questionId).delete();

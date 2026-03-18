@@ -17,5 +17,12 @@ abstract class IQnaRepository {
     required bool isPublished,
   });
 
+  Stream<Map<String, bool>> getAnswerPublishStates(String userId);
+
+  Future<void> publishSavedAnswer({
+    required String questionId,
+    required String userId,
+  });
+
   Future<void> deleteQuestion(String questionId);
 }
