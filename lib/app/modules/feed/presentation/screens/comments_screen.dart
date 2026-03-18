@@ -141,9 +141,7 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
-    // Keep webhook payload consistent with what is persisted (PostCommentNotifier trims).
     final rawText = _controller.text;
-    final trimmedText = rawText.trim();
 
     final authUser = ref.read(authStateProvider).asData?.value;
     final uid = authUser?.uid;
@@ -157,11 +155,12 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
 
     setState(() => _error = null);
 
-    final failure = await ref.read(postCommentProvider.notifier).post(
+    final result = await ref.read(postCommentProvider.notifier).post(
           answerId: widget.answerId,
           content: rawText,
           isAnonymous: _isAnonymous,
         );
+    final failure = result.failure;
 
     if (!mounted) return;
 
@@ -185,8 +184,9 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     _controller.clear();
     setState(() => _error = null);
 
-    if (trimmedText.isNotEmpty) {
-      await _triggerNotifyNewComment(ref, widget.answerId, trimmedText);
+    final persistedContent = result.persistedContent;
+    if (persistedContent != null && persistedContent.isNotEmpty) {
+      await _triggerNotifyNewComment(ref, widget.answerId, persistedContent);
     }
   }
 
