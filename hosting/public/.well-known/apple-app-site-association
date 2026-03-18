@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "JHB7GHC4BZ.com.humg.askmehumg",
-        "paths": ["/user/*"]
+        "paths": ["/user/*", "/answer/*"]
       }
     ]
   }

@@ -16,7 +16,11 @@ const humgVerifyExemptPaths = <String>{
 
 /// Path prefixes that are exempt from the HUMG-verification redirect (UC-1.3).
 /// Checked with String.startsWith.
-const humgVerifyExemptPrefixes = <String>[AppRoutes.me, AppRoutes.settings];
+const humgVerifyExemptPrefixes = <String>[
+  AppRoutes.me,
+  AppRoutes.settings,
+  AppRoutes.answer,
+];
 
 /// Returns true when [path] does not require HUMG verification to access.
 bool isHumgVerifyExempt(String path) =>
@@ -37,6 +41,7 @@ abstract final class AppRoutes {
   static const verifyHumg = '/verify-humg';
   static const admin = '/admin';
   static const userProfile = '/user';
+  static const trackQuestion = '/track-question';
 }
 
 /// External URLs opened via url_launcher.

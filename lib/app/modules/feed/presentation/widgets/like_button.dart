@@ -13,11 +13,13 @@ class LikeButton extends ConsumerWidget {
     required this.answerId,
     required this.likeCount,
     required this.likedBy,
+    this.onToggleSuccess,
   });
 
   final String answerId;
   final int likeCount;
   final List<String> likedBy;
+  final VoidCallback? onToggleSuccess;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,17 +31,21 @@ class LikeButton extends ConsumerWidget {
     final isLiked = uid != null && likedBy.contains(uid);
     final isLoading = ref.watch(toggleLikeProvider(answerId)).isLoading;
 
-    void handleTap() {
+    Future<void> handleTap() async {
       if (!context.requireVerified(
         uid: uid,
         isVerified: isVerified,
         loginMessage: l10n.loginRequiredToLike,
         verifyMessage: l10n.verifyRequiredToLike,
       )) { return; }
-      ref.read(toggleLikeProvider(answerId).notifier).toggle(
-            uid: uid!,
-            isCurrentlyLiked: isLiked,
-          );
+      await ref.read(toggleLikeProvider(answerId).notifier).toggle(
+        uid: uid!,
+        isCurrentlyLiked: isLiked,
+      );
+      final result = ref.read(toggleLikeProvider(answerId));
+      if (result is! AsyncError<void>) {
+        onToggleSuccess?.call();
+      }
     }
 
     return Semantics(

@@ -372,7 +372,13 @@ class _RecentAnswersSection extends ConsumerWidget {
                 children: [
                   for (int i = 0; i < answers.length; i++) ...[
                     if (i > 0) const SizedBox(height: AppSpacing.md),
-                    AnswerPreviewCard(item: answers[i]),
+                    AnswerPreviewCard(
+                      item: answers[i],
+                      onLikeToggleSuccess: () {
+                        ref.invalidate(userAnswersProvider(userId));
+                        ref.invalidate(userProfileProvider(userId));
+                      },
+                    ),
                   ],
                 ],
               );

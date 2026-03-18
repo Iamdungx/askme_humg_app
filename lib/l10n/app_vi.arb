@@ -220,6 +220,10 @@
   "@feedAnswerNotFound": { "description": "Trạng thái khi mở link bài trả lời nhưng bài không tồn tại hoặc chưa được công khai" },
   "feedReachedEnd": "Bạn đã xem hết bài đăng",
   "@feedReachedEnd": { "description": "Thông báo cuối danh sách feed" },
+  "commonCopyLink": "Sao chép link",
+  "@commonCopyLink": { "description": "Nút sao chép đường link vào clipboard" },
+  "feedShareAnswerPill": "CHIA SẺ CÂU TRẢ LỜI",
+  "@feedShareAnswerPill": { "description": "Nhãn pill nhỏ trên ảnh share bài trả lời" },
 
   "loginRequiredToLike": "Đăng nhập để thích câu trả lời này",
   "@loginRequiredToLike": { "description": "Snackbar khi khách thích bài" },
@@ -527,6 +531,61 @@
   "@onboardingHintSettingsTitle": { "description": "Tiêu đề hint lần đầu ở tab Settings" },
   "onboardingHintSettingsBody": "Bật thông báo và hoàn tất xác minh HUMG để mở các tính năng host.",
   "@onboardingHintSettingsBody": { "description": "Nội dung hint lần đầu ở tab Settings" }
+
+  ,"commonCopy": "Sao chép"
+  ,"@commonCopy": { "description": "Nút chung để sao chép văn bản vào clipboard" }
+  ,"commonClose": "Đóng"
+  ,"@commonClose": { "description": "Nút chung để đóng dialog hoặc lớp phủ" }
+  ,"settingsTrackQuestion": "Theo dõi phiếu hỏi"
+  ,"@settingsTrackQuestion": { "description": "Mục cài đặt mở màn hình tra cứu câu hỏi ẩn danh" }
+  ,"settingsTrackQuestionSubtitle": "Nhập mã 6 ký tự (chữ và số) để xem trạng thái trả lời"
+  ,"@settingsTrackQuestionSubtitle": { "description": "Mô tả phụ cho mục theo dõi phiếu hỏi bằng mã thủ công" }
+  ,"questionTrackingCodeDescription": "Hãy lưu mã 6 ký tự (chữ và số) này để tra cứu trạng thái câu hỏi sau."
+  ,"@questionTrackingCodeDescription": { "description": "Mô tả trong dialog sau khi gửi câu hỏi thành công, hướng dẫn dùng mã tra cứu" }
+  ,"questionTrackingCodeCopied": "Đã sao chép mã tra cứu"
+  ,"@questionTrackingCodeCopied": { "description": "Snackbar sau khi người dùng sao chép mã tra cứu" }
+  ,"questionTrackingCodeTrackNow": "Tra cứu ngay"
+  ,"@questionTrackingCodeTrackNow": { "description": "Nút trong dialog để mở ngay màn hình tra cứu" }
+  ,"trackQuestionTitle": "Theo dõi câu hỏi"
+  ,"@trackQuestionTitle": { "description": "Tiêu đề AppBar của màn hình theo dõi câu hỏi ẩn danh" }
+  ,"trackQuestionDescription": "Nhập mã tra cứu 6 ký tự (chữ và số) để kiểm tra câu hỏi ẩn danh của bạn đã được trả lời hay chưa."
+  ,"@trackQuestionDescription": { "description": "Đoạn mô tả ở đầu màn hình theo dõi câu hỏi" }
+  ,"trackQuestionInputLabel": "Mã tra cứu"
+  ,"@trackQuestionInputLabel": { "description": "Nhãn ô nhập mã tra cứu" }
+  ,"trackQuestionInputHint": "Mã 6 ký tự"
+  ,"@trackQuestionInputHint": { "description": "Placeholder cho ô nhập mã tra cứu" }
+  ,"trackQuestionLookupButton": "Tra cứu trạng thái"
+  ,"@trackQuestionLookupButton": { "description": "Nút chính để gửi yêu cầu tra cứu mã" }
+  ,"trackQuestionErrorInvalidCode": "Mã tra cứu không hợp lệ."
+  ,"@trackQuestionErrorInvalidCode": { "description": "Lỗi khi mã tra cứu không hợp lệ từ phản hồi server" }
+  ,"trackQuestionErrorNotFound": "Không tìm thấy câu hỏi với mã này."
+  ,"@trackQuestionErrorNotFound": { "description": "Lỗi khi không có câu hỏi tương ứng với mã tra cứu" }
+  ,"trackQuestionErrorTooManyRequests": "Bạn tra cứu quá nhiều lần. Vui lòng thử lại sau."
+  ,"@trackQuestionErrorTooManyRequests": { "description": "Lỗi khi endpoint tra cứu bị giới hạn tần suất" }
+  ,"trackQuestionErrorEmpty": "Vui lòng nhập mã tra cứu."
+  ,"@trackQuestionErrorEmpty": { "description": "Lỗi client khi ô mã tra cứu để trống" }
+  ,"trackQuestionErrorCodeLength": "Mã tra cứu phải gồm đúng 6 ký tự."
+  ,"@trackQuestionErrorCodeLength": { "description": "Lỗi client khi độ dài mã tra cứu không phải 6" }
+  ,"trackQuestionErrorCodeFormat": "Mã tra cứu chỉ được chứa chữ và số."
+  ,"@trackQuestionErrorCodeFormat": { "description": "Lỗi client khi mã tra cứu có ký tự không phải chữ hoặc số" }
+  ,"trackQuestionStatusAnswered": "Đã trả lời"
+  ,"@trackQuestionStatusAnswered": { "description": "Nhãn trạng thái khi câu hỏi ẩn danh đã có câu trả lời" }
+  ,"trackQuestionStatusUnanswered": "Đang chờ trả lời"
+  ,"@trackQuestionStatusUnanswered": { "description": "Nhãn trạng thái khi câu hỏi ẩn danh chưa được trả lời" }
+  ,"trackQuestionCreatedAt": "Đã hỏi {timeAgo}"
+  ,"@trackQuestionCreatedAt": {
+    "description": "Mốc thời gian tương đối cho thời điểm gửi câu hỏi",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnsweredAt": "Đã trả lời {timeAgo}"
+  ,"@trackQuestionAnsweredAt": {
+    "description": "Mốc thời gian tương đối cho thời điểm host trả lời",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnswerNotPublished": "Host đã trả lời nhưng chưa công khai câu trả lời này."
+  ,"@trackQuestionAnswerNotPublished": { "description": "Thông tin khi đã có câu trả lời nhưng chưa được publish lên feed" }
+  ,"trackQuestionOpenAnswer": "Mở câu trả lời"
+  ,"@trackQuestionOpenAnswer": { "description": "Nhãn nút mở chi tiết câu trả lời đã công khai từ màn tra cứu" }
 
   ,"adminEntryTitle": "Admin Dashboard"
   ,"@adminEntryTitle": { "description": "Tiêu đề banner entry Admin hiển thị ở tab Hồ sơ khi user là admin" }

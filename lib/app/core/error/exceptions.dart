@@ -48,9 +48,18 @@ class AppCheckException extends AppException {
   const AppCheckException() : super('App verification failed.');
 }
 
+class InvalidTrackingCodeException extends AppException {
+  const InvalidTrackingCodeException() : super('Invalid tracking code.');
+}
+
+class TrackingNotFoundException extends AppException {
+  const TrackingNotFoundException() : super('Tracking code not found.');
+}
+
 /// UC-1.3 — OTP-specific exceptions thrown from OtpDatasource.
 class OtpExpiredException extends AppException {
-  const OtpExpiredException() : super('OTP has expired. Please request a new one.');
+  const OtpExpiredException()
+    : super('OTP has expired. Please request a new one.');
 }
 
 class OtpInvalidException extends AppException {
@@ -59,7 +68,7 @@ class OtpInvalidException extends AppException {
 
 class OtpMaxAttemptsException extends AppException {
   const OtpMaxAttemptsException()
-      : super('Too many failed attempts. Please request a new OTP.');
+    : super('Too many failed attempts. Please request a new OTP.');
 }
 
 class OtpSendException extends AppException {
@@ -69,7 +78,7 @@ class OtpSendException extends AppException {
 /// Thrown when the user tries to change their avatar within the 7-day cooldown window.
 class AvatarCooldownException extends AppException {
   const AvatarCooldownException(this.nextAllowedAt)
-      : super('Avatar can only be changed once every 7 days');
+    : super('Avatar can only be changed once every 7 days');
 
   /// The earliest DateTime the user may change their avatar again.
   final DateTime nextAllowedAt;

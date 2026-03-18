@@ -31,19 +31,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadVersion();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncNotificationIfLoggedIn());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _syncNotificationIfLoggedIn(),
+    );
   }
 
   /// OneSignal: login + đồng bộ tag khi mở Settings (user đã đăng nhập).
   Future<void> _syncNotificationIfLoggedIn() async {
     final user = ref.read(authStateProvider).asData?.value;
-    if (user == null || !mounted) return;
+    if (!mounted || user == null) return;
     final svc = ref.read(notificationServiceProvider);
     if (!svc.isAvailable) return;
     await svc.login(user.uid);
     final notifQuestion = ref.read(notifNewQuestionProvider);
     final notifComment = ref.read(notifNewCommentProvider);
-    await svc.syncTags(notifNewQuestion: notifQuestion, notifNewComment: notifComment);
+    await svc.syncTags(
+      notifNewQuestion: notifQuestion,
+      notifNewComment: notifComment,
+    );
   }
 
   Future<void> _onNotifNewQuestionChanged(
@@ -51,7 +56,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     bool value,
     bool notifComment,
   ) async {
-    await ref.read(notificationPrefsUpdaterProvider.notifier).setPrefs(
+    await ref
+        .read(notificationPrefsUpdaterProvider.notifier)
+        .setPrefs(
           userId: userId,
           notifNewQuestion: value,
           notifNewComment: notifComment,
@@ -63,7 +70,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     bool value,
     bool notifQuestion,
   ) async {
-    await ref.read(notificationPrefsUpdaterProvider.notifier).setPrefs(
+    await ref
+        .read(notificationPrefsUpdaterProvider.notifier)
+        .setPrefs(
           userId: userId,
           notifNewQuestion: notifQuestion,
           notifNewComment: value,
@@ -73,7 +82,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _loadVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      if (mounted) setState(() => _version = '${info.version} (${info.buildNumber})');
+      if (mounted) {
+        setState(() => _version = '${info.version} (${info.buildNumber})');
+      }
     } catch (e) {
       logger.w('Failed to load package info', error: e);
     }
@@ -95,9 +106,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context);
     await ref.read(cacheClearerProvider.notifier).clear();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.settingsClearCacheSuccess)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.settingsClearCacheSuccess)));
   }
 
   @override
@@ -118,9 +129,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     ref.listen<AsyncValue<void>>(notificationPrefsUpdaterProvider, (_, next) {
       if (next is AsyncError && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commonError)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.commonError)));
       }
     });
     final cacheSizeAsync = ref.watch(cacheSizeProvider);
@@ -147,219 +158,275 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Expanded(
             child: ListView(
               children: [
-          // ── ACCOUNT (only when logged in) ─────────────────────────────
-          if (isLoggedIn) ...[
-            _SectionHeader(label: l10n.settingsSectionAccount),
-            _SettingsTile(
-              icon: LucideIcons.userPen,
-              label: l10n.settingsEditProfile,
-              trailing: const Icon(LucideIcons.chevronRight, size: AppIconSize.md),
-              onTap: () => context.push(AppRoutes.meEdit),
-            ),
-            _SettingsTile(
-              icon: LucideIcons.badgeCheck,
-              label: l10n.settingsHumgVerification,
-              trailing: user.isHumgVerified == true
-                  ? Text(
-                      l10n.settingsHumgVerified,
-                      style: tt.bodySmall?.copyWith(color: cs.primary),
-                    )
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.settingsHumgNotVerified,
-                          style: tt.bodySmall?.copyWith(color: cs.error),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Icon(LucideIcons.circleAlert, size: AppIconSize.md, color: cs.error),
-                      ],
+                // ── ACCOUNT (only when logged in) ─────────────────────────────
+                if (user case final currentUser?) ...[
+                  _SectionHeader(label: l10n.settingsSectionAccount),
+                  _SettingsTile(
+                    icon: LucideIcons.userPen,
+                    label: l10n.settingsEditProfile,
+                    trailing: const Icon(
+                      LucideIcons.chevronRight,
+                      size: AppIconSize.md,
                     ),
-              onTap: user.isHumgVerified == true
-                  ? null
-                  : () => context.push(AppRoutes.verifyHumg),
-            ),
-            _SettingsTile(
-              icon: LucideIcons.eye,
-              label: l10n.settingsShowRealName,
-              subtitle: l10n.settingsShowRealNameSubtitle,
-              trailing: Switch(
-                value: showRealName,
-                onChanged: (v) {
-                  ref.read(showRealNameProvider.notifier).toggle(v);
-                  // TODO(v2): persist showRealName to Firestore users doc
-                },
-              ),
-            ),
-          ],
+                    onTap: () => context.push(AppRoutes.meEdit),
+                  ),
+                  _SettingsTile(
+                    icon: LucideIcons.badgeCheck,
+                    label: l10n.settingsHumgVerification,
+                    trailing: currentUser.isHumgVerified == true
+                        ? Text(
+                            l10n.settingsHumgVerified,
+                            style: tt.bodySmall?.copyWith(color: cs.primary),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n.settingsHumgNotVerified,
+                                style: tt.bodySmall?.copyWith(color: cs.error),
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Icon(
+                                LucideIcons.circleAlert,
+                                size: AppIconSize.md,
+                                color: cs.error,
+                              ),
+                            ],
+                          ),
+                    onTap: currentUser.isHumgVerified == true
+                        ? null
+                        : () => context.push(AppRoutes.verifyHumg),
+                  ),
+                  _SettingsTile(
+                    icon: LucideIcons.eye,
+                    label: l10n.settingsShowRealName,
+                    subtitle: l10n.settingsShowRealNameSubtitle,
+                    trailing: Switch(
+                      value: showRealName,
+                      onChanged: (v) {
+                        ref.read(showRealNameProvider.notifier).toggle(v);
+                        // TODO(v2): persist showRealName to Firestore users doc
+                      },
+                    ),
+                  ),
+                ],
 
-          // ── NOTIFICATIONS (logged in only, FCM) ─────────────────────────
-          if (isLoggedIn) ...[
-            _SectionHeader(label: l10n.settingsSectionNotifications),
-            _SettingsTile(
-              icon: LucideIcons.bellRing,
-              label: l10n.settingsNotifNewQuestion,
-              trailing: Switch(
-                value: notifNewQuestion,
-                onChanged: notifUpdateLoading
-                    ? null
-                    : (v) => _onNotifNewQuestionChanged(
-                          user.uid,
-                          v,
-                          notifNewComment,
-                        ),
-              ),
-            ),
-            _SettingsTile(
-              icon: LucideIcons.messageCircle,
-              label: l10n.settingsNotifNewComment,
-              trailing: Switch(
-                value: notifNewComment,
-                onChanged: notifUpdateLoading
-                    ? null
-                    : (v) => _onNotifNewCommentChanged(
-                          user.uid,
-                          v,
-                          notifNewQuestion,
-                        ),
-              ),
-            ),
-          ],
+                // ── NOTIFICATIONS (logged in only, FCM) ─────────────────────────
+                if (user case final currentUser?) ...[
+                  _SectionHeader(label: l10n.settingsSectionNotifications),
+                  _SettingsTile(
+                    icon: LucideIcons.bellRing,
+                    label: l10n.settingsNotifNewQuestion,
+                    trailing: Switch(
+                      value: notifNewQuestion,
+                      onChanged: notifUpdateLoading
+                          ? null
+                          : (v) => _onNotifNewQuestionChanged(
+                              currentUser.uid,
+                              v,
+                              notifNewComment,
+                            ),
+                    ),
+                  ),
+                  _SettingsTile(
+                    icon: LucideIcons.messageCircle,
+                    label: l10n.settingsNotifNewComment,
+                    trailing: Switch(
+                      value: notifNewComment,
+                      onChanged: notifUpdateLoading
+                          ? null
+                          : (v) => _onNotifNewCommentChanged(
+                              currentUser.uid,
+                              v,
+                              notifNewQuestion,
+                            ),
+                    ),
+                  ),
+                ],
 
-          // ── APP ───────────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsSectionApp),
-          _SettingsTile(
-            icon: LucideIcons.circleQuestionMark,
-            label: l10n.settingsUserGuide,
-            trailing: const Icon(LucideIcons.chevronRight, size: AppIconSize.md),
-            onTap: () => context.push(AppRoutes.onboarding),
-          ),
-          _SettingsTile(
-            icon: LucideIcons.languages,
-            label: l10n.settingsLanguage,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _localeName(locale.languageCode, l10n),
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: AppSemanticColors.opacitySubtle),
+                // ── APP ───────────────────────────────────────────────────────
+                _SectionHeader(label: l10n.settingsSectionApp),
+                _SettingsTile(
+                  icon: LucideIcons.circleQuestionMark,
+                  label: l10n.settingsUserGuide,
+                  trailing: const Icon(
+                    LucideIcons.chevronRight,
+                    size: AppIconSize.md,
+                  ),
+                  onTap: () => context.push(AppRoutes.onboarding),
+                ),
+                _SettingsTile(
+                  icon: LucideIcons.searchCheck,
+                  label: l10n.settingsTrackQuestion,
+                  subtitle: l10n.settingsTrackQuestionSubtitle,
+                  trailing: const Icon(
+                    LucideIcons.chevronRight,
+                    size: AppIconSize.md,
+                  ),
+                  onTap: () => context.push(AppRoutes.trackQuestion),
+                ),
+                _SettingsTile(
+                  icon: LucideIcons.languages,
+                  label: l10n.settingsLanguage,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _localeName(locale.languageCode, l10n),
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurface.withValues(
+                            alpha: AppSemanticColors.opacitySubtle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: AppIconSize.md,
+                        color: cs.outline,
+                      ),
+                    ],
+                  ),
+                  onTap: () => _showLanguageDialog(context, l10n, locale),
+                ),
+                ListTile(
+                  leading: Icon(
+                    LucideIcons.sunMoon,
+                    color: cs.primary,
+                    size: AppIconSize.lg,
+                  ),
+                  title: Text(l10n.settingsTheme),
+                  trailing: SegmentedButton<ThemeMode>(
+                    segments: [
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: const Icon(LucideIcons.sun, size: AppIconSize.sm),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        icon: const Icon(
+                          LucideIcons.monitor,
+                          size: AppIconSize.sm,
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: const Icon(
+                          LucideIcons.moon,
+                          size: AppIconSize.sm,
+                        ),
+                      ),
+                    ],
+                    selected: {themeMode},
+                    onSelectionChanged: (s) =>
+                        ref.read(themeModeProvider.notifier).setMode(s.first),
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                Icon(LucideIcons.chevronRight, size: AppIconSize.md, color: cs.outline),
+                _SettingsTile(
+                  icon: LucideIcons.trash2,
+                  label: l10n.settingsClearCache,
+                  trailing: Text(
+                    cacheSizeAsync.when(
+                      data: CacheService.formatBytes,
+                      loading: () => CacheService.loadingPlaceholder,
+                      error: (_, _) => CacheService.errorPlaceholder,
+                    ),
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(
+                        alpha: AppSemanticColors.opacityDisabled,
+                      ),
+                    ),
+                  ),
+                  onTap: _clearCache,
+                ),
+
+                // ── ABOUT ─────────────────────────────────────────────────────
+                _SectionHeader(label: l10n.settingsSectionAbout),
+                _SettingsTile(
+                  icon: LucideIcons.info,
+                  label: l10n.settingsVersion,
+                  trailing: Text(
+                    _version.isEmpty
+                        ? CacheService.loadingPlaceholder
+                        : _version,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(
+                        alpha: AppSemanticColors.opacityDisabled,
+                      ),
+                    ),
+                  ),
+                ),
+                _SettingsTile(
+                  icon: LucideIcons.fileText,
+                  label: l10n.settingsTermsOfService,
+                  trailing: Text(
+                    l10n.settingsNotifComingSoon,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(
+                        alpha: AppSemanticColors.opacityDisabled,
+                      ),
+                    ),
+                  ),
+                  onTap: null,
+                ),
+                _SettingsTile(
+                  icon: LucideIcons.shield,
+                  label: l10n.settingsPrivacyPolicy,
+                  trailing: Text(
+                    l10n.settingsNotifComingSoon,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(
+                        alpha: AppSemanticColors.opacityDisabled,
+                      ),
+                    ),
+                  ),
+                  onTap: null,
+                ),
+
+                // ── SIGN OUT ──────────────────────────────────────────────────
+                if (isLoggedIn) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    child: OutlinedButton.icon(
+                      onPressed: _signOut,
+                      icon: const Icon(LucideIcons.logOut),
+                      label: Text(l10n.settingsSignOut),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: cs.error,
+                        side: BorderSide(
+                          color: cs.error.withValues(
+                            alpha: AppSemanticColors.opacityDisabled,
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: AppSpacing.xxl),
+                Center(
+                  child: Text(
+                    l10n.settingsTagline,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(
+                        alpha: AppSemanticColors.opacityHint,
+                      ),
+                      fontSize: AppTypography.fontSizeCaption,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
               ],
-            ),
-            onTap: () => _showLanguageDialog(context, l10n, locale),
-          ),
-          ListTile(
-            leading: Icon(LucideIcons.sunMoon, color: cs.primary, size: AppIconSize.lg),
-            title: Text(l10n.settingsTheme),
-            trailing: SegmentedButton<ThemeMode>(
-              segments: [
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: const Icon(LucideIcons.sun, size: AppIconSize.sm),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: const Icon(LucideIcons.monitor, size: AppIconSize.sm),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: const Icon(LucideIcons.moon, size: AppIconSize.sm),
-                ),
-              ],
-              selected: {themeMode},
-              onSelectionChanged: (s) =>
-                  ref.read(themeModeProvider.notifier).setMode(s.first),
-              style: const ButtonStyle(
-                visualDensity: VisualDensity.compact,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-          ),
-          _SettingsTile(
-            icon: LucideIcons.trash2,
-            label: l10n.settingsClearCache,
-            trailing: Text(
-              cacheSizeAsync.when(
-                data: CacheService.formatBytes,
-                loading: () => CacheService.loadingPlaceholder,
-                error: (_, _) => CacheService.errorPlaceholder,
-              ),
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-              ),
-            ),
-            onTap: _clearCache,
-          ),
-
-          // ── ABOUT ─────────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsSectionAbout),
-          _SettingsTile(
-            icon: LucideIcons.info,
-            label: l10n.settingsVersion,
-            trailing: Text(
-              _version.isEmpty ? CacheService.loadingPlaceholder : _version,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-              ),
-            ),
-          ),
-          _SettingsTile(
-            icon: LucideIcons.fileText,
-            label: l10n.settingsTermsOfService,
-            trailing: Text(
-              l10n.settingsNotifComingSoon,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-              ),
-            ),
-            onTap: null,
-          ),
-          _SettingsTile(
-            icon: LucideIcons.shield,
-            label: l10n.settingsPrivacyPolicy,
-            trailing: Text(
-              l10n.settingsNotifComingSoon,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-              ),
-            ),
-            onTap: null,
-          ),
-
-          // ── SIGN OUT ──────────────────────────────────────────────────
-          if (isLoggedIn) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: OutlinedButton.icon(
-                onPressed: _signOut,
-                icon: const Icon(LucideIcons.logOut),
-                label: Text(l10n.settingsSignOut),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: cs.error,
-                  side: BorderSide(color: cs.error.withValues(alpha: AppSemanticColors.opacityDisabled)),
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                ),
-              ),
-            ),
-          ],
-
-          const SizedBox(height: AppSpacing.xxl),
-          Center(
-            child: Text(
-              l10n.settingsTagline,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityHint),
-                fontSize: AppTypography.fontSizeCaption,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
             ),
           ),
         ],
@@ -424,7 +491,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     'ja' => '🇯🇵',
     _ => '🌐',
   };
-
 }
 
 // ---------------------------------------------------------------------------
@@ -449,7 +515,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: tt.labelSmall?.copyWith(
-          color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
+          color: cs.onSurface.withValues(
+            alpha: AppSemanticColors.opacityDisabled,
+          ),
           letterSpacing: 1.2,
           fontWeight: FontWeight.w600,
         ),
@@ -483,13 +551,16 @@ class _SettingsTile extends StatelessWidget {
           ? Text(
               subtitle!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityDisabled),
-                  ),
+                color: cs.onSurface.withValues(
+                  alpha: AppSemanticColors.opacityDisabled,
+                ),
+              ),
             )
           : null,
       trailing: trailing,
       onTap: onTap,
-      enabled: onTap != null ||
+      enabled:
+          onTap != null ||
           (trailing is Switch && (trailing as Switch).onChanged != null),
     );
   }
@@ -530,17 +601,17 @@ class _SignOutSheet extends StatelessWidget {
           Text(
             l10n.settingsSignOut,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.settingsSignOutConfirm,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.xl),
           Row(

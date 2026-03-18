@@ -226,6 +226,10 @@
   "@feedAnswerNotFound": { "description": "Empty state message when an answer deep link points to a missing/unpublished post" },
   "feedReachedEnd": "You've seen all posts",
   "@feedReachedEnd": { "description": "Footer message when all feed items have been loaded" },
+  "commonCopyLink": "Copy link",
+  "@commonCopyLink": { "description": "Generic button label to copy a link to clipboard" },
+  "feedShareAnswerPill": "SHARE THIS ANSWER",
+  "@feedShareAnswerPill": { "description": "Small pill label on answer share card image" },
 
   "loginRequiredToLike": "Sign in to like this answer",
   "@loginRequiredToLike": { "description": "Snackbar when unauthenticated user taps like" },
@@ -524,6 +528,61 @@
   "@onboardingHintSettingsTitle": { "description": "First-run hint title on Settings tab" },
   "onboardingHintSettingsBody": "Enable notifications and complete HUMG verification to unlock host features.",
   "@onboardingHintSettingsBody": { "description": "First-run hint body on Settings tab" }
+
+  ,"commonCopy": "Copy"
+  ,"@commonCopy": { "description": "Generic button label to copy plain text to clipboard" }
+  ,"commonClose": "Close"
+  ,"@commonClose": { "description": "Generic button label to close dialogs and overlays" }
+  ,"settingsTrackQuestion": "Track anonymous question"
+  ,"@settingsTrackQuestion": { "description": "Settings item label to open anonymous question tracking screen" }
+  ,"settingsTrackQuestionSubtitle": "Enter a 6-character code (letters and numbers) to check answer status"
+  ,"@settingsTrackQuestionSubtitle": { "description": "Settings item subtitle describing manual tracking code lookup" }
+  ,"questionTrackingCodeDescription": "Save this 6-character code (letters and numbers) to track your question status later."
+  ,"@questionTrackingCodeDescription": { "description": "Dialog body shown after anonymous submit success to explain tracking code usage" }
+  ,"questionTrackingCodeCopied": "Tracking code copied"
+  ,"@questionTrackingCodeCopied": { "description": "Snackbar shown after copying tracking code from submit success dialog" }
+  ,"questionTrackingCodeTrackNow": "Track now"
+  ,"@questionTrackingCodeTrackNow": { "description": "Dialog action button to open the tracking screen immediately" }
+  ,"trackQuestionTitle": "Track question"
+  ,"@trackQuestionTitle": { "description": "AppBar title for anonymous question tracking screen" }
+  ,"trackQuestionDescription": "Enter your 6-character tracking code (letters and numbers) to check whether your anonymous question has been answered."
+  ,"@trackQuestionDescription": { "description": "Description text at top of tracking screen" }
+  ,"trackQuestionInputLabel": "Tracking code"
+  ,"@trackQuestionInputLabel": { "description": "Input label for tracking code field" }
+  ,"trackQuestionInputHint": "6-character code"
+  ,"@trackQuestionInputHint": { "description": "Placeholder hint for tracking code input field" }
+  ,"trackQuestionLookupButton": "Check status"
+  ,"@trackQuestionLookupButton": { "description": "Primary button label to submit tracking code lookup" }
+  ,"trackQuestionErrorInvalidCode": "Invalid tracking code."
+  ,"@trackQuestionErrorInvalidCode": { "description": "Error message when tracking code format is invalid on server response" }
+  ,"trackQuestionErrorNotFound": "No question found for this code."
+  ,"@trackQuestionErrorNotFound": { "description": "Error message when no question exists for provided tracking code" }
+  ,"trackQuestionErrorTooManyRequests": "Too many lookup attempts. Please try again later."
+  ,"@trackQuestionErrorTooManyRequests": { "description": "Error message when tracking lookup endpoint is rate-limited" }
+  ,"trackQuestionErrorEmpty": "Please enter your tracking code."
+  ,"@trackQuestionErrorEmpty": { "description": "Client-side validation error when tracking code input is empty" }
+  ,"trackQuestionErrorCodeLength": "Tracking code must be exactly 6 characters."
+  ,"@trackQuestionErrorCodeLength": { "description": "Client-side validation error when tracking code length is not 6" }
+  ,"trackQuestionErrorCodeFormat": "Tracking code must contain letters and numbers only."
+  ,"@trackQuestionErrorCodeFormat": { "description": "Client-side validation error when tracking code contains non-alphanumeric characters" }
+  ,"trackQuestionStatusAnswered": "Answered"
+  ,"@trackQuestionStatusAnswered": { "description": "Status label when anonymous question has been answered" }
+  ,"trackQuestionStatusUnanswered": "Waiting for answer"
+  ,"@trackQuestionStatusUnanswered": { "description": "Status label when anonymous question is not answered yet" }
+  ,"trackQuestionCreatedAt": "Asked {timeAgo}"
+  ,"@trackQuestionCreatedAt": {
+    "description": "Relative timestamp showing when anonymous question was submitted",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnsweredAt": "Answered {timeAgo}"
+  ,"@trackQuestionAnsweredAt": {
+    "description": "Relative timestamp showing when anonymous question was answered",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnswerNotPublished": "The host has answered, but this answer is not public yet."
+  ,"@trackQuestionAnswerNotPublished": { "description": "Informational text when answer exists but is not published to feed" }
+  ,"trackQuestionOpenAnswer": "Open answer"
+  ,"@trackQuestionOpenAnswer": { "description": "Button label to open published answer detail from tracking screen" }
 
   ,"adminEntryTitle": "Admin Dashboard"
   ,"@adminEntryTitle": { "description": "Title for the admin entry banner shown on the Profile tab for admins" }

@@ -12,7 +12,6 @@ import 'package:askme_humg/config/router.dart';
 import 'package:askme_humg/app/core/values/app_theme.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/config/app_routes.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

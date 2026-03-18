@@ -261,15 +261,23 @@ class PostCommentNotifier extends _$PostCommentNotifier {
   @override
   FutureOr<void> build() {}
 
-  /// Returns a [Failure] if validation fails or the call errors, null on success.
-  Future<Failure?> post({
+  /// Returns submission result including normalized persisted content.
+  Future<PostCommentSubmissionResult> post({
     required String answerId,
     required String content,
     required bool isAnonymous,
   }) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty) return const ValidationFailure('errorCommentEmpty');
-    if (trimmed.length > 500) return const ValidationFailure('errorCommentTooLong');
+    if (trimmed.isEmpty) {
+      return const PostCommentSubmissionResult(
+        failure: ValidationFailure('errorCommentEmpty'),
+      );
+    }
+    if (trimmed.length > 500) {
+      return const PostCommentSubmissionResult(
+        failure: ValidationFailure('errorCommentTooLong'),
+      );
+    }
 
     final uid = ref.read(authStateProvider).asData?.value?.uid;
 
@@ -290,13 +298,25 @@ class PostCommentNotifier extends _$PostCommentNotifier {
         error: result.error,
         stackTrace: result.stackTrace,
       );
-      return result.error is Failure
-          ? result.error as Failure
-          : UnknownFailure(result.error.toString());
+      return PostCommentSubmissionResult(
+        failure: result.error is Failure
+            ? result.error as Failure
+            : UnknownFailure(result.error.toString()),
+      );
     }
 
     // Keep the feed card in sync (commentCount) without forcing a full refresh.
     ref.read(feedProvider.notifier).incrementItemCommentCount(answerId);
-    return null;
+    return PostCommentSubmissionResult(persistedContent: trimmed);
   }
+}
+
+class PostCommentSubmissionResult {
+  const PostCommentSubmissionResult({
+    this.failure,
+    this.persistedContent,
+  });
+
+  final Failure? failure;
+  final String? persistedContent;
 }

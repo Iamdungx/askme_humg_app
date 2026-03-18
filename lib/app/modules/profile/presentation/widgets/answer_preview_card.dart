@@ -8,9 +8,14 @@ import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dar
 
 /// Read-only answer preview card shown in the Profile screen's "Recent Answers" section.
 class AnswerPreviewCard extends StatelessWidget {
-  const AnswerPreviewCard({super.key, required this.item});
+  const AnswerPreviewCard({
+    super.key,
+    required this.item,
+    this.onLikeToggleSuccess,
+  });
 
   final FeedItem item;
+  final VoidCallback? onLikeToggleSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,7 @@ class AnswerPreviewCard extends StatelessWidget {
                         answerId: item.answerId,
                         likeCount: item.likeCount,
                         likedBy: item.likedBy,
+                        onToggleSuccess: onLikeToggleSuccess,
                       ),
                       const SizedBox(width: AppSpacing.lg),
                       _CommentChip(
