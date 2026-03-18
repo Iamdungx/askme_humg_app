@@ -11,10 +11,12 @@ App gửi thông báo qua OneSignal bằng cách gọi webhook sau khi tạo câ
 
 ```env
 ONESIGNAL_APP_ID=your-onesignal-app-id
-NOTIFY_WEBHOOK_URL=https://your-deployment.vercel.app/api
+NOTIFY_WEBHOOK_URL=https://askme-humg.vercel.app/api
+API_BASE_URL=https://askme-humg.vercel.app/api
 ```
 
 - `NOTIFY_WEBHOOK_URL`: URL gốc tới project Vercel (không ghi thêm `/notify` — client tự thêm).
+- `API_BASE_URL`: URL gốc API cho submit question + tracking status.
 
 ## 3. Deploy webhook (Vercel)
 
@@ -34,6 +36,7 @@ vercel
 | Name | Mô tả |
 |------|--------|
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | Nội dung JSON của service account (Firebase Console > Project Settings > Service accounts > Generate new private key). Copy toàn bộ JSON dán vào (một dòng). |
+| `TRACKING_CODE_PEPPER` | Secret dùng để hash tracking code (khuyên dùng chuỗi random dài). |
 | `ONESIGNAL_REST_API_KEY` | REST API Key từ OneSignal. |
 | `ONESIGNAL_APP_ID` | OneSignal App ID. |
 
@@ -45,6 +48,18 @@ vercel
 - Khi có câu hỏi mới: client sau khi ghi Firestore gọi `POST {NOTIFY_WEBHOOK_URL}/notify` với `idToken`, `type: 'new_question'`, `toUserId`, `content`. Webhook kiểm tra `users/{toUserId}.notifNewQuestion` rồi gửi OneSignal tới `external_id = toUserId`.
 - Khi có comment mới: client gọi với `type: 'new_comment'`, `answerId`, `content`. Webhook đọc `answers/{answerId}.userId`, kiểm tra `users/{userId}.notifNewComment` rồi gửi OneSignal.
 
+### Bổ sung (Tracking + Submit API)
+
+- Submit câu hỏi ẩn danh:
+  - `POST {API_BASE_URL}/submitQuestion`
+  - Body: `{ toUserId, content, fid }`
+  - Response: `{ questionId, trackingCode }`
+- Tra cứu trạng thái:
+  - `POST {API_BASE_URL}/getQuestionTrackingStatus`
+  - Body: `{ trackingCode, clientKey }`
+  - Response: `{ status, createdAt, answeredAt, isPublished, answerId }`
+- Tracking code hiện dùng format 6 ký tự chữ+số (ví dụ `AD79HQ`).
+
 ## 5. Khi đã có Blaze
 
-Có thể tắt OneSignal + webhook, bật lại FCM và deploy Cloud Functions `onQuestionCreated` / `onCommentCreated` trong `functions/` như đã viết sẵn.
+Có thể tắt OneSignal + Vercel webhook API, bật lại Firebase Functions cho toàn bộ luồng notification/submit nếu muốn thống nhất hạ tầng.

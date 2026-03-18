@@ -1,9 +1,16 @@
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
+import 'package:askme_humg/app/modules/qna_core/domain/question_submission_receipt.dart';
+import 'package:askme_humg/app/modules/qna_core/domain/question_tracking_status.dart';
 
 abstract class IQnaRepository {
-  Future<void> submitAnonymousQuestion({
+  Future<QuestionSubmissionReceipt> submitAnonymousQuestion({
     required String toUserId,
     required String content,
+  });
+
+  Future<QuestionTrackingStatus> getQuestionTrackingStatus({
+    required String trackingCode,
+    String? clientKey,
   });
 
   Stream<List<Question>> getInboxQuestions(String userId);

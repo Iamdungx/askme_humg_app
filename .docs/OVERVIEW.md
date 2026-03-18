@@ -46,9 +46,9 @@ Tổng tiến độ: 100% ██████████  (v1.0.0 — 02-03-2026
 | Settings Screen (theme, language, HUMG verify, sign out) | ✅ Xong |
 | Edit Profile Screen (avatar upload + display name) | ✅ Xong |
 | Kiểm duyệt / báo cáo (UC-5.1, UC-5.2) | ✅ Xong |
-| App Check + Cloud Function rate limiting (UC-3.1) | ⚠️ Deferred → v1.1 (chờ Blaze plan) |
+| App Check + server-side rate limiting cho submit/tracking (UC-3.1) | ✅ Xong (Vercel API `askme-humg.vercel.app`) |
 
-> **Known limitation:** Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan. Client hiện ghi thẳng vào Firestore với Firestore Security Rules là lớp bảo vệ. Xem `BACKLOG.md` → BACKLOG-01.
+> **Current implementation note:** Luồng UC-3.1 đang chạy qua Vercel API (`askme-humg.vercel.app/api`) để tránh phụ thuộc Blaze plan.
 
 ---
 
@@ -77,14 +77,17 @@ ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, dee
 - UC-3.3 WriteBatch atomic: `answers` create + `questions` status update
 - Rate limiting per-device: App Check token + Firebase Installations ID (FID)
 - Localization: timeago đa ngôn ngữ (vi/en/ja)
-- Cloud Function `submitQuestion` (TypeScript, `functions/`) — **chưa deploy** (xem note bên dưới)
+- Vercel API `submitQuestion` + `getQuestionTrackingStatus` (`webhook/api/`)
 
-**⚠️ Known limitation — UC-3.1 chưa hoạt động đầy đủ:**
-Cloud Function `submitQuestion` chưa được deploy do Firebase project chưa upgrade lên Blaze plan (pay-as-you-go). Khi nào có thẻ tín dụng quốc tế:
-1. Upgrade tại: `https://console.firebase.google.com/project/askme-humg-app/usage/details`
-2. Chạy: `firebase deploy --only functions`
-3. Lấy URL: `https://asia-southeast1-askme-humg-app.cloudfunctions.net`
-4. Cập nhật `.env`: `API_BASE_URL=https://asia-southeast1-askme-humg-app.cloudfunctions.net`
+**UC-3.1 hiện trạng triển khai (03/2026):**
+1. Submit anonymous question gọi `POST https://askme-humg.vercel.app/api/submitQuestion`
+2. API sinh `trackingCode` 6 ký tự chữ+số (ví dụ `AD79HQ`), lưu `trackingCodeHash` vào `questions`
+3. Lookup trạng thái gọi `POST https://askme-humg.vercel.app/api/getQuestionTrackingStatus`
+4. App/Web đều dùng chung backend Vercel cho tracking
+
+**Lưu ý bảo mật hiện tại:**
+- Lookup đang là anonymous theo mã tra cứu (biết mã là tra được)
+- Đã có TODO security trong code để harden thêm (verify nguồn submit + chống brute-force lookup)
 
 **Fixes đã apply sau review:**
 - `content.trim()` trước validate + submit trong `AskQuestionSheet`
@@ -223,6 +226,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 | `lib/app/core/values/app_colors.dart` | Bảng màu |
 | `lib/app/core/values/app_theme.dart` | Theme Material 3 |
 | `lib/config/router.dart` | Tất cả routes |
+| `webhook/api/` | API Vercel cho notify + submitQuestion + getQuestionTrackingStatus |
 
 ---
 
@@ -248,7 +252,7 @@ Tất cả 5 Phase đã hoàn thành. App đã sẵn sàng cho TestFlight / Play
 
 Xem `.docs/BACKLOG.md` để biết chi tiết đầy đủ.
 
-**P1 — cần cho production:** BACKLOG-01 (App Check + Cloud Function — chờ Blaze plan)
+**P1 — cần cho production:** hardening security cho API tracking/submit (xem `BACKLOG.md`)
 
 **P2 — UX quan trọng:** BACKLOG-03 (`showRealName` persist Firestore), BACKLOG-06 (View All Answers)
 

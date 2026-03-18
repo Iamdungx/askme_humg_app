@@ -79,6 +79,7 @@ class Validators {
   }
 
   static const _maxQuestionChars = 300;
+  static const _trackingCodeLength = 6;
 
   /// UC-3.1 — Validates question content before submitting.
   /// Returns null if valid, [QuestionValidationError] code if invalid.
@@ -86,8 +87,12 @@ class Validators {
   static QuestionValidationError? validateQuestion(String content) {
     final trimmed = content.trim();
     if (trimmed.isEmpty) return QuestionValidationError.empty;
-    if (trimmed.length > _maxQuestionChars) return QuestionValidationError.tooLong;
-    if (_containsProfanity(trimmed)) return QuestionValidationError.inappropriate;
+    if (trimmed.length > _maxQuestionChars) {
+      return QuestionValidationError.tooLong;
+    }
+    if (_containsProfanity(trimmed)) {
+      return QuestionValidationError.inappropriate;
+    }
     return null;
   }
 
@@ -104,6 +109,21 @@ class Validators {
     final lower = text.toLowerCase();
     return blocked.any((word) => lower.contains(word));
   }
+
+  /// Validates anonymous question tracking code (6 digits).
+  static TrackingCodeValidationError? validateTrackingCode(String input) {
+    final normalized = input.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').trim();
+    if (normalized.isEmpty) return TrackingCodeValidationError.empty;
+    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(normalized)) {
+      return TrackingCodeValidationError.invalidFormat;
+    }
+    if (normalized.length != _trackingCodeLength) {
+      return TrackingCodeValidationError.invalidLength;
+    }
+    return null;
+  }
 }
 
 enum QuestionValidationError { empty, tooLong, inappropriate }
+
+enum TrackingCodeValidationError { empty, invalidLength, invalidFormat }

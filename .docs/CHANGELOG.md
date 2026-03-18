@@ -91,8 +91,28 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] — v1.1 (kế hoạch)
 
+### Added
+- UC-3.1 moved to Vercel backend (`askme-humg.vercel.app/api`) for production without Firebase Blaze plan.
+- New endpoints:
+  - `POST /api/submitQuestion` (server-side rate limiting + returns tracking code)
+  - `POST /api/getQuestionTrackingStatus` (lookup by tracking code)
+- Anonymous tracking flow on app + web:
+  - Tracking screen in app (`/track-question`)
+  - Tracking section on hosting page (`askme-humg-app.web.app`)
+- Tracking code format upgraded from `6 digits` to `6 alphanumeric chars` (example: `AD79HQ`).
+
+### Changed
+- Submit success UX now shows tracking code dialog + copy action.
+- Web tracking input now accepts alphanumeric codes and normalizes uppercase input.
+- `qna` datasource defaults to Vercel API base (`https://askme-humg.vercel.app/api`) when env is absent.
+
+### Security Notes
+- Added `// TODO(security)` markers for:
+  - stronger submit request verification
+  - stricter lookup brute-force protection independent from client-provided key
+
 ### Planned
-- BACKLOG-01: App Check + Cloud Function rate limiting (chờ Blaze plan)
+- BACKLOG-01: Harden Vercel API security for submit/tracking
 - BACKLOG-03: `showRealName` persist lên Firestore
 - BACKLOG-06: "View All Answers" screen với pagination
 

@@ -144,6 +144,97 @@
       letter-spacing: 0.2px;
     }
 
+    .track-section {
+      margin-top: 30px;
+      text-align: left;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding-top: 24px;
+    }
+
+    .track-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .track-description {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.52);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .track-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .track-input {
+      flex: 1;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .track-input:focus {
+      border-color: rgba(0, 0, 0, 0.35);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .track-button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      min-width: 92px;
+      background: #1d1d1f;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .track-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .track-result {
+      margin-top: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: #f8f8fa;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #303033;
+      display: none;
+    }
+
+    .track-result.show {
+      display: block;
+    }
+
+    .track-result-error {
+      color: #b3261e;
+      border-color: rgba(179, 38, 30, 0.28);
+      background: rgba(179, 38, 30, 0.05);
+    }
+
+    .track-open-answer {
+      display: inline-block;
+      margin-top: 8px;
+      color: #1d1d1f;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
     footer {
       margin-top: 32px;
       font-size: 12px;
@@ -188,6 +279,17 @@
       </span>
       -->
     </div>
+
+    <section class="track-section">
+      <p class="track-title">Theo dõi phiếu hỏi</p>
+      <p class="track-description">Nhập mã tra cứu 6 ký tự (chữ và số) để xem trạng thái câu hỏi ẩn danh của bạn.</p>
+      <div class="track-row">
+        <input id="trackingCodeInput" class="track-input" inputmode="text" maxlength="6" placeholder="AB3D7K"
+          aria-label="Mã tra cứu 6 ký tự chữ và số">
+        <button id="trackingCodeButton" class="track-button">Tra cứu</button>
+      </div>
+      <div id="trackingResult" class="track-result" role="status" aria-live="polite"></div>
+    </section>
   </div>
 
   <footer>© 2026 AskMe HUMG <br> Được phát triển bởi sinh viên Đại học Mỏ - Địa chất</footer>
@@ -196,6 +298,116 @@
     const path = window.location.pathname;
     const userMatch = path.match(/^\/user\/(.+)$/);
     const answerMatch = path.match(/^\/answer\/(.+)$/);
+    const trackingCodeInput = document.getElementById('trackingCodeInput');
+    const trackingCodeButton = document.getElementById('trackingCodeButton');
+    const trackingResult = document.getElementById('trackingResult');
+    const trackingClientKeyStorage = 'askme_tracking_client_key';
+    const trackingApiBaseStorage = 'askme_tracking_api_base';
+    const defaultTrackingApiBase = 'https://askme-humg.vercel.app/api';
+
+    function getTrackingClientKey() {
+      const existing = localStorage.getItem(trackingClientKeyStorage);
+      if (existing) return existing;
+      const generated = `web-${crypto.randomUUID()}`;
+      localStorage.setItem(trackingClientKeyStorage, generated);
+      return generated;
+    }
+
+    function renderTrackingResult(message, { isError = false } = {}) {
+      trackingResult.className = `track-result show${isError ? ' track-result-error' : ''}`;
+      trackingResult.innerHTML = message;
+    }
+
+    function normalizeApiBase(url) {
+      if (!url) return '';
+      return url.endsWith('/') ? url.slice(0, -1) : url;
+    }
+
+    function resolveTrackingApiBase() {
+      const fromWindow = normalizeApiBase(window.ASKME_TRACKING_API_BASE || '');
+      if (fromWindow) return fromWindow;
+      const fromStorage = normalizeApiBase(localStorage.getItem(trackingApiBaseStorage) || '');
+      if (fromStorage) return fromStorage;
+      if (window.location.hostname.endsWith('.vercel.app')) {
+        return `${window.location.origin}/api`;
+      }
+      return defaultTrackingApiBase;
+    }
+
+    async function lookupTrackingCode() {
+      const normalizedCode = trackingCodeInput.value.replace(/[^a-zA-Z0-9]/g, '').trim().toUpperCase();
+      if (!/^[A-Z0-9]{6}$/.test(normalizedCode)) {
+        renderTrackingResult('Mã tra cứu không hợp lệ. Vui lòng nhập đúng 6 ký tự gồm chữ và số.', { isError: true });
+        return;
+      }
+
+      trackingCodeButton.disabled = true;
+      trackingCodeButton.textContent = 'Đang tra...';
+      trackingResult.className = 'track-result';
+      trackingResult.textContent = '';
+      const trackingApiBase = resolveTrackingApiBase();
+
+      try {
+        const response = await fetch(`${trackingApiBase}/getQuestionTrackingStatus`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            trackingCode: normalizedCode,
+            clientKey: getTrackingClientKey(),
+          }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const error = data?.error;
+          if (error === 'too_many_requests') {
+            renderTrackingResult('Bạn tra cứu quá nhanh. Vui lòng thử lại sau ít phút.', { isError: true });
+            return;
+          }
+          if (error === 'not_found') {
+            renderTrackingResult('Không tìm thấy phiếu hỏi với mã này.', { isError: true });
+            return;
+          }
+          renderTrackingResult('Không thể tra cứu lúc này. Vui lòng thử lại sau.', { isError: true });
+          return;
+        }
+
+        const statusLabel = data.status === 'answered' ? 'Đã trả lời' : 'Chưa trả lời';
+        const createdAtText = data.createdAt
+          ? `<div>Gửi lúc: ${new Date(data.createdAt).toLocaleString('vi-VN')}</div>`
+          : '';
+        const answeredAtText = data.answeredAt
+          ? `<div>Trả lời lúc: ${new Date(data.answeredAt).toLocaleString('vi-VN')}</div>`
+          : '';
+        let publishText = '';
+        if (data.status === 'answered' && !data.isPublished) {
+          publishText = '<div>Bài trả lời đã có nhưng chưa công khai.</div>';
+        }
+        let openAnswerLink = '';
+        if (data.isPublished && data.answerId) {
+          openAnswerLink = `<a class="track-open-answer" href="/answer/${data.answerId}">Mở câu trả lời</a>`;
+        }
+        renderTrackingResult(
+          `<div><strong>Trạng thái:</strong> ${statusLabel}</div>${createdAtText}${answeredAtText}${publishText}${openAnswerLink}`
+        );
+      } catch (error) {
+        renderTrackingResult('Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.', { isError: true });
+      } finally {
+        trackingCodeButton.disabled = false;
+        trackingCodeButton.textContent = 'Tra cứu';
+      }
+    }
+
+    trackingCodeButton?.addEventListener('click', lookupTrackingCode);
+    trackingCodeInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        lookupTrackingCode();
+      }
+    });
+    trackingCodeInput?.addEventListener('input', (event) => {
+      const normalized = event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+      event.target.value = normalized;
+    });
 
     if (userMatch || answerMatch) {
       const type = userMatch ? 'user' : 'answer';

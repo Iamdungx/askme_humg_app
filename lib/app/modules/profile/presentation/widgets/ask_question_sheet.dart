@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/network/firebase_providers.dart';
@@ -10,6 +12,7 @@ import 'package:askme_humg/app/global_widgets/input/app_text_input.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
 import 'package:askme_humg/app/core/utils/validator.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 /// UC-3.1 — Anonymous question submission with App Check + Cloud Function.
@@ -54,8 +57,9 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
     final l10n = AppLocalizations.of(context);
     final submitState = ref.watch(submitQuestionProvider);
 
-    ref.listen<AsyncValue<void>>(submitQuestionProvider, (_, next) {
-      if (!next.isLoading && !next.hasError && next.hasValue) {
+    ref.listen(submitQuestionProvider, (_, next) {
+      final receipt = next.asData?.value;
+      if (!next.isLoading && !next.hasError && receipt != null) {
         if (!context.mounted) return;
         final toUserId = _lastSubmittedToUserId;
         final content = _lastSubmittedContent ?? '';
@@ -69,21 +73,16 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
           _lastSubmittedToUserId = null;
           _lastSubmittedContent = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.questionSubmitSuccess)),
-        );
+        _showTrackingCodeDialog(receipt.trackingCode);
       } else if (next.hasError) {
         final err = next.error;
         final message = err is RateLimitFailure
             ? l10n.questionSubmitErrorRateLimit
             : err is NetworkFailure
-                ? l10n.questionSubmitErrorAppCheck
-                : l10n.commonError;
+            ? l10n.questionSubmitErrorAppCheck
+            : l10n.commonError;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: cs.error,
-          ),
+          SnackBar(content: Text(message), backgroundColor: cs.error),
         );
       }
     });
@@ -151,18 +150,89 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
       _lastSubmittedToUserId = widget.toUserId;
       _lastSubmittedContent = content;
     });
-    await ref.read(submitQuestionProvider.notifier).submit(
-      toUserId: widget.toUserId,
-      content: content,
-    );
+    await ref
+        .read(submitQuestionProvider.notifier)
+        .submit(toUserId: widget.toUserId, content: content);
   }
 
-  Future<void> _triggerNotifyNewQuestion(WidgetRef ref, String toUserId, String content) async {
+  Future<void> _showTrackingCodeDialog(String trackingCode) async {
+    final l10n = AppLocalizations.of(context);
+    final shouldTrackNow = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.questionSubmitSuccess),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.questionTrackingCodeDescription),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Text(
+                trackingCode,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  letterSpacing: 3,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: trackingCode));
+              if (!ctx.mounted) return;
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                SnackBar(content: Text(l10n.questionTrackingCodeCopied)),
+              );
+            },
+            child: Text(l10n.commonCopy),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.commonClose),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.questionTrackingCodeTrackNow),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    if (shouldTrackNow == true) {
+      context.push(AppRoutes.trackQuestion);
+    }
+  }
+
+  Future<void> _triggerNotifyNewQuestion(
+    WidgetRef ref,
+    String toUserId,
+    String content,
+  ) async {
     final client = ref.read(notifyWebhookClientProvider);
     if (!client.isAvailable) return;
     final auth = ref.read(firebaseAuthProvider);
     final token = await auth.currentUser?.getIdToken(true);
     if (token == null) return;
-    await client.sendNewQuestion(idToken: token, toUserId: toUserId, content: content);
+    await client.sendNewQuestion(
+      idToken: token,
+      toUserId: toUserId,
+      content: content,
+    );
   }
 }

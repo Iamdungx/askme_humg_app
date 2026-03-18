@@ -17,31 +17,29 @@
 
 ## 🔴 P1 — Cần thiết cho production (v1.1)
 
-### BACKLOG-01: App Check + Cloud Function Rate Limiting (UC-3.1)
+### BACKLOG-01: Harden Vercel API security cho UC-3.1/Tracking
 
-**Lý do defer:** Yêu cầu Firebase Blaze plan (pay-as-you-go). Chưa kích hoạt do chưa có phương thức thanh toán.
+**Bối cảnh hiện tại:** Luồng submit/tracking đã chạy production qua Vercel API `askme-humg.vercel.app/api`.
 
 **Scope:**
-- Bật Firebase App Check trên Android (Play Integrity) và iOS (DeviceCheck)
-- Deploy Cloud Function `submitQuestion` có:
-  - Xác thực App Check token (`X-Firebase-AppCheck` header)
-  - Rate limiting: tối đa 5 câu hỏi / device / giờ (lưu counter trong Firestore `rateLimits` collection)
-  - Ghi `questions` doc vào Firestore sau khi pass validation
-- Client (`qna_repository_impl.dart`): bỏ bypass, gọi Cloud Function thay vì ghi Firestore trực tiếp
-- Xoá comment `// TODO(blaze)` sau khi deploy
+- `submitQuestion`:
+  - Verify nguồn request mạnh hơn (App Check equivalent / signed nonce / idToken policy)
+  - Không chỉ dựa vào rate-limit theo IP/fid
+- `getQuestionTrackingStatus`:
+  - Siết rate-limit theo IP/subnet làm khóa chính (không tin `clientKey` từ client)
+  - Cân nhắc thêm delay/captcha sau nhiều lần sai
+- Secret management:
+  - Bắt buộc `TRACKING_CODE_PEPPER` trên Vercel (fail-fast nếu thiếu ở production)
 
 **Files cần thay đổi:**
-- `lib/app/modules/qna_core/data/qna_repository_impl.dart` — đổi Firestore write → Cloud Function call qua `dio`
-- `functions/src/index.ts` (hoặc tương đương) — tạo mới Cloud Function
-- `firebase.json` — khai báo functions
-- `lib/main.dart` — bật `FirebaseAppCheck.activate()` với provider thật (không phải debug)
+- `webhook/api/submitQuestion.js`
+- `webhook/api/getQuestionTrackingStatus.js`
+- `webhook/api/_shared.js`
 
 **Acceptance criteria:**
-- [ ] Bot/script gửi quá 5 câu hỏi/giờ → nhận HTTP 429
-- [ ] Request không có App Check token hợp lệ → rejected
-- [ ] App vẫn hoạt động bình thường trên thiết bị thật
-
-**Prerequisite:** Upgrade Firebase project lên Blaze plan.
+- [ ] Submit endpoint từ script không hợp lệ bị reject theo cơ chế verify mới
+- [ ] Lookup brute-force khó bypass bằng thay đổi `clientKey`
+- [ ] Không chạy production nếu thiếu secret env quan trọng (`TRACKING_CODE_PEPPER`)
 
 ---
 
@@ -96,7 +94,7 @@
 
 ---
 
-### BACKLOG-05: Push Notifications (FCM)
+### BACKLOG-05: Push Notifications (FCM / hoặc OneSignal full migration)
 
 **Scope:**
 - UI placeholder đã có (`settingsNotifComingSoon`)
@@ -104,7 +102,7 @@
 - Cloud Function trigger: gửi FCM khi có câu hỏi mới hoặc comment mới
 - Lưu preference vào `SharedPreferences`
 
-**Prerequisite:** Blaze plan (BACKLOG-01).
+**Prerequisite:** Chốt chiến lược push dài hạn (giữ OneSignal qua Vercel hoặc quay lại Firebase Functions khi có Blaze).
 
 ---
 

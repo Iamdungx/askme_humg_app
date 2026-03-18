@@ -20,6 +20,7 @@ import 'package:askme_humg/app/modules/onboarding/presentation/screens/onboardin
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
+import 'package:askme_humg/app/modules/qna_core/presentation/screens/question_tracking_screen.dart';
 import 'package:askme_humg/app/modules/settings/presentation/edit_profile_screen.dart';
 import 'package:askme_humg/app/modules/settings/presentation/settings_screen.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/screens/admin_dashboard_screen.dart';
@@ -77,7 +78,8 @@ class _RouterNotifier extends ChangeNotifier {
 
     // /me and /settings require login but NOT HUMG verification.
     if (!isLoggedIn &&
-        (path.startsWith(AppRoutes.me) || path.startsWith(AppRoutes.settings))) {
+        (path.startsWith(AppRoutes.me) ||
+            path.startsWith(AppRoutes.settings))) {
       return AppRoutes.login;
     }
 
@@ -100,7 +102,9 @@ class _RouterNotifier extends ChangeNotifier {
 
     // UC-1.3 — Redirect to HUMG verification if not yet verified.
     // Exempt paths/prefixes are defined in app_routes.dart (isHumgVerifyExempt).
-    if (isLoggedIn && user.isHumgVerified == false && !isHumgVerifyExempt(path)) {
+    if (isLoggedIn &&
+        user.isHumgVerified == false &&
+        !isHumgVerifyExempt(path)) {
       return AppRoutes.verifyHumg;
     }
 
@@ -117,7 +121,7 @@ GoRouter appRouter(Ref ref) {
   final notifier = _RouterNotifier(ref);
   ref.onDispose(notifier.dispose);
 
-  final     router = GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: notifier,
@@ -178,6 +182,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: AppRoutes.verifyHumg,
         builder: (context, state) => const VerifyHumgScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.trackQuestion,
+        builder: (context, state) => const QuestionTrackingScreen(),
       ),
 
       // ── Shell: 4 tabs with persistent bottom NavigationBar ───────────────
@@ -276,17 +284,22 @@ void _initDeepLinks(GoRouter router, Ref ref) {
   );
   ref.onDispose(sub.cancel);
 
-  appLinks.getInitialLink().then((initialUri) {
-    if (initialUri != null) {
-      logger.i('Deep link cold-start: $initialUri');
-      final path = _resolveDeepLinkPath(initialUri);
-      if (path != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => router.go(path));
-      }
-    }
-  }).catchError((Object e, StackTrace s) {
-    logger.w('Failed to get initial deep link', error: e, stackTrace: s);
-  });
+  appLinks
+      .getInitialLink()
+      .then((initialUri) {
+        if (initialUri != null) {
+          logger.i('Deep link cold-start: $initialUri');
+          final path = _resolveDeepLinkPath(initialUri);
+          if (path != null) {
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => router.go(path),
+            );
+          }
+        }
+      })
+      .catchError((Object e, StackTrace s) {
+        logger.w('Failed to get initial deep link', error: e, stackTrace: s);
+      });
 }
 
 // ---------------------------------------------------------------------------
@@ -337,11 +350,17 @@ class _AdminMeWrapper extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: cs.secondary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: cs.secondary.withValues(alpha: 0.25)),
+                  border: Border.all(
+                    color: cs.secondary.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.shieldCheck, color: cs.secondary, size: 20),
+                    Icon(
+                      LucideIcons.shieldCheck,
+                      color: cs.secondary,
+                      size: 20,
+                    ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
@@ -349,7 +368,8 @@ class _AdminMeWrapper extends StatelessWidget {
                         children: [
                           Text(
                             l10n.adminEntryTitle,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: cs.onSurface,
                                 ),
@@ -357,9 +377,8 @@ class _AdminMeWrapper extends StatelessWidget {
                           const SizedBox(height: AppSpacing.xs),
                           Text(
                             l10n.adminEntrySubtitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -405,7 +424,9 @@ class _ProfileLoginPrompt extends StatelessWidget {
               Icon(
                 LucideIcons.circleUserRound,
                 size: 72,
-                color: cs.onSurface.withValues(alpha: AppSemanticColors.opacityHint),
+                color: cs.onSurface.withValues(
+                  alpha: AppSemanticColors.opacityHint,
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -434,7 +455,9 @@ class _ProfileLoginPrompt extends StatelessWidget {
 // askme://user/{id} → host="user", pathSegments=["{id}"] → /user/{id}
 // https://askme-humg-app.web.app/user/{id} → path="/user/{id}"
 String? _resolveDeepLinkPath(Uri uri) {
-  logger.d('resolveDeepLinkPath: scheme=${uri.scheme} host=${uri.host} path=${uri.path} segments=${uri.pathSegments}');
+  logger.d(
+    'resolveDeepLinkPath: scheme=${uri.scheme} host=${uri.host} path=${uri.path} segments=${uri.pathSegments}',
+  );
   if (uri.scheme == 'askme') {
     // askme://user/{userId} → host="user", pathSegments=["{userId}"]
     final pathSegments = uri.pathSegments;

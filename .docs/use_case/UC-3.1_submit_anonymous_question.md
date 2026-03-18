@@ -26,16 +26,17 @@
    → If validation fails: show inline error, do NOT call Firebase
 6. System obtains a Firebase App Check token
    → If App Check fails: show error l10n.errorAppCheckFailed
-7. System calls Cloud Function `submitQuestion` with:
-   { toUserId, content, appCheckToken }
-8. Cloud Function enforces:
+7. System calls backend API `submitQuestion` with:
+   Body: { toUserId, content, fid }
+   Header: X-Firebase-AppCheck (best-effort from client)
+8. Backend enforces:
    a. Rate limit: max 5 questions per device per hour
-   b. Server-side profanity filter
-   c. Saves document to `questions` collection
+   b. Saves document to `questions` collection
+   c. Generates tracking code and returns it to client
 9. On success:
-   a. Close bottom sheet
-   b. Play success animation (lottie confetti or flutter_animate)
-   c. Show snackbar: l10n.questionSentSuccess
+   a. Show tracking code dialog (copy + track now actions)
+   b. Close bottom sheet
+   c. Show success state
 10. On rate limit exceeded: show error l10n.errorRateLimitExceeded
 ```
 
@@ -54,12 +55,11 @@ B1. Cloud Function returns HTTP 429
 B2. Show error: l10n.errorRateLimitExceeded ("You've sent 5 questions this hour. Try again later.")
 ```
 
-## 5. Alternative Flow C – App Check Failure
+## 5. Alternative Flow C – Backend Request Failure
 
 ```
-C1. App Check token cannot be obtained (emulator without debug token)
-C2. Cloud Function rejects with HTTP 403
-C3. Show error: l10n.errorAppCheckFailed
+C1. Backend returns HTTP 401/403/500 or network timeout
+C2. Client shows mapped error message (rate-limit/network/common error)
 ```
 
 ---
@@ -70,9 +70,9 @@ C3. Show error: l10n.errorAppCheckFailed
 
 | Operation | Fields Written |
 |---|---|
-| `add` (via Cloud Function) | `toUserId`, `content`, `createdAt: serverTimestamp()`, `status: 'unanswered'` |
+| `add` (via backend API) | `toUserId`, `content`, `createdAt: serverTimestamp()`, `status: 'unanswered'`, `trackingCodeHash` |
 
-> **Privacy note (SRS NFR-01):** No sender identity, device ID, or IP address is stored in the `questions` document. App Check token is ephemeral and NOT persisted.
+> **Privacy note (SRS NFR-01):** No sender identity is stored in the `questions` document. Tracking uses `trackingCodeHash` only (plain code is not persisted).
 
 ---
 
@@ -138,23 +138,19 @@ class SubmitAnonymousQuestion {
 }
 ```
 
-### Data Layer – App Check + Cloud Function call
+### Data Layer – API call (`submitQuestion`)
 ```dart
 // In qna_datasource.dart
 Future<void> submitAnonymousQuestion({
   required String toUserId,
   required String content,
 }) async {
-  // Obtain App Check token
-  final appCheckToken = await FirebaseAppCheck.instance.getToken(false);
-
-  // Call Cloud Function via Dio
+  // Call backend API via Dio
   await _dio.post('/submitQuestion', data: {
     'toUserId': toUserId,
     'content': content,
-  }, options: Options(headers: {
-    'X-Firebase-AppCheck': appCheckToken,
-  }));
+    'fid': firebaseInstallationsId,
+  });
 }
 ```
 
@@ -202,8 +198,9 @@ Bottom sheet layout:
 - [ ] Empty question → send button disabled or shows inline error
 - [ ] Question > 300 chars → character counter turns red, cannot submit
 - [ ] Client profanity check blocks obvious violations before any Firebase call
-- [ ] App Check token is attached to every submission request
-- [ ] Cloud Function rate limit: 6th question within 1 hour → HTTP 429 → error shown
-- [ ] On success: bottom sheet closes, success animation plays
+- [ ] Submit request includes `fid` and is rate-limited server-side
+- [ ] Backend rate limit: 6th question within 1 hour → HTTP 429 → error shown
+- [ ] On success: tracking code dialog appears and can be copied
 - [ ] No sender identity stored in `questions` collection
 - [ ] `status` field is always `'unanswered'` on creation
+- [ ] `trackingCodeHash` is stored, plain tracking code is not stored
