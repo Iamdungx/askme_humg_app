@@ -98,5 +98,15 @@ service cloud.firestore {
       allow update: if isOwner(uid);
       allow delete: if isOwner(uid) || isAdmin();
     }
+
+    // ── app_config ─────────────────────────────────────────────────────
+    // AI classification taxonomy for feed topics:
+    // - app_config/ai_classification
+    // Public read so app can render topic chips/filter.
+    // Write restricted to admin only.
+    match /app_config/{docId} {
+      allow read: if docId == 'ai_classification';
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

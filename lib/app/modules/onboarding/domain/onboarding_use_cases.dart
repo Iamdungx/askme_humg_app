@@ -36,4 +36,3 @@ class SetDemoMode {
 
   Future<void> call(bool value) => _repo.setDemoMode(value);
 }
-

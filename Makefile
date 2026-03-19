@@ -1,6 +1,6 @@
 .PHONY: help get gen l10n setup run run-stg run-release run-ios run-ios-stg \
         build-apk build-aab build-ios icons splash clean fmt analyze check \
-        seed seed-clear admin-set admin-unset
+        seed seed-clear seed-clear-ai admin-set admin-unset
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN {FS=":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
@@ -65,6 +65,9 @@ seed:         ## Seed Firestore với dữ liệu mẫu sinh viên HUMG
 
 seed-clear:   ## Xoá toàn bộ dữ liệu Firestore (users/questions/answers/comments...)
 	cd scripts && npx ts-node clear.ts
+
+seed-clear-ai: ## Chỉ xoá nhãn AI trên answers (giữ nguyên dữ liệu bài viết)
+	cd scripts && npx ts-node clear_ai_tags.ts
 
 admin-set:    ## Set custom claim admin=true
 	cd scripts && npx ts-node set_admin.ts $(ID) true

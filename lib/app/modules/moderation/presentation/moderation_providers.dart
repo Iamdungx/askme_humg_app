@@ -65,7 +65,9 @@ class ReportNotifier extends _$ReportNotifier {
     if (uid == null) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(submitReportUseCaseProvider).call(
+      () => ref
+          .read(submitReportUseCaseProvider)
+          .call(
             targetId: targetId,
             targetType: targetType,
             reportedBy: uid,
@@ -96,7 +98,9 @@ class ResolveReportNotifier extends _$ResolveReportNotifier {
   }) async {
     state = const AsyncLoading();
     try {
-      await ref.read(resolveReportUseCaseProvider).call(
+      await ref
+          .read(resolveReportUseCaseProvider)
+          .call(
             reportId: reportId,
             targetId: targetId,
             targetType: targetType,

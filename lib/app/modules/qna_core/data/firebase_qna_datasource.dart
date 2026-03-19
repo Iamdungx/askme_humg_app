@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_installations/firebase_installations.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
@@ -43,6 +46,39 @@ class FirebaseQnaDatasource {
   static DateTime? _parseDateTime(Object? value) {
     if (value is! String || value.trim().isEmpty) return null;
     return DateTime.tryParse(value)?.toLocal();
+  }
+
+  Future<void> classifyPublishedAnswer({
+    required String answerId,
+    String? idToken,
+  }) async {
+    try {
+      final resolvedToken = (idToken != null && idToken.trim().isNotEmpty)
+          ? idToken.trim()
+          : await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (resolvedToken == null || resolvedToken.isEmpty) {
+        logger.w('classifyPublishedAnswer skipped: missing id token');
+        return;
+      }
+      await _apiClient.post<Map<String, dynamic>>(
+        '$_functionsBaseUrl/classifyAnswer',
+        data: {'answerId': answerId},
+        options: Options(headers: {'Authorization': 'Bearer $resolvedToken'}),
+      );
+    } on DioException catch (e, s) {
+      // Classification is non-blocking and must not break publish UX.
+      logger.w(
+        'classifyPublishedAnswer failed (non-blocking)',
+        error: e,
+        stackTrace: s,
+      );
+    } catch (e, s) {
+      logger.w(
+        'classifyPublishedAnswer unexpected error (non-blocking)',
+        error: e,
+        stackTrace: s,
+      );
+    }
   }
 
   Never _throwFromDioException(DioException e) {
@@ -209,7 +245,7 @@ class FirebaseQnaDatasource {
   ///
   /// Denormalizes questionContent, hostName, hostAvatar into the answers doc
   /// so UC-4.1 feed queries read 1 doc instead of 3 (SRS NFR-02 performance).
-  Future<void> answerQuestion({
+  Future<String> answerQuestion({
     required String questionId,
     required String userId,
     required String content,
@@ -259,6 +295,10 @@ class FirebaseQnaDatasource {
       batch.update(questionRef, {'status': 'answered'});
 
       await batch.commit();
+      if (isPublished) {
+        unawaited(classifyPublishedAnswer(answerId: answerRef.id));
+      }
+      return answerRef.id;
     } on FirebaseException catch (e, s) {
       logger.e('answerQuestion WriteBatch failed', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore write failed');
@@ -284,7 +324,7 @@ class FirebaseQnaDatasource {
   }
 
   /// Publishes a previously saved private answer for a question.
-  Future<void> publishSavedAnswer({
+  Future<String> publishSavedAnswer({
     required String questionId,
     required String userId,
   }) async {
@@ -304,9 +344,11 @@ class FirebaseQnaDatasource {
 
       final answerDoc = snap.docs.first;
       final isPublished = answerDoc.data()['isPublished'] as bool? ?? false;
-      if (isPublished) return;
+      if (isPublished) return answerDoc.id;
 
       await answerDoc.reference.update({'isPublished': true});
+      unawaited(classifyPublishedAnswer(answerId: answerDoc.id));
+      return answerDoc.id;
     } on FirebaseException catch (e, s) {
       logger.e('publishSavedAnswer failed', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore update failed');

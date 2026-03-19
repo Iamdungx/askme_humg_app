@@ -62,7 +62,10 @@ class _CommentsSheetContent extends ConsumerWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: Icon(LucideIcons.x, color: cs.onSurface.withValues(alpha: 0.6)),
+                icon: Icon(
+                  LucideIcons.x,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -151,11 +154,15 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
       isVerified: isVerified,
       loginMessage: l10n.loginRequiredToComment,
       verifyMessage: l10n.verifyRequiredToComment,
-    )) { return; }
+    )) {
+      return;
+    }
 
     setState(() => _error = null);
 
-    final result = await ref.read(postCommentProvider.notifier).post(
+    final result = await ref
+        .read(postCommentProvider.notifier)
+        .post(
           answerId: widget.answerId,
           content: rawText,
           isAnonymous: _isAnonymous,
@@ -173,10 +180,7 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     }
     if (failure != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.commonError),
-          backgroundColor: cs.error,
-        ),
+        SnackBar(content: Text(l10n.commonError), backgroundColor: cs.error),
       );
       return;
     }
@@ -190,13 +194,21 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     }
   }
 
-  Future<void> _triggerNotifyNewComment(WidgetRef ref, String answerId, String content) async {
+  Future<void> _triggerNotifyNewComment(
+    WidgetRef ref,
+    String answerId,
+    String content,
+  ) async {
     final client = ref.read(notifyWebhookClientProvider);
     if (!client.isAvailable) return;
     final auth = ref.read(firebaseAuthProvider);
     final token = await auth.currentUser?.getIdToken(true);
     if (token == null) return;
-    await client.sendNewComment(idToken: token, answerId: answerId, content: content);
+    await client.sendNewComment(
+      idToken: token,
+      answerId: answerId,
+      content: content,
+    );
   }
 
   @override
@@ -220,7 +232,11 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
           // Anonymous toggle row
           Row(
             children: [
-              Icon(LucideIcons.lock, size: 18, color: cs.onSurface.withValues(alpha: 0.5)),
+              Icon(
+                LucideIcons.lock,
+                size: 18,
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 l10n.commentAnonymousToggle,

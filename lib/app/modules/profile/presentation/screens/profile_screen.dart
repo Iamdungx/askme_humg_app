@@ -72,7 +72,11 @@ class _ProfileContent extends ConsumerWidget {
     );
   }
 
-  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+  void _showMoreMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+  ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
 
@@ -109,7 +113,9 @@ class _ProfileContent extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
+        backgroundColor: Theme.of(
+          context,
+        ).scaffoldBackgroundColor.withValues(alpha: 0.9),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 1,
@@ -118,8 +124,9 @@ class _ProfileContent extends ConsumerWidget {
             ? null
             : IconButton(
                 icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
-                onPressed: () =>
-                    context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+                onPressed: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.feed),
               ),
         title: Text(
           l10n.profileTitle,
@@ -199,15 +206,15 @@ class _ProfileBody extends StatelessWidget {
       ),
       children: [
         // Profile header: avatar + name + stats
-          Center(
-            child: ProfileHeader(
-              name: profile.name,
-              avatarUrl: profile.avatar,
-              answerCount: profile.answerCount,
-              totalLikes: profile.totalLikes,
-              isHumgVerified: profile.isHumgVerified,
-            ),
+        Center(
+          child: ProfileHeader(
+            name: profile.name,
+            avatarUrl: profile.avatar,
+            answerCount: profile.answerCount,
+            totalLikes: profile.totalLikes,
+            isHumgVerified: profile.isHumgVerified,
           ),
+        ),
         const SizedBox(height: AppSpacing.xl),
 
         // isOwner: share link card + inbox shortcut (UC-2.2 §2)

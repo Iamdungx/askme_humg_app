@@ -77,7 +77,11 @@ class ProfileRepositoryImpl implements IProfileRepository {
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } catch (e, st) {
-      logger.e('updateNotificationPrefs unexpected error', error: e, stackTrace: st);
+      logger.e(
+        'updateNotificationPrefs unexpected error',
+        error: e,
+        stackTrace: st,
+      );
       throw UnknownFailure(e.toString());
     }
   }

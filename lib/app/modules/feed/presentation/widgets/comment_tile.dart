@@ -40,9 +40,8 @@ class CommentTile extends ConsumerWidget {
           InkWell(
             borderRadius: BorderRadius.circular(999),
             onTap: canOpenProfile
-                ? () => context.push(
-                      '${AppRoutes.userProfile}/${comment.userId}',
-                    )
+                ? () =>
+                      context.push('${AppRoutes.userProfile}/${comment.userId}')
                 : null,
             child: AppAvatar(
               imageUrl: comment.authorAvatar.isNotEmpty
@@ -65,8 +64,8 @@ class CommentTile extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(10),
                       onTap: canOpenProfile
                           ? () => context.push(
-                                '${AppRoutes.userProfile}/${comment.userId}',
-                              )
+                              '${AppRoutes.userProfile}/${comment.userId}',
+                            )
                           : null,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -79,11 +78,13 @@ class CommentTile extends ConsumerWidget {
                               comment.isAnonymous
                                   ? l10n.commentAnonymous
                                   : (comment.authorName.isNotEmpty
-                                      ? comment.authorName
-                                      : l10n.commentAnonymous),
+                                        ? comment.authorName
+                                        : l10n.commentAnonymous),
                               style: comment.isAnonymous
                                   ? tt.labelMedium?.copyWith(
-                                      color: cs.onSurface.withValues(alpha: 0.5),
+                                      color: cs.onSurface.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       fontStyle: FontStyle.italic,
                                     )
                                   : tt.labelMedium?.copyWith(

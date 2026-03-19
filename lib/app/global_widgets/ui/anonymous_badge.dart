@@ -69,10 +69,7 @@ class AnonymousBadge extends StatelessWidget {
           padding: EdgeInsets.all(size * 0.1),
           child: Assets.svgsAnonymous.svg(
             fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(
-              cs.onSurfaceVariant,
-              BlendMode.srcIn,
-            ),
+            colorFilter: ColorFilter.mode(cs.onSurfaceVariant, BlendMode.srcIn),
           ),
         ),
       ),

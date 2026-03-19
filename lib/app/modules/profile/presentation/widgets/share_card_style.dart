@@ -11,13 +11,13 @@ part 'share_card_style.g.dart';
 // ---------------------------------------------------------------------------
 
 enum ShareCardStyle {
-  abstract,     // Light blue, illustrated faces — light text scheme
-  candy,        // Yellow/green/red bold — dark text scheme
-  darkCarbon,   // Dark navy illustrated — light text scheme
-  darkSpace,    // Dark green astronaut — light text scheme
-  deepForest1,  // Brown warm bokeh — light text scheme
-  deepForest2,  // Dark teal forest — light text scheme
-  sunshine,     // Orange warm illustrated — dark text scheme
+  abstract, // Light blue, illustrated faces — light text scheme
+  candy, // Yellow/green/red bold — dark text scheme
+  darkCarbon, // Dark navy illustrated — light text scheme
+  darkSpace, // Dark green astronaut — light text scheme
+  deepForest1, // Brown warm bokeh — light text scheme
+  deepForest2, // Dark teal forest — light text scheme
+  sunshine, // Orange warm illustrated — dark text scheme
 }
 
 extension ShareCardStyleX on ShareCardStyle {
@@ -25,38 +25,59 @@ extension ShareCardStyleX on ShareCardStyle {
 
   String get assetPath {
     switch (this) {
-      case ShareCardStyle.abstract:    return Assets.imagesSharesAbstractBg.path;
-      case ShareCardStyle.candy:       return Assets.imagesSharesCandyBg.path;
-      case ShareCardStyle.darkCarbon:  return Assets.imagesSharesDarkcarbonBg.path;
-      case ShareCardStyle.darkSpace:   return Assets.imagesSharesDarkspaceBg.path;
-      case ShareCardStyle.deepForest1: return Assets.imagesSharesDeepforest1Bg.path;
-      case ShareCardStyle.deepForest2: return Assets.imagesSharesDeepforest2Bg.path;
-      case ShareCardStyle.sunshine:    return Assets.imagesSharesSunshineBg.path;
+      case ShareCardStyle.abstract:
+        return Assets.imagesSharesAbstractBg.path;
+      case ShareCardStyle.candy:
+        return Assets.imagesSharesCandyBg.path;
+      case ShareCardStyle.darkCarbon:
+        return Assets.imagesSharesDarkcarbonBg.path;
+      case ShareCardStyle.darkSpace:
+        return Assets.imagesSharesDarkspaceBg.path;
+      case ShareCardStyle.deepForest1:
+        return Assets.imagesSharesDeepforest1Bg.path;
+      case ShareCardStyle.deepForest2:
+        return Assets.imagesSharesDeepforest2Bg.path;
+      case ShareCardStyle.sunshine:
+        return Assets.imagesSharesSunshineBg.path;
     }
   }
 
   String label(BuildContext context) {
     switch (this) {
-      case ShareCardStyle.abstract:    return 'Abstract';
-      case ShareCardStyle.candy:       return 'Candy';
-      case ShareCardStyle.darkCarbon:  return 'Carbon';
-      case ShareCardStyle.darkSpace:   return 'Space';
-      case ShareCardStyle.deepForest1: return 'Forest';
-      case ShareCardStyle.deepForest2: return 'Deep Forest';
-      case ShareCardStyle.sunshine:    return 'Sunshine';
+      case ShareCardStyle.abstract:
+        return 'Abstract';
+      case ShareCardStyle.candy:
+        return 'Candy';
+      case ShareCardStyle.darkCarbon:
+        return 'Carbon';
+      case ShareCardStyle.darkSpace:
+        return 'Space';
+      case ShareCardStyle.deepForest1:
+        return 'Forest';
+      case ShareCardStyle.deepForest2:
+        return 'Deep Forest';
+      case ShareCardStyle.sunshine:
+        return 'Sunshine';
     }
   }
 
   // Whether the background is predominantly light (needs dark text)
   bool get isLightBackground {
     switch (this) {
-      case ShareCardStyle.abstract:    return true;
-      case ShareCardStyle.candy:       return true;
-      case ShareCardStyle.darkCarbon:  return false;
-      case ShareCardStyle.darkSpace:   return false;
-      case ShareCardStyle.deepForest1: return false;
-      case ShareCardStyle.deepForest2: return false;
-      case ShareCardStyle.sunshine:    return true;
+      case ShareCardStyle.abstract:
+        return true;
+      case ShareCardStyle.candy:
+        return true;
+      case ShareCardStyle.darkCarbon:
+        return false;
+      case ShareCardStyle.darkSpace:
+        return false;
+      case ShareCardStyle.deepForest1:
+        return false;
+      case ShareCardStyle.deepForest2:
+        return false;
+      case ShareCardStyle.sunshine:
+        return true;
     }
   }
 
@@ -105,17 +126,24 @@ extension ShareCardStyleX on ShareCardStyle {
 
   Color get accentColor {
     switch (this) {
-      case ShareCardStyle.abstract:    return const Color(0xFF1A3A8C);
-      case ShareCardStyle.candy:       return const Color(0xFF065F46);
-      case ShareCardStyle.darkCarbon:  return AppDarkColors.accent;
-      case ShareCardStyle.darkSpace:   return const Color(0xFF4ADE80);
-      case ShareCardStyle.deepForest1: return const Color(0xFFFBBF24);
-      case ShareCardStyle.deepForest2: return AppDarkColors.accentLight;
-      case ShareCardStyle.sunshine:    return const Color(0xFF92400E);
+      case ShareCardStyle.abstract:
+        return const Color(0xFF1A3A8C);
+      case ShareCardStyle.candy:
+        return const Color(0xFF065F46);
+      case ShareCardStyle.darkCarbon:
+        return AppDarkColors.accent;
+      case ShareCardStyle.darkSpace:
+        return const Color(0xFF4ADE80);
+      case ShareCardStyle.deepForest1:
+        return const Color(0xFFFBBF24);
+      case ShareCardStyle.deepForest2:
+        return AppDarkColors.accentLight;
+      case ShareCardStyle.sunshine:
+        return const Color(0xFF92400E);
     }
   }
 
-  Color get pillBgColor     => accentColor.withValues(alpha: 0.25);
+  Color get pillBgColor => accentColor.withValues(alpha: 0.25);
   Color get pillBorderColor => accentColor.withValues(alpha: 0.7);
   // For dark backgrounds, use pure white for pill text so it always pops
   Color get accentTextColor =>
@@ -123,13 +151,20 @@ extension ShareCardStyleX on ShareCardStyle {
 
   Color get avatarGapColor {
     switch (this) {
-      case ShareCardStyle.abstract:    return const Color(0xFFBAE6FD);
-      case ShareCardStyle.candy:       return const Color(0xFFF0FDF4);
-      case ShareCardStyle.darkCarbon:  return const Color(0xFF1E293B);
-      case ShareCardStyle.darkSpace:   return const Color(0xFF052E16);
-      case ShareCardStyle.deepForest1: return const Color(0xFF292524);
-      case ShareCardStyle.deepForest2: return const Color(0xFF134E4A);
-      case ShareCardStyle.sunshine:    return const Color(0xFF7C2D12);
+      case ShareCardStyle.abstract:
+        return const Color(0xFFBAE6FD);
+      case ShareCardStyle.candy:
+        return const Color(0xFFF0FDF4);
+      case ShareCardStyle.darkCarbon:
+        return const Color(0xFF1E293B);
+      case ShareCardStyle.darkSpace:
+        return const Color(0xFF052E16);
+      case ShareCardStyle.deepForest1:
+        return const Color(0xFF292524);
+      case ShareCardStyle.deepForest2:
+        return const Color(0xFF134E4A);
+      case ShareCardStyle.sunshine:
+        return const Color(0xFF7C2D12);
     }
   }
 

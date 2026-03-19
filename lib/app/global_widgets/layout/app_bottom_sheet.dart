@@ -32,9 +32,7 @@ Future<T?> showAppScrollableSheet<T>({
     useSafeArea: true,
     isScrollControlled: true,
     builder: (ctx) => AnimatedPadding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.viewInsetsOf(ctx).bottom,
-      ),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
       child: DraggableScrollableSheet(
@@ -65,10 +63,7 @@ class AppBottomSheetBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

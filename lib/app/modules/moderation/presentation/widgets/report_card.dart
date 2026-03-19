@@ -20,8 +20,7 @@ class ReportCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final resolveState =
-        ref.watch(resolveReportProvider(report.reportId));
+    final resolveState = ref.watch(resolveReportProvider(report.reportId));
     final isLoading = resolveState.isLoading;
 
     Future<void> resolve(ResolveAction action) async {
@@ -29,21 +28,19 @@ class ReportCard extends ConsumerWidget {
       final messenger = ScaffoldMessenger.of(context);
 
       try {
-        await ref.read(resolveReportProvider(report.reportId).notifier).resolve(
+        await ref
+            .read(resolveReportProvider(report.reportId).notifier)
+            .resolve(
               targetId: report.targetId,
               targetType: report.targetType,
               action: action,
               parentAnswerId: report.parentAnswerId,
             );
         if (!context.mounted) return;
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.adminResolved)),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.adminResolved)));
       } catch (_) {
         if (!context.mounted) return;
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.commonError)),
-        );
+        messenger.showSnackBar(SnackBar(content: Text(l10n.commonError)));
       }
     }
 
@@ -81,9 +78,7 @@ class ReportCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   reasonLabel,
-                  style: tt.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ),
               Text(
@@ -117,7 +112,9 @@ class ReportCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: isLoading ? null : () => resolve(ResolveAction.dismiss),
+                  onPressed: isLoading
+                      ? null
+                      : () => resolve(ResolveAction.dismiss),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 40),
                     shape: const StadiumBorder(),
@@ -139,7 +136,9 @@ class ReportCard extends ConsumerWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: FilledButton(
-                  onPressed: isLoading ? null : () => resolve(ResolveAction.remove),
+                  onPressed: isLoading
+                      ? null
+                      : () => resolve(ResolveAction.remove),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 40),
                     shape: const StadiumBorder(),

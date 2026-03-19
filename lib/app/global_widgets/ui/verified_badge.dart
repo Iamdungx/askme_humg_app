@@ -10,11 +10,8 @@ class VerifiedBadge extends StatelessWidget {
   final double size;
   final bool inline;
 
-  Widget _icon(Color color) => Icon(
-        LucideIcons.badgeCheck,
-        size: size,
-        color: color,
-      );
+  Widget _icon(Color color) =>
+      Icon(LucideIcons.badgeCheck, size: size, color: color);
 
   @override
   Widget build(BuildContext context) {

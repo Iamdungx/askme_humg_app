@@ -22,4 +22,3 @@ class OnboardingRepositoryImpl implements IOnboardingRepository {
   @override
   Future<void> setDemoMode(bool value) => _ds.setDemoMode(value);
 }
-

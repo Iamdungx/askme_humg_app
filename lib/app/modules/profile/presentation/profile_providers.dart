@@ -10,9 +10,7 @@ part 'profile_providers.g.dart';
 
 @riverpod
 FirebaseProfileDatasource profileDatasource(Ref ref) =>
-    FirebaseProfileDatasource(
-      firestore: ref.watch(firestoreProvider),
-    );
+    FirebaseProfileDatasource(firestore: ref.watch(firestoreProvider));
 
 @riverpod
 IProfileRepository profileRepository(Ref ref) =>

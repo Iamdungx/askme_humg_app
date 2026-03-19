@@ -73,8 +73,9 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
           loading: () => _buildTabBar(context, l10n, 0),
           error: (e, s) => _buildTabBar(context, l10n, 0),
           data: (questions) {
-            final unansweredCount =
-                questions.where((q) => q.status == 'unanswered').length;
+            final unansweredCount = questions
+                .where((q) => q.status == 'unanswered')
+                .length;
             return _buildTabBar(context, l10n, unansweredCount);
           },
         ),
@@ -95,10 +96,12 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
                 onRetry: () => ref.invalidate(inboxProvider),
               ),
               data: (questions) {
-                final unanswered =
-                    questions.where((q) => q.status == 'unanswered').toList();
-                final answered =
-                    questions.where((q) => q.status == 'answered').toList();
+                final unanswered = questions
+                    .where((q) => q.status == 'unanswered')
+                    .toList();
+                final answered = questions
+                    .where((q) => q.status == 'answered')
+                    .toList();
 
                 return TabBarView(
                   controller: _tabController,
@@ -179,9 +182,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen>
 
   Future<void> _deleteQuestion(Question question) async {
     final l10n = AppLocalizations.of(context);
-    await ref
-        .read(deleteQuestionProvider.notifier)
-        .delete(question.questionId);
+    await ref.read(deleteQuestionProvider.notifier).delete(question.questionId);
 
     // Provider may have been disposed by the time the await returns
     // (inbox stream fires immediately on deletion). Check mounted first.
@@ -243,7 +244,8 @@ class _QuestionList extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.lg),
       itemCount: questions.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
         final question = questions[index];
         return QuestionCard(

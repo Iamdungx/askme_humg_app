@@ -19,7 +19,9 @@ abstract class CommentModel with _$CommentModel {
     @Default(false) bool authorIsHumgVerified,
   }) = _CommentModel;
 
-  factory CommentModel.fromFirestore(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+  factory CommentModel.fromFirestore(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data();
     final createdAtTs = data['createdAt'] as Timestamp?;
     if (createdAtTs == null) {
@@ -41,14 +43,14 @@ abstract class CommentModel with _$CommentModel {
 
 extension CommentModelX on CommentModel {
   Comment toDomain() => Comment(
-        commentId: commentId,
-        answerId: answerId,
-        userId: userId,
-        content: content,
-        isAnonymous: isAnonymous,
-        createdAt: createdAt,
-        authorName: authorName,
-        authorAvatar: authorAvatar,
-        authorIsHumgVerified: authorIsHumgVerified,
-      );
+    commentId: commentId,
+    answerId: answerId,
+    userId: userId,
+    content: content,
+    isAnonymous: isAnonymous,
+    createdAt: createdAt,
+    authorName: authorName,
+    authorAvatar: authorAvatar,
+    authorIsHumgVerified: authorIsHumgVerified,
+  );
 }

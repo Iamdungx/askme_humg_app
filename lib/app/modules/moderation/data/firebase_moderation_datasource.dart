@@ -7,7 +7,7 @@ import 'package:askme_humg/app/modules/moderation/domain/report.dart';
 
 class FirebaseModerationDatasource {
   FirebaseModerationDatasource({required FirebaseFirestore firestore})
-      : _firestore = firestore;
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 

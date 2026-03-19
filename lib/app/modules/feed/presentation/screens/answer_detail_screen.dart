@@ -23,7 +23,8 @@ class AnswerDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.feed),
         ),
         title: Text(l10n.feedTitle),
       ),
@@ -35,7 +36,8 @@ class AnswerDetailScreen extends ConsumerWidget {
             icon: LucideIcons.triangleAlert,
             message: l10n.commonError,
             actionLabel: l10n.commonRetry,
-            onAction: () => ref.invalidate(publishedAnswerByIdProvider(answerId)),
+            onAction: () =>
+                ref.invalidate(publishedAnswerByIdProvider(answerId)),
           ),
         ),
         data: (item) {
@@ -60,4 +62,3 @@ class AnswerDetailScreen extends ConsumerWidget {
     );
   }
 }
-

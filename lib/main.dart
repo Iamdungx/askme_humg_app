@@ -12,6 +12,7 @@ import 'package:askme_humg/config/router.dart';
 import 'package:askme_humg/app/core/values/app_theme.dart';
 import 'package:askme_humg/app/core/providers/theme_provider.dart';
 import 'package:askme_humg/config/app_routes.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -59,28 +60,29 @@ class MainApp extends ConsumerWidget {
     ref.listen<AsyncValue<ForegroundNotificationEvent>>(
       notificationForegroundsProvider,
       (_, next) {
-      final event = next.asData?.value;
-      if (event == null) return;
-      final msg = [event.title, event.body]
-          .where((s) => s.trim().isNotEmpty)
-          .join(' — ');
-      if (msg.isEmpty) return;
-      _scaffoldMessengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
-    },
+        final event = next.asData?.value;
+        if (event == null) return;
+        final msg = [
+          event.title,
+          event.body,
+        ].where((s) => s.trim().isNotEmpty).join(' — ');
+        if (msg.isEmpty) return;
+        _scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      },
     );
-    ref.listen<AsyncValue<Map<String, dynamic>>>(
-      notificationTapsProvider,
-      (_, next) {
+    ref.listen<AsyncValue<Map<String, dynamic>>>(notificationTapsProvider, (
+      _,
+      next,
+    ) {
       final data = next.asData?.value;
       if (data == null) return;
       final type = (data['type'] as String?)?.trim();
       if (type == 'new_question' || type == 'new_comment') {
         router.go(AppRoutes.inbox);
       }
-    },
-    );
+    });
 
     // OneSignal: login khi có user, logout khi đăng xuất
     ref.listen(authStateProvider, (prev, next) {

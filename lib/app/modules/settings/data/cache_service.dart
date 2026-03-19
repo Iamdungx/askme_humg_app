@@ -16,7 +16,11 @@ class CacheService {
       final dir = await getTemporaryDirectory();
       return _measureDir(dir);
     } catch (e, s) {
-      logger.w('CacheService: failed to measure cache', error: e, stackTrace: s);
+      logger.w(
+        'CacheService: failed to measure cache',
+        error: e,
+        stackTrace: s,
+      );
       return 0;
     }
   }

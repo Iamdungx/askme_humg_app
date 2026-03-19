@@ -31,7 +31,10 @@ class _OtpInputStepState extends ConsumerState<OtpInputStep> {
   static const _otpLength = 6;
   static const _countdownSeconds = 60;
 
-  final _controllers = List.generate(_otpLength, (_) => TextEditingController());
+  final _controllers = List.generate(
+    _otpLength,
+    (_) => TextEditingController(),
+  );
   final _focusNodes = List.generate(_otpLength, (_) => FocusNode());
 
   String? _error;
@@ -77,8 +80,7 @@ class _OtpInputStepState extends ConsumerState<OtpInputStep> {
     });
   }
 
-  String get _currentOtp =>
-      _controllers.map((c) => c.text).join();
+  String get _currentOtp => _controllers.map((c) => c.text).join();
 
   bool get _isComplete => _currentOtp.length == _otpLength;
 
@@ -111,9 +113,9 @@ class _OtpInputStepState extends ConsumerState<OtpInputStep> {
     final state = ref.read(verifyOtpProvider);
     state.whenOrNull(
       data: (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.verifyHumgSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.verifyHumgSuccess)));
         widget.onVerified();
       },
       error: (err, _) {
@@ -224,10 +226,7 @@ class _OtpInputStepState extends ConsumerState<OtpInputStep> {
               children: [
                 Icon(LucideIcons.circleAlert, size: 14, color: cs.error),
                 const SizedBox(width: 4),
-                Text(
-                  _error!,
-                  style: tt.bodySmall?.copyWith(color: cs.error),
-                ),
+                Text(_error!, style: tt.bodySmall?.copyWith(color: cs.error)),
               ],
             ),
           ],
@@ -236,7 +235,9 @@ class _OtpInputStepState extends ConsumerState<OtpInputStep> {
 
           // Confirm button
           FilledButton(
-            onPressed: (isLoading || !_isComplete) ? null : () => _confirm(l10n),
+            onPressed: (isLoading || !_isComplete)
+                ? null
+                : () => _confirm(l10n),
             child: isLoading
                 ? const SizedBox(
                     width: 20,
@@ -309,10 +310,7 @@ class _OtpDigitBox extends StatelessWidget {
           maxLength: 1,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: onChanged,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
           decoration: InputDecoration(
             counterText: '',
             contentPadding: EdgeInsets.zero,
