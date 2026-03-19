@@ -1,6 +1,6 @@
 .PHONY: help get gen l10n setup run run-stg run-release run-ios run-ios-stg \
         build-apk build-aab build-ios icons splash clean fmt analyze check \
-        seed seed-clear seed-clear-ai admin-set admin-unset
+        seed seed-user-questions seed-clear seed-clear-ai admin-set admin-unset
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN {FS=":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
@@ -62,6 +62,9 @@ check: fmt fix analyze ## fmt + fix + analyze
 
 seed:         ## Seed Firestore với dữ liệu mẫu sinh viên HUMG
 	cd scripts && npx ts-node seed.ts
+
+seed-user-questions: ## Seed 5 câu hỏi đa chủ đề cho user test mặc định
+	cd scripts && npx ts-node seed_questions_for_user.ts
 
 seed-clear:   ## Xoá toàn bộ dữ liệu Firestore (users/questions/answers/comments...)
 	cd scripts && npx ts-node clear.ts
