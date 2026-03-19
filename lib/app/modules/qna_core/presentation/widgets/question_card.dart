@@ -64,9 +64,7 @@ class QuestionCard extends StatelessWidget {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.5),
-          ),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -75,17 +73,13 @@ class QuestionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    LucideIcons.clock,
-                    size: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  Icon(LucideIcons.clock, size: 14, color: cs.onSurfaceVariant),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     context.timeAgo(question.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -173,9 +167,7 @@ class QuestionCard extends StatelessWidget {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               l10n.commonDelete,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -219,4 +211,3 @@ class _ReplyButton extends StatelessWidget {
     );
   }
 }
-

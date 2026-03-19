@@ -17,7 +17,7 @@ abstract class IQnaRepository {
 
   Future<Question?> getQuestionById(String questionId);
 
-  Future<void> answerQuestion({
+  Future<String> answerQuestion({
     required String questionId,
     required String userId,
     required String content,
@@ -26,7 +26,7 @@ abstract class IQnaRepository {
 
   Stream<Map<String, bool>> getAnswerPublishStates(String userId);
 
-  Future<void> publishSavedAnswer({
+  Future<String> publishSavedAnswer({
     required String questionId,
     required String userId,
   });

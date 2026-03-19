@@ -39,7 +39,8 @@ SetDemoMode setDemoModeUseCase(Ref ref) =>
 @Riverpod(keepAlive: true)
 class OnboardingCompletedNotifier extends _$OnboardingCompletedNotifier {
   @override
-  bool build() => ref.watch(getOnboardingProgressUseCaseProvider).call().completed;
+  bool build() =>
+      ref.watch(getOnboardingProgressUseCaseProvider).call().completed;
 
   Future<void> complete() async {
     state = true;
@@ -69,4 +70,3 @@ class HintSeen extends _$HintSeen {
     await ref.read(setHintSeenUseCaseProvider).call(hint, true);
   }
 }
-

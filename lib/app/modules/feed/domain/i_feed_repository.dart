@@ -1,9 +1,12 @@
 import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_page.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 abstract class IFeedRepository {
-  Future<FeedPage> getPublicFeed({String? lastDocId});
+  Future<FeedPage> getPublicFeed({String? lastDocId, String? topicTagId});
+
+  Future<List<FeedTopic>> getAiTopics();
 
   Future<FeedItem?> getPublishedAnswerById(String answerId);
 

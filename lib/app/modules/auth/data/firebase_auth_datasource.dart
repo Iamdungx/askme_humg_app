@@ -45,10 +45,9 @@ class FirebaseAuthDatasource {
             if (user == null) {
               controller.add(null);
             } else {
-              innerSub = _userDocStream(user).listen(
-                controller.add,
-                onError: controller.addError,
-              );
+              innerSub = _userDocStream(
+                user,
+              ).listen(controller.add, onError: controller.addError);
             }
           },
           onError: controller.addError,

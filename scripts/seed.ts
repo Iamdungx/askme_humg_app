@@ -24,6 +24,43 @@ const app = admin.initializeApp({
 });
 const db = admin.firestore(app);
 
+type AiCategory = "hoc_tap" | "su_kien" | "doi_song" | "tuyen_dung" | "khac";
+
+type AiTagDef = {
+  id: string;
+  slug: string;
+  label: string;
+  color: string;
+  category: AiCategory;
+};
+
+const AI_CLASSIFICATION_CONFIG: {
+  enabled: boolean;
+  version: string;
+  categories: AiCategory[];
+  maxTags: number;
+  promptHint: string;
+  tags: AiTagDef[];
+} = {
+  enabled: true,
+  version: "v1",
+  categories: ["hoc_tap", "su_kien", "doi_song", "tuyen_dung", "khac"],
+  maxTags: 5,
+  promptHint: "uu tien context sinh vien HUMG",
+  tags: [
+    { id: "tag_hoc_bong", slug: "hoc_bong", label: "Học bổng", color: "#22C55E", category: "hoc_tap" },
+    { id: "tag_lich_thi", slug: "lich_thi", label: "Lịch thi", color: "#1A7AAF", category: "hoc_tap" },
+    { id: "tag_diem_ren_luyen", slug: "diem_ren_luyen", label: "Điểm rèn luyện", color: "#1A3A8C", category: "hoc_tap" },
+    { id: "tag_clb_sinh_vien", slug: "clb_sinh_vien", label: "CLB sinh viên", color: "#2D9BD8", category: "doi_song" },
+    { id: "tag_ky_nang_mem", slug: "ky_nang_mem", label: "Kỹ năng mềm", color: "#475569", category: "doi_song" },
+    { id: "tag_tuyen_thuc_tap", slug: "tuyen_thuc_tap", label: "Tuyển thực tập", color: "#F59E0B", category: "tuyen_dung" },
+    { id: "tag_tuyen_fresher", slug: "tuyen_fresher", label: "Tuyển fresher", color: "#2A4FA8", category: "tuyen_dung" },
+    { id: "tag_deadline_ho_so", slug: "deadline_ho_so", label: "Deadline hồ sơ", color: "#EF4444", category: "tuyen_dung" },
+    { id: "tag_su_kien_khoa", slug: "su_kien_khoa", label: "Sự kiện khoa", color: "#1A7AAF", category: "su_kien" },
+    { id: "tag_workshop", slug: "workshop", label: "Workshop", color: "#22C55E", category: "su_kien" },
+  ],
+};
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function randomId() {
   return db.collection("_").doc().id;
@@ -35,6 +72,118 @@ function daysAgo(n: number) {
 
 function hoursAgo(n: number) {
   return Timestamp.fromDate(new Date(Date.now() - n * 3_600_000));
+}
+
+function getDefaultTagsByCategory(category: AiCategory): string[] {
+  switch (category) {
+    case "hoc_tap":
+      return ["lich_thi", "hoc_bong"];
+    case "doi_song":
+      return ["clb_sinh_vien", "ky_nang_mem"];
+    case "tuyen_dung":
+      return ["tuyen_thuc_tap", "tuyen_fresher"];
+    case "su_kien":
+      return ["su_kien_khoa", "workshop"];
+    default:
+      return ["ky_nang_mem"];
+  }
+}
+
+function classifySeedContent(question: string, answer: string): {
+  category: AiCategory;
+  tags: string[];
+} {
+  const text = `${question} ${answer}`.toLowerCase();
+  const hasDiemRenLuyenContext =
+    text.includes("điểm rèn luyện") ||
+    text.includes("diem ren luyen") ||
+    text.includes("rèn luyện") ||
+    text.includes("ren luyen");
+  const tags: string[] = [];
+
+  const addTag = (slug: string) => {
+    if (tags.includes(slug)) return;
+    tags.push(slug);
+  };
+
+  if (
+    text.includes("thực tập") ||
+    text.includes("intern") ||
+    text.includes("fresher") ||
+    text.includes("tuyển") ||
+    text.includes("xin việc") ||
+    text.includes("lương") ||
+    text.includes("cv")
+  ) {
+    addTag("tuyen_thuc_tap");
+    addTag("tuyen_fresher");
+    addTag("deadline_ho_so");
+    return { category: "tuyen_dung", tags };
+  }
+
+  if (
+    text.includes("sự kiện") ||
+    text.includes("workshop") ||
+    text.includes("hội thảo") ||
+    text.includes("clb") ||
+    text.includes("câu lạc bộ")
+  ) {
+    addTag("su_kien_khoa");
+    addTag("workshop");
+    return { category: "su_kien", tags };
+  }
+
+  if (
+    text.includes("ktx") ||
+    text.includes("canteen") ||
+    text.includes("khu b") ||
+    text.includes("cổ nhuế") ||
+    text.includes("đời sống") ||
+    text.includes("ăn")
+  ) {
+    addTag("clb_sinh_vien");
+    addTag("ky_nang_mem");
+    return { category: "doi_song", tags };
+  }
+
+  if (
+    text.includes("học") ||
+    text.includes("thi") ||
+    text.includes("gpa") ||
+    text.includes("môn") ||
+    text.includes("điểm") ||
+    text.includes("tín chỉ")
+  ) {
+    addTag("lich_thi");
+    addTag("hoc_bong");
+    if (hasDiemRenLuyenContext) {
+      addTag("diem_ren_luyen");
+    }
+    return { category: "hoc_tap", tags };
+  }
+
+  return { category: "khac", tags: [] };
+}
+
+function toTagRefs(tagSlugs: string[]): Array<{
+  id: string;
+  slug: string;
+  label: string;
+  color: string;
+}> {
+  const bySlug = new Map(AI_CLASSIFICATION_CONFIG.tags.map((tag) => [tag.slug, tag]));
+  const result: Array<{ id: string; slug: string; label: string; color: string }> = [];
+  for (const slug of tagSlugs) {
+    const tag = bySlug.get(slug);
+    if (!tag) continue;
+    result.push({
+      id: tag.id,
+      slug: tag.slug,
+      label: tag.label,
+      color: tag.color,
+    });
+  }
+  return result;
 }
 
 // dicebear initials avatar — consistent, dễ nhận diện
@@ -309,6 +458,92 @@ const QA_DATA = [
       { author: "uid_nguyen_bao_long", text: "Quá đỉnh, nếu bạn ổn về lập trình nhúng thì freelance trên Upwork cũng ngon lắm" },
     ],
   },
+
+  // ── HOT POSTS (seed để tăng tương tác feed) ───────────────────────────────
+  {
+    hostUid: "uid_nguyen_bao_long",
+    question:
+      "Có nên học IELTS/TOEIC từ năm 1 không? Mình sợ đến năm 4 mới học thì không kịp chuẩn đầu ra tiếng Anh 😭",
+    answer:
+      "Nên học càng sớm càng tốt nhé. Năm 1–2 lịch còn nhẹ, mỗi ngày dành 45–60 phút vẫn ổn. Nếu mục tiêu chỉ để qua chuẩn đầu ra thì TOEIC nhanh hơn, còn muốn xin intern/công ty nước ngoài thì IELTS đáng đầu tư. Lộ trình mình đi: 6 tháng TOEIC lên 700+, sau đó học thêm speaking/writing để chuyển IELTS. Mẹo quan trọng: học từ vựng theo ngành của bạn (CNTT, mỏ, dầu khí...) để vừa ôn tiếng Anh vừa phục vụ đi làm.",
+    likes: 163,
+    publishedDaysAgo: 1,
+    comments: [
+      { author: "uid_le_thu_huong", text: "Mình để đến năm 4 mới học TOEIC nên stress thật sự 🥲 lời khuyên này quá đúng" },
+      { author: "uid_vo_thi_mai_linh", text: "Có app nào luyện nghe TOEIC ổn không mọi người?" },
+      { author: "uid_nguyen_bao_long", text: "@Mai Linh: thử Tactics + ETS 2024, nghe từ dễ đến khó là lên nhanh." },
+    ],
+  },
+  {
+    hostUid: "uid_le_thu_huong",
+    question:
+      "Điểm rèn luyện có thật sự quan trọng khi xét học bổng và xét tốt nghiệp không hay chỉ là hình thức?",
+    answer:
+      "Quan trọng thật nhé, nhất là khi xét học bổng khuyến khích học tập và một số danh hiệu của khoa/trường. GPA cao mà điểm rèn luyện thấp thì vẫn có thể hụt học bổng. Mình từng mất học bổng 1 kỳ vì thiếu hoạt động đoàn-hội. Mẹo là: mỗi học kỳ cố định 1–2 hoạt động vừa sức (CLB, hiến máu, tình nguyện), đừng để dồn cuối kỳ mới đi xin xác nhận. Làm đều sẽ nhẹ đầu hơn nhiều.",
+    likes: 141,
+    publishedDaysAgo: 2,
+    comments: [
+      { author: "uid_hoang_phuong_anh", text: "Chuẩn luôn, nhiều bạn chủ quan điểm rèn luyện xong mất học bổng tiếc lắm." },
+      { author: "uid_pham_duc_anh", text: "Cho xin list hoạt động dễ tham gia với 😅" },
+      { author: "uid_le_thu_huong", text: "@Đức Anh: CLB học thuật + 1 đợt hiến máu là gần như đủ base rồi." },
+    ],
+  },
+  {
+    hostUid: "uid_tran_minh_hieu",
+    question:
+      "Mức lương thực tập ở Hà Nội bây giờ thực tế là bao nhiêu? Có nên nhận intern không lương để lấy kinh nghiệm?",
+    answer:
+      "Tùy ngành nhưng mặt bằng intern tại HN giờ thường 2–6tr/tháng, có nơi 8–10tr nếu bạn làm tốt. Không lương vẫn có thể nhận trong 1–2 tháng đầu nếu mentor tốt và dự án thật, nhưng đừng kéo dài quá lâu. Mình khuyên: đặt mốc rõ ràng với công ty (sau bao lâu sẽ có phụ cấp/lương), tránh bị 'dùng sức lao động free'. Kinh nghiệm quan trọng, nhưng tài chính sinh viên cũng quan trọng không kém.",
+    likes: 177,
+    publishedDaysAgo: 1,
+    comments: [
+      { author: "uid_nguyen_tuan_kiet", text: "Bài này đúng tâm trạng luôn, đi intern mà vẫn phải đóng tiền trọ 🥲" },
+      { author: "uid_bui_van_thanh", text: "Nên ưu tiên chỗ có mentor tử tế, lương thấp chút vẫn đáng." },
+      { author: "uid_tran_minh_hieu", text: "Đúng rồi, intern mà chỉ giao việc vặt thì nghỉ sớm cho đỡ tốn thời gian." },
+    ],
+  },
+  {
+    hostUid: "uid_vo_thi_mai_linh",
+    question:
+      "Môn nào ở HUMG bị xem là 'boss cuối' theo từng ngành? Mọi người chia sẻ để tân sinh viên đỡ sốc với 😆",
+    answer:
+      "Theo trải nghiệm của mình và bạn bè: CNTT sợ Cấu trúc dữ liệu + môn đồ án; Dầu khí sợ Cơ học chất lỏng; Kế toán sợ Kế toán quản trị; Trắc địa sợ Xử lý số liệu; Xây dựng sợ Sức bền vật liệu; Môi trường sợ Mô hình hóa môi trường. Không có môn nào không thể qua, chỉ là cần chiến thuật: học nhóm, làm đề cũ, và hỏi thầy cô sớm. Đừng để sát thi mới học là dễ toang 😭",
+    likes: 189,
+    publishedDaysAgo: 0,
+    comments: [
+      { author: "uid_nguyen_bao_long", text: "Cấu trúc dữ liệu đúng là ác mộng năm 2 của mình luôn 😂" },
+      { author: "uid_hoang_phuong_anh", text: "Mô hình hóa môi trường thật sự khó nếu nền toán yếu." },
+      { author: "uid_vo_thi_mai_linh", text: "Ai cần đề cũ trắc địa mình share drive cho nhé." },
+    ],
+  },
+  {
+    hostUid: "uid_pham_duc_anh",
+    question:
+      "Làm thế nào để cân bằng giữa đi làm thêm và học ở HUMG? Mình đi làm tối về là đuối quá 😵",
+    answer:
+      "Mình từng làm part-time 5 buổi/tuần và điểm tụt thấy rõ. Sau đó mình đổi sang 3 buổi/tuần, ưu tiên ca cuối tuần và giữ ít nhất 4 buổi tối cho học/ nghỉ. Bí kíp: chốt 3 môn ưu tiên ngay từ đầu kỳ, học theo block 90 phút, và đặt ngày nghỉ cố định để hồi sức. Đi làm thêm giúp tài chính tốt hơn, nhưng nếu burn-out thì vừa mất sức vừa mất điểm, không đáng.",
+    likes: 132,
+    publishedDaysAgo: 3,
+    comments: [
+      { author: "uid_le_thu_huong", text: "Mình cũng áp dụng lịch 3 buổi/tuần và ổn hơn hẳn." },
+      { author: "uid_bui_van_thanh", text: "Block 90 phút hiệu quả thật, mình dùng Pomodoro extended thấy ổn." },
+      { author: "uid_pham_duc_anh", text: "Giữ sức khỏe trước đã, học đường dài chứ không phải chạy nước rút." },
+    ],
+  },
+  {
+    hostUid: "uid_hoang_phuong_anh",
+    question:
+      "Sắp ra trường thì nên ưu tiên làm đồ án thật đẹp hay đi intern thật mạnh để xin việc nhanh hơn?",
+    answer:
+      "Nếu được thì nên làm cả hai ở mức vừa phải, nhưng phải chọn trọng tâm theo mục tiêu. Muốn vào doanh nghiệp ngay sau tốt nghiệp thì intern + portfolio thực tế thường có lợi hơn. Đồ án vẫn cần chỉn chu vì đó là 'bằng chứng tư duy' khi phỏng vấn. Mình chọn cách: đề tài đồ án gần với công việc intern để một công đôi việc, vừa có điểm tốt vừa có case thực chiến.",
+    likes: 154,
+    publishedDaysAgo: 2,
+    comments: [
+      { author: "uid_nguyen_bao_long", text: "Làm đề tài đồ án gắn với intern là nước đi quá thông minh." },
+      { author: "uid_nguyen_tuan_kiet", text: "Cho em xin ví dụ đề tài kiểu này với ạ." },
+      { author: "uid_hoang_phuong_anh", text: "Ví dụ: xử lý dữ liệu quan trắc thực tế từ công ty mình intern luôn." },
+    ],
+  },
 ];
 
 // ─── Seeder Functions ─────────────────────────────────────────────────────────
@@ -339,6 +574,15 @@ async function seedUsers() {
 
   await batch.commit();
   console.log("✓ Users seeded");
+}
+
+async function seedAiClassificationConfig() {
+  console.log("\n🏷️ Seeding AI classification config...");
+  await db
+    .collection("app_config")
+    .doc("ai_classification")
+    .set(AI_CLASSIFICATION_CONFIG, { merge: false });
+  console.log(`✓ app_config/ai_classification seeded (${AI_CLASSIFICATION_CONFIG.tags.length} tags)`);
 }
 
 async function seedQA() {
@@ -375,6 +619,26 @@ async function seedQA() {
 
     const answerBatch = db.batch();
     answerBatch.set(answerRef, {
+      ...(function buildAiClassification() {
+        const base = classifySeedContent(qa.question, qa.answer);
+        const withFallback =
+          base.tags.length > 0
+            ? base.tags
+            : getDefaultTagsByCategory(base.category);
+        const finalSlugs = withFallback.slice(0, 3);
+        const tagRefs = toTagRefs(finalSlugs);
+        return {
+          aiCategory: base.category,
+          aiTags: tagRefs.map((t) => t.slug),
+          aiTagIds: tagRefs.map((t) => t.id),
+          aiTagRefs: tagRefs,
+          aiClassificationStatus: "done",
+          aiClassificationVersion: AI_CLASSIFICATION_CONFIG.version,
+          aiClassificationModel: "seed-rule-based",
+          aiConfidence: 1,
+          aiClassifiedAt: publishedAt,
+        };
+      })(),
       questionId: questionRef.id,
       questionContent: qa.question,   // denormalized for feed display
       userId: qa.hostUid,
@@ -499,6 +763,7 @@ async function main() {
 
   try {
     await seedUsers();
+    await seedAiClassificationConfig();
     await seedQA();
     await seedUnansweredQuestions();
 

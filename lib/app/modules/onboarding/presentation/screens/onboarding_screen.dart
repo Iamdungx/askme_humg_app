@@ -99,8 +99,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     count: pages.length,
                     index: _index,
                     activeColor: cs.primary,
-                    inactiveColor:
-                        cs.onSurface.withValues(alpha: 0.15),
+                    inactiveColor: cs.onSurface.withValues(alpha: 0.15),
                   ),
                   const Spacer(),
                   FilledButton.icon(
@@ -114,8 +113,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         curve: Curves.easeOut,
                       );
                     },
-                    icon: Icon(isLast ? LucideIcons.check : LucideIcons.arrowRight),
-                    label: Text(isLast ? l10n.onboardingDone : l10n.onboardingNext),
+                    icon: Icon(
+                      isLast ? LucideIcons.check : LucideIcons.arrowRight,
+                    ),
+                    label: Text(
+                      isLast ? l10n.onboardingDone : l10n.onboardingNext,
+                    ),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(0, 52),
                       padding: const EdgeInsets.symmetric(
@@ -224,4 +227,3 @@ class _Dots extends StatelessWidget {
     );
   }
 }
-

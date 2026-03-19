@@ -11,6 +11,21 @@ const SUBMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const LOOKUP_LIMIT = 8;
 const LOOKUP_WINDOW_MS = 10 * 60 * 1000; // 10 mins
 const LOOKUP_COOLDOWN_MS = 15 * 60 * 1000; // 15 mins
+const CLASSIFY_LIMIT = 60;
+const CLASSIFY_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+// Keep tag colors aligned with .docs/UI_UX_SPECS.md palette tokens.
+const UI_SPEC_TAG_COLORS = new Set([
+  '#1A3A8C', // primary
+  '#2D9BD8', // dark accent
+  '#1A7AAF', // light accent
+  '#2A4FA8', // primaryLight mapping
+  '#22C55E', // success
+  '#F59E0B', // warning
+  '#EF4444', // error / like
+  '#7FA8C9', // dark secondary text
+  '#475569', // light secondary text
+  '#9AA0A6', // neutral fallback for uncategorized tags
+]);
 
 function getFirestore() {
   if (!admin.apps.length) {
@@ -34,6 +49,20 @@ function parseBody(req) {
     }
   }
   return req.body || {};
+}
+
+function getAuthTokenFromReq(req, body) {
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+  const bodyToken = typeof body?.idToken === 'string' ? body.idToken.trim() : '';
+  return bodyToken;
+}
+
+async function verifyFirebaseIdToken(idToken) {
+  if (!idToken) return null;
+  return admin.auth().verifyIdToken(idToken);
 }
 
 function getClientIp(req) {
@@ -143,13 +172,141 @@ async function checkLookupRateLimit({ db, key }) {
   });
 }
 
+async function checkClassifyRateLimit({ db, key }) {
+  return checkWindowedRateLimit({
+    db,
+    collectionName: 'aiClassifyLimits',
+    key,
+    limit: CLASSIFY_LIMIT,
+    windowMs: CLASSIFY_WINDOW_MS,
+  });
+}
+
+function getGeminiApiKey() {
+  return (process.env.GEMINI_API_KEY || '').trim();
+}
+
+function getGeminiModel() {
+  return (process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite').trim();
+}
+
+function getGeminiFallbackModel() {
+  return (process.env.GEMINI_FALLBACK_MODEL || 'gemini-2.5-flash').trim();
+}
+
+function normalizeUiSpecColor(rawColor, fallbackColor = '#9AA0A6') {
+  const fallback = UI_SPEC_TAG_COLORS.has(fallbackColor) ? fallbackColor : '#9AA0A6';
+  if (typeof rawColor !== 'string') return fallback;
+  const normalized = rawColor.trim().toUpperCase();
+  if (!/^#[0-9A-F]{6}$/.test(normalized)) return fallback;
+  return UI_SPEC_TAG_COLORS.has(normalized) ? normalized : fallback;
+}
+
+function normalizeTag(rawTag) {
+  if (typeof rawTag !== 'string') return '';
+  return rawTag.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+}
+
+function normalizeCategory(rawCategory, categories) {
+  const fallback = categories.includes('khac') ? 'khac' : categories[0];
+  if (typeof rawCategory !== 'string') return fallback;
+  const normalized = rawCategory.trim().toLowerCase();
+  return categories.includes(normalized) ? normalized : fallback;
+}
+
+function extractTextFromGeminiPayload(payload) {
+  const parts = payload?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts
+    .map((part) => (typeof part?.text === 'string' ? part.text : ''))
+    .filter(Boolean)
+    .join('\n')
+    .trim();
+}
+
+async function requestGeminiClassification({
+  content,
+  categories,
+  maxTags,
+  promptHint,
+  model,
+  allowedTagSlugs = [],
+}) {
+  const key = getGeminiApiKey();
+  if (!key) {
+    throw new Error('missing_gemini_api_key');
+  }
+  const prompt = [
+    'Ban la bo phan phan loai noi dung cho ung dung hoi dap.',
+    `Danh muc bat buoc chon 1: ${categories.join(', ')}.`,
+    `Tra ve toi da ${maxTags} tags.`,
+    allowedTagSlugs.length
+      ? `Danh sach tag hop le (chi duoc chon trong danh sach nay): ${allowedTagSlugs.join(', ')}.`
+      : '',
+    'Tra ve JSON dung schema:',
+    '{"category":"string","tags":["string"],"confidence":0.0}',
+    'Quy tac: category phai nam trong danh muc bat buoc; tags ngan gon, lower_snake_case, khong trung lap.',
+    promptHint ? `Goi y bo sung: ${promptHint}` : '',
+    `Noi dung can phan loai:\n${content}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const endpoint =
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}` +
+    `:generateContent?key=${encodeURIComponent(key)}`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      },
+    }),
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`gemini_http_${response.status}:${errorBody.slice(0, 240)}`);
+  }
+  const payload = await response.json();
+  const outputText = extractTextFromGeminiPayload(payload);
+  if (!outputText) throw new Error('gemini_empty_output');
+  let parsed;
+  try {
+    parsed = JSON.parse(outputText);
+  } catch {
+    throw new Error('gemini_invalid_json');
+  }
+  const category = normalizeCategory(parsed.category, categories);
+  const tagsRaw = Array.isArray(parsed.tags) ? parsed.tags : [];
+  const normalizedTags = [...new Set(tagsRaw.map(normalizeTag).filter(Boolean))];
+  const tags =
+    allowedTagSlugs.length > 0
+      ? normalizedTags.filter((tag) => allowedTagSlugs.includes(tag)).slice(0, maxTags)
+      : normalizedTags.slice(0, maxTags);
+  const confidenceRaw = Number(parsed.confidence);
+  const confidence =
+    Number.isFinite(confidenceRaw) && confidenceRaw >= 0 && confidenceRaw <= 1
+      ? confidenceRaw
+      : 0;
+  return { category, tags, confidence };
+}
+
 module.exports = {
   admin,
   parseBody,
   getFirestore,
+  getAuthTokenFromReq,
+  verifyFirebaseIdToken,
   getClientIp,
   hashTrackingCode,
   createUniqueTrackingCode,
   checkSubmitRateLimit,
   checkLookupRateLimit,
+  checkClassifyRateLimit,
+  getGeminiModel,
+  getGeminiFallbackModel,
+  normalizeUiSpecColor,
+  requestGeminiClassification,
 };

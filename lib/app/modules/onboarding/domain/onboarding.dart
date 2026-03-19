@@ -2,12 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'onboarding.freezed.dart';
 
-enum OnboardingHint {
-  feed,
-  inbox,
-  profile,
-  settings,
-}
+enum OnboardingHint { feed, inbox, profile, settings }
 
 extension OnboardingHintX on OnboardingHint {
   String get storageKey => switch (this) {
@@ -37,4 +32,3 @@ extension OnboardingProgressX on OnboardingProgress {
     OnboardingHint.settings => hintSettingsSeen,
   };
 }
-

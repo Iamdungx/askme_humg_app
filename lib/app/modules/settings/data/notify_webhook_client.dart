@@ -5,12 +5,15 @@ import 'package:askme_humg/config/env_reader.dart';
 /// Gọi webhook để gửi thông báo qua OneSignal (khi chưa có Blaze).
 /// Webhook verify idToken, đọc preference từ Firestore, gọi OneSignal API.
 class NotifyWebhookClient {
-  NotifyWebhookClient() : _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-    sendTimeout: const Duration(seconds: 10),
-    headers: {'Content-Type': 'application/json'},
-  ));
+  NotifyWebhookClient()
+    : _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
 
   final Dio _dio;
 
@@ -46,11 +49,7 @@ class NotifyWebhookClient {
         stackTrace: s,
       );
     } catch (e, s) {
-      logger.w(
-        'NotifyWebhook sendNewQuestion failed',
-        error: e,
-        stackTrace: s,
-      );
+      logger.w('NotifyWebhook sendNewQuestion failed', error: e, stackTrace: s);
     }
   }
 
@@ -83,11 +82,7 @@ class NotifyWebhookClient {
         stackTrace: s,
       );
     } catch (e, s) {
-      logger.w(
-        'NotifyWebhook sendNewComment failed',
-        error: e,
-        stackTrace: s,
-      );
+      logger.w('NotifyWebhook sendNewComment failed', error: e, stackTrace: s);
     }
   }
 }

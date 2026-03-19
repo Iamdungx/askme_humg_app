@@ -76,7 +76,9 @@ class NotificationPrefsUpdater extends _$NotificationPrefsUpdater {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       // 1) Persist to backend first (source of truth for next login + webhook).
-      await ref.read(profileRepositoryProvider).updateNotificationPrefs(
+      await ref
+          .read(profileRepositoryProvider)
+          .updateNotificationPrefs(
             userId: userId,
             notifNewQuestion: notifNewQuestion,
             notifNewComment: notifNewComment,
@@ -103,7 +105,8 @@ class NotificationPrefsUpdater extends _$NotificationPrefsUpdater {
 // ---------------------------------------------------------------------------
 
 @riverpod
-NotificationService notificationService(Ref ref) => NotificationService.instance;
+NotificationService notificationService(Ref ref) =>
+    NotificationService.instance;
 
 @riverpod
 NotifyWebhookClient notifyWebhookClient(Ref ref) => NotifyWebhookClient();
@@ -133,7 +136,8 @@ CacheService cacheService(Ref ref) => const CacheService();
 // ---------------------------------------------------------------------------
 
 @riverpod
-Future<int> cacheSize(Ref ref) => ref.watch(cacheServiceProvider).getCacheSize();
+Future<int> cacheSize(Ref ref) =>
+    ref.watch(cacheServiceProvider).getCacheSize();
 
 // ---------------------------------------------------------------------------
 // CacheClearer — AsyncNotifier that clears cache and refreshes cacheSize
@@ -172,11 +176,9 @@ class EditProfileNotifier extends _$EditProfileNotifier {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(updateProfileUseCaseProvider).call(
-        userId: userId,
-        name: name,
-        avatarLocalPath: avatarLocalPath,
-      );
+      await ref
+          .read(updateProfileUseCaseProvider)
+          .call(userId: userId, name: name, avatarLocalPath: avatarLocalPath);
       ref.invalidate(userProfileProvider(userId));
     });
   }

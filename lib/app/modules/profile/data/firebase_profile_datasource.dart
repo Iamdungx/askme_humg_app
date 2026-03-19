@@ -11,9 +11,8 @@ import 'package:askme_humg/app/modules/profile/data/user_profile_model.dart';
 import 'package:askme_humg/app/modules/profile/domain/user_profile.dart';
 
 class FirebaseProfileDatasource {
-  FirebaseProfileDatasource({
-    required FirebaseFirestore firestore,
-  }) : _firestore = firestore;
+  FirebaseProfileDatasource({required FirebaseFirestore firestore})
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 
@@ -74,8 +73,7 @@ class FirebaseProfileDatasource {
 
       if (avatarLocalPath != null) {
         // Enforce 7-day avatar cooldown.
-        final userDoc =
-            await _firestore.collection('users').doc(userId).get();
+        final userDoc = await _firestore.collection('users').doc(userId).get();
         final raw = userDoc.data()?['avatarUpdatedAt'];
         if (raw != null) {
           final lastChanged = (raw as Timestamp).toDate();
@@ -156,8 +154,7 @@ class FirebaseProfileDatasource {
   /// or null if they have never changed it.
   Future<DateTime?> getAvatarUpdatedAt(String userId) async {
     try {
-      final doc =
-          await _firestore.collection('users').doc(userId).get();
+      final doc = await _firestore.collection('users').doc(userId).get();
       final raw = doc.data()?['avatarUpdatedAt'];
       if (raw == null) return null;
       return (raw as Timestamp).toDate();

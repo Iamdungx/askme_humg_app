@@ -7,4 +7,3 @@ abstract class IOnboardingRepository {
   Future<void> setHintSeen(OnboardingHint hint, bool value);
   Future<void> setDemoMode(bool value);
 }
-

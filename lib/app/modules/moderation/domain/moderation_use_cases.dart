@@ -12,15 +12,14 @@ class SubmitReport {
     required String reason,
     required String content,
     String? parentAnswerId,
-  }) =>
-      _repo.submitReport(
-        targetId: targetId,
-        targetType: targetType,
-        reportedBy: reportedBy,
-        reason: reason,
-        content: content,
-        parentAnswerId: parentAnswerId,
-      );
+  }) => _repo.submitReport(
+    targetId: targetId,
+    targetType: targetType,
+    reportedBy: reportedBy,
+    reason: reason,
+    content: content,
+    parentAnswerId: parentAnswerId,
+  );
 }
 
 class GetPendingReports {
@@ -40,12 +39,11 @@ class ResolveReport {
     required String targetType,
     required ResolveAction action,
     String? parentAnswerId,
-  }) =>
-      _repo.resolveReport(
-        reportId: reportId,
-        targetId: targetId,
-        targetType: targetType,
-        action: action,
-        parentAnswerId: parentAnswerId,
-      );
+  }) => _repo.resolveReport(
+    reportId: reportId,
+    targetId: targetId,
+    targetType: targetType,
+    action: action,
+    parentAnswerId: parentAnswerId,
+  );
 }

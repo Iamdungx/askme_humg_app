@@ -10,6 +10,7 @@ import 'package:askme_humg/app/global_widgets/layout/app_card.dart';
 import 'package:askme_humg/app/global_widgets/layout/left_accent_block.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/share_answer_card_widget.dart';
@@ -18,6 +19,13 @@ import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedItemCard extends ConsumerWidget {
   const FeedItemCard({super.key, required this.item, this.onCommentTap});
+  static const Map<String, String> _mainCategoryLabelBySlug = {
+    'hoc_tap': 'Học Tập',
+    'doi_song': 'Đời Sống',
+    'tuyen_dung': 'Chuyên Ngành',
+    'su_kien': 'Sinh Viên',
+    'khac': 'Khác',
+  };
 
   final FeedItem item;
   final VoidCallback? onCommentTap;
@@ -27,9 +35,12 @@ class FeedItemCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
+    final topics = ref.watch(aiTopicsProvider).asData?.value ?? const [];
     final authUser = ref.watch(authStateProvider).asData?.value;
     final uid = authUser?.uid;
     final isVerified = authUser?.isHumgVerified == true;
+    final topicAccentColor = _resolveTopicAccentColor(item, topics, cs);
 
     return AppCard(
       margin: const EdgeInsets.symmetric(
@@ -137,11 +148,26 @@ class FeedItemCard extends ConsumerWidget {
 
           // Answer block with left border accent
           LeftAccentBlock(
+            accentColor: topicAccentColor,
             child: Text(
               item.answerContent,
               style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
             ),
           ),
+          if (item.aiCategory != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                _AiChip(
+                  label: _displayMainCategoryLabel(item.aiCategory!),
+                  accentColor: topicAccentColor,
+                  brightness: brightness,
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
 
           Divider(color: cs.outline.withValues(alpha: 0.3)),
@@ -164,7 +190,9 @@ class FeedItemCard extends ConsumerWidget {
                           isVerified: isVerified,
                           loginMessage: l10n.loginRequiredToComment,
                           verifyMessage: l10n.verifyRequiredToComment,
-                        )) { return; }
+                        )) {
+                          return;
+                        }
                         onCommentTap!();
                       }
                     : null,
@@ -186,7 +214,11 @@ class FeedItemCard extends ConsumerWidget {
     );
   }
 
-  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+  void _showMoreMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+  ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
 
@@ -217,12 +249,62 @@ class FeedItemCard extends ConsumerWidget {
     AppLocalizations l10n,
     WidgetRef ref,
   ) async {
-    final deepLink =
-        ref.read(generateAnswerDeepLinkUseCaseProvider).call(item.answerId);
+    final deepLink = ref
+        .read(generateAnswerDeepLinkUseCaseProvider)
+        .call(item.answerId);
     showAppBottomSheet<void>(
       context: context,
       builder: (_) => ShareAnswerCardWidget(item: item, deepLink: deepLink),
     );
+  }
+
+  static String _toDisplayLabel(String raw) {
+    final compact = raw.trim();
+    if (compact.isEmpty) return raw;
+    final words = compact
+        .replaceAll(RegExp(r'[_\s]+'), ' ')
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return compact;
+    return words
+        .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+        .join(' ');
+  }
+
+  static String _displayMainCategoryLabel(String slug) {
+    final normalizedSlug = slug.trim().toLowerCase();
+    return _mainCategoryLabelBySlug[normalizedSlug] ?? _toDisplayLabel(slug);
+  }
+
+  static Color _resolveTopicAccentColor(
+    FeedItem item,
+    List<FeedTopic> topics,
+    ColorScheme cs,
+  ) {
+    final normalizedCategory = item.aiCategory?.trim().toLowerCase() ?? '';
+    for (final topic in topics) {
+      final topicSlug = topic.slug.trim().toLowerCase();
+      if (topicSlug == normalizedCategory) {
+        return _colorFromHex(topic.color, cs.primary);
+      }
+    }
+    for (final ref in item.aiTagRefs) {
+      final color = _colorFromHex(ref.color, cs.primary);
+      if (color != cs.primary || ref.color.trim().isNotEmpty) return color;
+    }
+    return cs.primary;
+  }
+
+  static Color _colorFromHex(String rawHex, Color fallback) {
+    final normalized = rawHex.trim().toUpperCase();
+    final hex = normalized.startsWith('#')
+        ? normalized.substring(1)
+        : normalized;
+    if (hex.length != 6) return fallback;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return fallback;
+    return Color(0xFF000000 | value);
   }
 }
 
@@ -264,6 +346,51 @@ class _CommentButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AiChip extends StatelessWidget {
+  const _AiChip({
+    required this.label,
+    required this.accentColor,
+    required this.brightness,
+  });
+
+  final String label;
+  final Color accentColor;
+  final Brightness brightness;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final overlayAlpha = brightness == Brightness.dark ? 0.28 : 0.16;
+    final background = Color.alphaBlend(
+      accentColor.withValues(alpha: overlayAlpha),
+      cs.surfaceContainerHighest,
+    );
+    final borderColor = accentColor.withValues(
+      alpha: brightness == Brightness.dark ? 0.55 : 0.35,
+    );
+    final foreground = cs.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Text(
+        label,
+        style: tt.labelSmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

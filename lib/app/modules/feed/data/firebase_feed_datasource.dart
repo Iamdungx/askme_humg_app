@@ -3,35 +3,112 @@ import 'package:askme_humg/app/core/error/exceptions.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/feed/data/comment_model.dart';
 import 'package:askme_humg/app/modules/feed/data/feed_item_model.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 class FirebaseFeedDatasource {
   FirebaseFeedDatasource({required FirebaseFirestore firestore})
-      : _firestore = firestore;
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
+  static const Duration _topicFilterIndexCooldown = Duration(seconds: 45);
+  static const Duration _topicFilterFallbackLogThrottle = Duration(seconds: 30);
+  DateTime? _topicFilterIndexCooldownUntil;
+  DateTime? _lastTopicFilterFallbackLogAt;
+
+  static const Set<String> _mainCategorySlugs = <String>{
+    'hoc_tap',
+    'doi_song',
+    'tuyen_dung',
+    'su_kien',
+    'khac',
+  };
+  static const Map<String, String> _mainTopicColorBySlug = {
+    'hoc_tap': '#1A7AAF',
+    'doi_song': '#2D9BD8',
+    'tuyen_dung': '#F59E0B',
+    'su_kien': '#22C55E',
+    'khac': '#475569',
+  };
 
   /// UC-4.1: Query published answers, cursor-based pagination.
   /// Requires composite index: answers(isPublished ASC, createdAt DESC).
   /// [lastDocId] is the Firestore doc ID of the last seen item (opaque cursor).
   Future<({List<FeedItemModel> items, String? lastDocId})> getPublicFeed({
     String? lastDocId,
+    String? topicTagId,
   }) async {
     try {
       Query<Map<String, dynamic>> query = _firestore
           .collection('answers')
           .where('isPublished', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+          .orderBy('createdAt', descending: true);
+
+      final normalizedTopicId = topicTagId?.trim();
+      final hasTopicFilter =
+          normalizedTopicId != null && normalizedTopicId.isNotEmpty;
+      final now = DateTime.now();
+      if (hasTopicFilter &&
+          _topicFilterIndexCooldownUntil != null &&
+          now.isBefore(_topicFilterIndexCooldownUntil!)) {
+        _logTopicFallbackOnce(
+          'getPublicFeed topic filter fallback: index cooldown active',
+        );
+        final fallbackSnap = await _runUnfilteredFeedQuery(
+          lastDocId: lastDocId,
+        );
+        final fallbackItems = fallbackSnap.docs
+            .map(FeedItemModel.fromFirestore)
+            .toList();
+        final fallbackLastDocId = fallbackSnap.docs.isNotEmpty
+            ? fallbackSnap.docs.last.id
+            : null;
+        return (items: fallbackItems, lastDocId: fallbackLastDocId);
+      }
+
+      if (normalizedTopicId != null && normalizedTopicId.isNotEmpty) {
+        if (_mainCategorySlugs.contains(normalizedTopicId)) {
+          query = query.where('aiCategory', isEqualTo: normalizedTopicId);
+        } else {
+          query = query.where('aiTagIds', arrayContains: normalizedTopicId);
+        }
+      }
+      query = query.limit(20);
 
       if (lastDocId != null) {
-        final lastSnap =
-            await _firestore.collection('answers').doc(lastDocId).get();
+        final lastSnap = await _firestore
+            .collection('answers')
+            .doc(lastDocId)
+            .get();
         if (lastSnap.exists) {
           query = query.startAfterDocument(lastSnap);
         }
       }
 
-      final snap = await query.get();
+      QuerySnapshot<Map<String, dynamic>> snap;
+      try {
+        snap = await query.get();
+      } on FirebaseException catch (e) {
+        final indexNotReady =
+            e.code == 'failed-precondition' &&
+            (e.message?.toLowerCase().contains('requires an index') == true ||
+                e.message?.toLowerCase().contains(
+                      'index is currently building',
+                    ) ==
+                    true);
+        if (!indexNotReady || !hasTopicFilter) {
+          rethrow;
+        }
+        // While Firestore is still building composite indexes, fallback to
+        // unfiltered feed so users can continue browsing instead of hard error.
+        _topicFilterIndexCooldownUntil = DateTime.now().add(
+          _topicFilterIndexCooldown,
+        );
+        _logTopicFallbackOnce(
+          'getPublicFeed topic filter fallback: index not ready',
+        );
+        snap = await _runUnfilteredFeedQuery(lastDocId: lastDocId);
+      }
       final items = snap.docs.map(FeedItemModel.fromFirestore).toList();
       final newLastDocId = snap.docs.isNotEmpty ? snap.docs.last.id : null;
 
@@ -43,6 +120,101 @@ class FirebaseFeedDatasource {
       throw FirestoreException(e.message ?? 'Firestore read failed');
     } catch (e, s) {
       logger.e('getPublicFeed unexpected error', error: e, stackTrace: s);
+      throw FirestoreException(e.toString());
+    }
+  }
+
+  Query<Map<String, dynamic>> _baseUnfilteredFeedQuery() {
+    return _firestore
+        .collection('answers')
+        .where('isPublished', isEqualTo: true)
+        .orderBy('createdAt', descending: true)
+        .limit(20);
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _runUnfilteredFeedQuery({
+    String? lastDocId,
+  }) async {
+    Query<Map<String, dynamic>> query = _baseUnfilteredFeedQuery();
+    if (lastDocId != null) {
+      final lastSnap = await _firestore
+          .collection('answers')
+          .doc(lastDocId)
+          .get();
+      if (lastSnap.exists) {
+        query = query.startAfterDocument(lastSnap);
+      }
+    }
+    return query.get();
+  }
+
+  void _logTopicFallbackOnce(String message) {
+    final now = DateTime.now();
+    if (_lastTopicFilterFallbackLogAt != null &&
+        now.difference(_lastTopicFilterFallbackLogAt!) <
+            _topicFilterFallbackLogThrottle) {
+      return;
+    }
+    _lastTopicFilterFallbackLogAt = now;
+    logger.w(message);
+  }
+
+  Future<List<FeedTopic>> getAiTopics() async {
+    try {
+      final snap = await _firestore
+          .collection('app_config')
+          .doc('ai_classification')
+          .get();
+      final data = snap.data() ?? const <String, dynamic>{};
+      final rawCategories = data['categories'];
+      final categorySlugs = <String>[];
+      if (rawCategories is List) {
+        for (final raw in rawCategories) {
+          if (raw is! String) continue;
+          final slug = raw.trim();
+          if (slug.isEmpty || categorySlugs.contains(slug)) continue;
+          categorySlugs.add(slug);
+        }
+      }
+
+      if (categorySlugs.isEmpty) {
+        final rawTags = data['tags'];
+        if (rawTags is List) {
+          for (final raw in rawTags) {
+            if (raw is! Map) continue;
+            final category = raw['category'] is String
+                ? (raw['category'] as String).trim()
+                : '';
+            if (category.isEmpty || categorySlugs.contains(category)) continue;
+            categorySlugs.add(category);
+          }
+        }
+      }
+
+      final topics = <FeedTopic>[];
+      for (final slug in categorySlugs) {
+        topics.add(
+          FeedTopic(
+            id: slug,
+            slug: slug,
+            // UI is responsible for localizing this display label by slug.
+            label: slug,
+            color: _mainTopicColorBySlug[slug] ?? '#475569',
+            category: slug,
+          ),
+        );
+      }
+      return topics;
+    } on FirebaseException catch (e, s) {
+      if (e.code == 'permission-denied') {
+        // Keep feed usable when app_config read is blocked by rules.
+        logger.w('getAiTopics permission denied, fallback to empty topics');
+        return const <FeedTopic>[];
+      }
+      logger.e('getAiTopics failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore read failed');
+    } catch (e, s) {
+      logger.e('getAiTopics unexpected error', error: e, stackTrace: s);
       throw FirestoreException(e.toString());
     }
   }
@@ -72,12 +244,20 @@ class FirebaseFeedDatasource {
         commentCount: data['commentCount'] as int? ?? 0,
         isPublished: data['isPublished'] as bool? ?? false,
         hostIsHumgVerified: data['hostIsHumgVerified'] as bool? ?? false,
+        aiCategory: data['aiCategory'] as String?,
+        aiTags: List<String>.from(data['aiTags'] as List? ?? []),
+        aiTagIds: List<String>.from(data['aiTagIds'] as List? ?? []),
+        aiTagRefs: _parseAiTagRefs(data['aiTagRefs'] as List?),
       );
     } on FirebaseException catch (e, s) {
       logger.e('getPublishedAnswerById failed', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore read failed');
     } catch (e, s) {
-      logger.e('getPublishedAnswerById unexpected error', error: e, stackTrace: s);
+      logger.e(
+        'getPublishedAnswerById unexpected error',
+        error: e,
+        stackTrace: s,
+      );
       throw FirestoreException(e.toString());
     }
   }
@@ -97,7 +277,9 @@ class FirebaseFeedDatasource {
         }
 
         final data = snap.data();
-        final currentLikedBy = List<String>.from(data?['likedBy'] as List? ?? []);
+        final currentLikedBy = List<String>.from(
+          data?['likedBy'] as List? ?? [],
+        );
         final isLikedOnServer = currentLikedBy.contains(userId);
         if (isLikedOnServer != isCurrentlyLiked) {
           logger.w(
@@ -129,9 +311,7 @@ class FirebaseFeedDatasource {
         .orderBy('createdAt')
         .limit(100)
         .snapshots()
-        .map(
-          (snap) => snap.docs.map(CommentModel.fromFirestore).toList(),
-        );
+        .map((snap) => snap.docs.map(CommentModel.fromFirestore).toList());
   }
 
   /// Returns the most recent [limit] published answers by a specific user.
@@ -182,8 +362,7 @@ class FirebaseFeedDatasource {
       String authorAvatar = '';
       bool authorIsHumgVerified = false;
       if (!isAnonymous && userId != null) {
-        final userSnap =
-            await _firestore.collection('users').doc(userId).get();
+        final userSnap = await _firestore.collection('users').doc(userId).get();
         final data = userSnap.data();
         authorName = (data?['name'] as String?) ?? '';
         authorAvatar = (data?['avatar'] as String?) ?? '';
@@ -206,9 +385,7 @@ class FirebaseFeedDatasource {
       });
 
       final answerRef = _firestore.collection('answers').doc(answerId);
-      batch.update(answerRef, {
-        'commentCount': FieldValue.increment(1),
-      });
+      batch.update(answerRef, {'commentCount': FieldValue.increment(1)});
 
       await batch.commit();
       logger.d('postComment WriteBatch committed for answer $answerId');
@@ -217,4 +394,26 @@ class FirebaseFeedDatasource {
       throw FirestoreException(e.message ?? 'Firestore batch failed');
     }
   }
+}
+
+List<FeedAiTagRef> _parseAiTagRefs(List? rawList) {
+  if (rawList == null) return const <FeedAiTagRef>[];
+  final results = <FeedAiTagRef>[];
+  for (final raw in rawList) {
+    if (raw is! Map) continue;
+    final id = raw['id'] is String ? raw['id'] as String : '';
+    final slug = raw['slug'] is String ? raw['slug'] as String : '';
+    final label = raw['label'] is String ? raw['label'] as String : '';
+    final color = raw['color'] is String ? raw['color'] as String : '';
+    if (id.isEmpty || slug.isEmpty) continue;
+    results.add(
+      FeedAiTagRef(
+        id: id,
+        slug: slug,
+        label: label.isNotEmpty ? label : slug,
+        color: color,
+      ),
+    );
+  }
+  return results;
 }

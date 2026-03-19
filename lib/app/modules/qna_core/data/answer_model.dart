@@ -29,7 +29,9 @@ abstract class AnswerModel with _$AnswerModel {
     final data = doc.data();
     final createdAtTs = data['createdAt'] as Timestamp?;
     if (createdAtTs == null) {
-      throw const FirestoreException('answers: missing required field createdAt');
+      throw const FirestoreException(
+        'answers: missing required field createdAt',
+      );
     }
     return AnswerModel(
       answerId: doc.id,

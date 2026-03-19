@@ -45,7 +45,7 @@ class AnswerQuestion {
   const AnswerQuestion(this._repo);
   final IQnaRepository _repo;
 
-  Future<void> call({
+  Future<String> call({
     required String questionId,
     required String userId,
     required String content,
@@ -70,7 +70,7 @@ class PublishSavedAnswer {
   const PublishSavedAnswer(this._repo);
   final IQnaRepository _repo;
 
-  Future<void> call({required String questionId, required String userId}) =>
+  Future<String> call({required String questionId, required String userId}) =>
       _repo.publishSavedAnswer(questionId: questionId, userId: userId);
 }
 

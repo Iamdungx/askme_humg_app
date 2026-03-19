@@ -59,9 +59,9 @@ class EditProfileScreen extends HookConsumerWidget {
         ? ref.watch(avatarUpdatedAtProvider(user.uid))
         : const AsyncData<DateTime?>(null);
     final lastAvatarChange = avatarUpdatedAtAsync.asData?.value;
-    final avatarCooldownUntil =
-        lastAvatarChange?.add(const Duration(days: 7));
-    final isAvatarOnCooldown = avatarCooldownUntil != null &&
+    final avatarCooldownUntil = lastAvatarChange?.add(const Duration(days: 7));
+    final isAvatarOnCooldown =
+        avatarCooldownUntil != null &&
         DateTime.now().isBefore(avatarCooldownUntil);
 
     final editState = ref.watch(editProfileProvider);
@@ -75,10 +75,7 @@ class EditProfileScreen extends HookConsumerWidget {
               ? _cooldownMessage(l10n, e.nextAllowedAt)
               : l10n.editProfileSaveFailed;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: cs.error,
-            ),
+            SnackBar(content: Text(message), backgroundColor: cs.error),
           );
         },
         data: (_) {
@@ -87,9 +84,9 @@ class EditProfileScreen extends HookConsumerWidget {
           if (user != null) {
             ref.invalidate(avatarUpdatedAtProvider(user.uid));
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.editProfileSuccess)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.editProfileSuccess)));
           Navigator.of(context).maybePop();
         },
       );
@@ -100,9 +97,9 @@ class EditProfileScreen extends HookConsumerWidget {
         title: Text(
           l10n.editProfileTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -176,14 +173,14 @@ class EditProfileScreen extends HookConsumerWidget {
                 isLoading: isLoading,
                 onPressed: hasChanges.value && !isLoading
                     ? () => _onSave(
-                          context,
-                          ref,
-                          formKey: formKey,
-                          userId: user?.uid ?? '',
-                          originalName: user?.displayName ?? '',
-                          nameController: nameController,
-                          pickedAvatarPath: pickedAvatarPath.value,
-                        )
+                        context,
+                        ref,
+                        formKey: formKey,
+                        userId: user?.uid ?? '',
+                        originalName: user?.displayName ?? '',
+                        nameController: nameController,
+                        pickedAvatarPath: pickedAvatarPath.value,
+                      )
                     : null,
               ),
             ),
@@ -207,7 +204,9 @@ class EditProfileScreen extends HookConsumerWidget {
     final newName = nameController.text.trim();
     final nameChanged = newName != originalName;
 
-    await ref.read(editProfileProvider.notifier).save(
+    await ref
+        .read(editProfileProvider.notifier)
+        .save(
           userId: userId,
           name: nameChanged ? newName : null,
           avatarLocalPath: pickedAvatarPath,
@@ -396,7 +395,8 @@ class _HeroSection extends StatelessWidget {
       if (!context.mounted) return;
       final l10n = AppLocalizations.of(context);
       final cs = Theme.of(context).colorScheme;
-      final isUnavailable = e.code == 'channel-error' ||
+      final isUnavailable =
+          e.code == 'channel-error' ||
           e.code == 'camera_access_denied' ||
           e.code == 'photo_access_denied';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -447,9 +447,9 @@ class _CooldownHint extends StatelessWidget {
         Text(
           text,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.error,
-                fontWeight: FontWeight.w500,
-              ),
+            color: cs.error,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -500,10 +500,10 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: cs.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
-          ),
+        color: cs.onSurfaceVariant,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.8,
+      ),
     );
   }
 }
@@ -633,10 +633,10 @@ class _EmailRow extends StatelessWidget {
                 child: Text(
                   displayEmail,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        // Muted text colour signals read-only
-                        color: cs.onSurface.withValues(alpha: 0.55),
-                        fontWeight: FontWeight.w400,
-                      ),
+                    // Muted text colour signals read-only
+                    color: cs.onSurface.withValues(alpha: 0.55),
+                    fontWeight: FontWeight.w400,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -657,8 +657,8 @@ class _EmailRow extends StatelessWidget {
             child: Text(
               l10n.editProfileEmailReadOnlyHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurface.withValues(alpha: 0.45),
-                  ),
+                color: cs.onSurface.withValues(alpha: 0.45),
+              ),
             ),
           )
         else
@@ -669,9 +669,9 @@ class _EmailRow extends StatelessWidget {
               child: Text(
                 l10n.editProfileEmailVerifyNow,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -705,11 +705,7 @@ class _NotVerifiedBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            LucideIcons.circleAlert,
-            size: 11,
-            color: cs.error,
-          ),
+          Icon(LucideIcons.circleAlert, size: 11, color: cs.error),
           const SizedBox(width: 3),
           Text(
             label,

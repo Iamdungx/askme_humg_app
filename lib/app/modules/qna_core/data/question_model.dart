@@ -25,7 +25,9 @@ abstract class QuestionModel with _$QuestionModel {
     final data = doc.data();
     final createdAtTs = data['createdAt'] as Timestamp?;
     if (createdAtTs == null) {
-      throw const FirestoreException('questions: missing required field createdAt');
+      throw const FirestoreException(
+        'questions: missing required field createdAt',
+      );
     }
     return QuestionModel(
       questionId: doc.id,

@@ -27,7 +27,8 @@ class ShareAnswerCardWidget extends ConsumerStatefulWidget {
   final String deepLink;
 
   @override
-  ConsumerState<ShareAnswerCardWidget> createState() => _ShareAnswerCardWidgetState();
+  ConsumerState<ShareAnswerCardWidget> createState() =>
+      _ShareAnswerCardWidgetState();
 }
 
 class _ShareAnswerCardWidgetState extends ConsumerState<ShareAnswerCardWidget> {
@@ -100,12 +101,14 @@ class _ShareAnswerCardWidgetState extends ConsumerState<ShareAnswerCardWidget> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: ShareCardStyle.values
-                  .map((s) => _StyleChip(
-                        style: s,
-                        isSelected: style == s,
-                        onTap: () =>
-                            ref.read(shareCardStyleProvider.notifier).setStyle(s),
-                      ))
+                  .map(
+                    (s) => _StyleChip(
+                      style: s,
+                      isSelected: style == s,
+                      onTap: () =>
+                          ref.read(shareCardStyleProvider.notifier).setStyle(s),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -167,8 +170,13 @@ class _AnswerShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    final question = _clamp(item.questionContent, max: 180);
-    final answer = _clamp(item.answerContent, max: 260);
+    final question = _clamp(
+      item.questionContent.isNotEmpty
+          ? item.questionContent
+          : l10n.feedEmptyQuestion,
+      max: 120,
+    );
+    final answer = _clamp(item.answerContent, max: 420);
 
     return AspectRatio(
       aspectRatio: 4 / 5,
@@ -185,12 +193,15 @@ class _AnswerShareCard extends StatelessWidget {
               ),
             ),
             ColoredBox(color: style.contentOverlay),
-            DecoratedBox(decoration: BoxDecoration(gradient: style.contentScrim)),
+            DecoratedBox(
+              decoration: BoxDecoration(gradient: style.contentScrim),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
               child: Column(
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         padding: const EdgeInsets.all(3),
@@ -256,78 +267,88 @@ class _AnswerShareCard extends StatelessWidget {
                           ],
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            l10n.appTitle,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: style.textPrimary,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.18),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: QrImageView(
+                              data: deepLink,
+                              version: QrVersions.auto,
+                              size: 64,
+                              backgroundColor: Colors.white,
+                              eyeStyle: const QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: Color(0xFF000000),
+                              ),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: Color(0xFF000000),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '“$question”',
-                          textAlign: TextAlign.center,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: style.textPrimary,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: style.footerBg,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: style.pillBorderColor.withValues(alpha: 0.6),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            answer,
-                            maxLines: 7,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: style.textPrimary,
-                              height: 1.45,
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 12),
+                  Text(
+                    '“$question”',
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: style.textPrimary,
+                      height: 1.35,
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: style.footerBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: style.pillBorderColor.withValues(alpha: 0.6),
+                          width: 1,
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: QrImageView(
-                      data: deepLink,
-                      version: QrVersions.auto,
-                      size: 120,
-                      backgroundColor: Colors.white,
-                      eyeStyle: const QrEyeStyle(
-                        eyeShape: QrEyeShape.square,
-                        color: Color(0xFF000000),
                       ),
-                      dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Color(0xFF000000),
+                      child: Text(
+                        answer,
+                        maxLines: 11,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: style.textPrimary,
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ),
@@ -431,4 +452,3 @@ class _StyleChip extends StatelessWidget {
     );
   }
 }
-

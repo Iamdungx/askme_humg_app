@@ -7,19 +7,39 @@ import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_page.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 class FeedRepositoryImpl implements IFeedRepository {
   FeedRepositoryImpl(this._datasource);
   final FirebaseFeedDatasource _datasource;
 
   @override
-  Future<FeedPage> getPublicFeed({String? lastDocId}) async {
+  Future<FeedPage> getPublicFeed({
+    String? lastDocId,
+    String? topicTagId,
+  }) async {
     try {
-      final result = await _datasource.getPublicFeed(lastDocId: lastDocId);
+      final result = await _datasource.getPublicFeed(
+        lastDocId: lastDocId,
+        topicTagId: topicTagId,
+      );
       return FeedPage(
         items: result.items.map((m) => m.toDomain()).toList(),
         lastDocId: result.lastDocId,
       );
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<List<FeedTopic>> getAiTopics() async {
+    try {
+      return await _datasource.getAiTopics();
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } on AppException catch (e) {
@@ -65,10 +85,10 @@ class FeedRepositoryImpl implements IFeedRepository {
   }
 
   @override
-  Stream<List<Comment>> getComments(String answerId) =>
-      _datasource.getComments(answerId).map(
-            (models) => models.map((m) => m.toDomain()).toList(),
-          ).handleError((Object e) {
+  Stream<List<Comment>> getComments(String answerId) => _datasource
+      .getComments(answerId)
+      .map((models) => models.map((m) => m.toDomain()).toList())
+      .handleError((Object e) {
         if (e is FirestoreException) throw FirestoreFailure(e.message);
         if (e is AppException) throw UnknownFailure(e.message);
         throw UnknownFailure(e.toString());
@@ -103,8 +123,10 @@ class FeedRepositoryImpl implements IFeedRepository {
     int limit = 3,
   }) async {
     try {
-      final models =
-          await _datasource.getUserAnswers(userId: userId, limit: limit);
+      final models = await _datasource.getUserAnswers(
+        userId: userId,
+        limit: limit,
+      );
       return models.map((m) => m.toDomain()).toList();
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);

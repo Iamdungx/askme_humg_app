@@ -20,7 +20,7 @@ import 'package:askme_humg/config/env_reader.dart';
 
 class OtpDatasource {
   OtpDatasource({required FirebaseFirestore firestore})
-      : _firestore = firestore;
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 
@@ -53,7 +53,11 @@ class OtpDatasource {
         'attempts': 0,
       });
     } on FirebaseException catch (e, s) {
-      logger.e('OtpDatasource.generateOtp Firestore write failed', error: e, stackTrace: s);
+      logger.e(
+        'OtpDatasource.generateOtp Firestore write failed',
+        error: e,
+        stackTrace: s,
+      );
       throw FirestoreException(e.message ?? 'Failed to store OTP');
     }
 
@@ -66,7 +70,11 @@ class OtpDatasource {
     } on OtpSendException {
       rethrow;
     } catch (e, s) {
-      logger.e('OtpDatasource.generateOtp Gmail send failed', error: e, stackTrace: s);
+      logger.e(
+        'OtpDatasource.generateOtp Gmail send failed',
+        error: e,
+        stackTrace: s,
+      );
       throw OtpSendException(e.toString());
     }
   }
@@ -75,10 +83,7 @@ class OtpDatasource {
   // Verify OTP
   // ---------------------------------------------------------------------------
 
-  Future<void> verifyOtp({
-    required String otp,
-    required String uid,
-  }) async {
+  Future<void> verifyOtp({required String otp, required String uid}) async {
     final docRef = _firestore.collection(_otpCollection).doc(uid);
 
     late Map<String, dynamic> data;
@@ -91,7 +96,11 @@ class OtpDatasource {
     } on OtpExpiredException {
       rethrow;
     } on FirebaseException catch (e, s) {
-      logger.e('OtpDatasource.verifyOtp Firestore read failed', error: e, stackTrace: s);
+      logger.e(
+        'OtpDatasource.verifyOtp Firestore read failed',
+        error: e,
+        stackTrace: s,
+      );
       throw FirestoreException(e.message ?? 'Failed to read OTP');
     }
 
@@ -113,7 +122,11 @@ class OtpDatasource {
       try {
         await docRef.update({'attempts': FieldValue.increment(1)});
       } on FirebaseException catch (e, s) {
-        logger.w('OtpDatasource.verifyOtp attempt increment failed', error: e, stackTrace: s);
+        logger.w(
+          'OtpDatasource.verifyOtp attempt increment failed',
+          error: e,
+          stackTrace: s,
+        );
       }
       final newAttempts = attempts + 1;
       if (newAttempts >= _maxAttempts) {
@@ -132,7 +145,11 @@ class OtpDatasource {
       batch.delete(docRef);
       await batch.commit();
     } on FirebaseException catch (e, s) {
-      logger.e('OtpDatasource.verifyOtp batch commit failed', error: e, stackTrace: s);
+      logger.e(
+        'OtpDatasource.verifyOtp batch commit failed',
+        error: e,
+        stackTrace: s,
+      );
       throw FirestoreException(e.message ?? 'Failed to verify OTP');
     }
   }
@@ -177,7 +194,8 @@ class OtpDatasource {
       ..from = Address(gmailUser, 'AskMe HUMG')
       ..recipients.add(email)
       ..subject = '[AskMe HUMG] Mã xác thực của bạn'
-      ..text = '$greeting\n\n'
+      ..text =
+          '$greeting\n\n'
           'Mã xác thực 6 chữ số để liên kết email HUMG với tài khoản AskMe của bạn:\n\n'
           '  $otp\n\n'
           'Mã có hiệu lực trong 10 phút.\n\n'
@@ -187,11 +205,14 @@ class OtpDatasource {
 
     try {
       final report = await send(message, smtpServer);
-      logger.i('OTP email sent via Gmail to $email | finished=${report.messageSendingEnd}');
+      logger.i(
+        'OTP email sent via Gmail to $email | finished=${report.messageSendingEnd}',
+      );
     } on MailerException catch (e) {
       logger.e('Gmail SMTP error: $e | problems: ${e.problems}');
-      throw OtpSendException('Gmail send failed: ${e.problems.map((p) => p.msg).join(', ')}');
+      throw OtpSendException(
+        'Gmail send failed: ${e.problems.map((p) => p.msg).join(', ')}',
+      );
     }
   }
-
 }

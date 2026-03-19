@@ -111,13 +111,14 @@ class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: ShareCardStyle.values
-                  .map((s) => _StyleChip(
-                        style: s,
-                        isSelected: style == s,
-                        onTap: () => ref
-                            .read(shareCardStyleProvider.notifier)
-                            .setStyle(s),
-                      ))
+                  .map(
+                    (s) => _StyleChip(
+                      style: s,
+                      isSelected: style == s,
+                      onTap: () =>
+                          ref.read(shareCardStyleProvider.notifier).setStyle(s),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -250,12 +251,17 @@ class _ShareCard extends StatelessWidget {
 
                   // App pill badge
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: style.pillBgColor,
                       borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: style.pillBorderColor, width: 1),
+                      border: Border.all(
+                        color: style.pillBorderColor,
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       '${l10n.appBrandName} ${l10n.appBrandSuffix}',
@@ -319,8 +325,11 @@ class _ShareCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(LucideIcons.messageCircle,
-                          size: 13, color: style.accentTextColor),
+                      Icon(
+                        LucideIcons.messageCircle,
+                        size: 13,
+                        color: style.accentTextColor,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${l10n.appBrandName} ${l10n.appBrandSuffix}',
@@ -393,8 +402,7 @@ class _StyleChip extends StatelessWidget {
                 style.assetPath,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => DecoratedBox(
-                  decoration:
-                      BoxDecoration(gradient: style.fallbackGradient),
+                  decoration: BoxDecoration(gradient: style.fallbackGradient),
                 ),
               ),
 
@@ -426,8 +434,11 @@ class _StyleChip extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 8,
                     backgroundColor: Colors.white,
-                    child: Icon(LucideIcons.check,
-                        size: 10, color: Colors.black87),
+                    child: Icon(
+                      LucideIcons.check,
+                      size: 10,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
             ],

@@ -82,14 +82,14 @@ class QnaRepositoryImpl implements IQnaRepository {
   }
 
   @override
-  Future<void> answerQuestion({
+  Future<String> answerQuestion({
     required String questionId,
     required String userId,
     required String content,
     required bool isPublished,
   }) async {
     try {
-      await _datasource.answerQuestion(
+      return await _datasource.answerQuestion(
         questionId: questionId,
         userId: userId,
         content: content,
@@ -113,12 +113,12 @@ class QnaRepositoryImpl implements IQnaRepository {
       });
 
   @override
-  Future<void> publishSavedAnswer({
+  Future<String> publishSavedAnswer({
     required String questionId,
     required String userId,
   }) async {
     try {
-      await _datasource.publishSavedAnswer(
+      return await _datasource.publishSavedAnswer(
         questionId: questionId,
         userId: userId,
       );

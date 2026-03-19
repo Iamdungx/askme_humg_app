@@ -43,15 +43,15 @@ abstract class ReportModel with _$ReportModel {
 
 extension ReportModelX on ReportModel {
   Report toDomain() => Report(
-        reportId: reportId,
-        targetId: targetId,
-        targetType: targetType,
-        reportedBy: reportedBy,
-        reason: reason,
-        status: status,
-        createdAt: createdAt,
-        content: content,
-        resolvedAt: resolvedAt,
-        parentAnswerId: parentAnswerId,
-      );
+    reportId: reportId,
+    targetId: targetId,
+    targetType: targetType,
+    reportedBy: reportedBy,
+    reason: reason,
+    status: status,
+    createdAt: createdAt,
+    content: content,
+    resolvedAt: resolvedAt,
+    parentAnswerId: parentAnswerId,
+  );
 }

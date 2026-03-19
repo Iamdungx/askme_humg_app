@@ -39,6 +39,9 @@ vercel
 | `TRACKING_CODE_PEPPER` | Secret dùng để hash tracking code (khuyên dùng chuỗi random dài). |
 | `ONESIGNAL_REST_API_KEY` | REST API Key từ OneSignal. |
 | `ONESIGNAL_APP_ID` | OneSignal App ID. |
+| `GEMINI_API_KEY` | API key để classify answer. |
+| `GEMINI_MODEL` | Model mặc định (gợi ý: `gemini-2.5-flash-lite`). |
+| `GEMINI_FALLBACK_MODEL` | Model fallback khi confidence thấp/lỗi parse (gợi ý: `gemini-2.5-flash`). |
 
 - Redeploy sau khi thêm env.
 
@@ -59,6 +62,31 @@ vercel
   - Body: `{ trackingCode, clientKey }`
   - Response: `{ status, createdAt, answeredAt, isPublished, answerId }`
 - Tracking code hiện dùng format 6 ký tự chữ+số (ví dụ `AD79HQ`).
+
+### Bổ sung (Answer AI Classification)
+
+- Endpoint:
+  - `POST {API_BASE_URL}/classifyAnswer`
+  - Header: `Authorization: Bearer <Firebase ID token>`
+  - Body: `{ answerId }`
+- Hành vi:
+  - Chỉ classify khi answer đã `isPublished == true`
+  - Nếu đã classify xong (`aiClassificationStatus == done`) thì trả dữ liệu cache (idempotent)
+  - Ghi field vào `answers`: `aiCategory`, `aiTags`, `aiTagIds`, `aiTagRefs`, `aiClassificationStatus`, `aiClassifiedAt`, ...
+- Taxonomy config:
+  - Firestore doc: `app_config/ai_classification`
+  - Ví dụ fields: `enabled`, `version`, `categories`, `maxTags`, `promptHint`, `tags[]`
+  - `tags[]` nên có cấu trúc: `{ id, slug, label, color, category }`
+  - `color` sẽ được backend chuẩn hóa theo palette trong `.docs/UI_UX_SPECS.md`; màu ngoài palette sẽ fallback về màu neutral.
+
+#### Backfill answer cũ
+
+```bash
+cd webhook
+node scripts/backfillClassifyAnswers.js --limit=100
+# dry run:
+node scripts/backfillClassifyAnswers.js --limit=100 --dry-run
+```
 
 ## 5. Khi đã có Blaze
 

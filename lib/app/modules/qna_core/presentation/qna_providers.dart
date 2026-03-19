@@ -158,16 +158,16 @@ class AnswerNotifier extends _$AnswerNotifier {
       state = AsyncError(Exception('Not authenticated'), StackTrace.current);
       return;
     }
-    state = await AsyncValue.guard(
-      () => ref
+    state = await AsyncValue.guard(() async {
+      await ref
           .read(answerQuestionUseCaseProvider)
           .call(
             questionId: questionId,
             userId: uid,
             content: content,
             isPublished: isPublished,
-          ),
-    );
+          );
+    });
   }
 }
 
@@ -183,10 +183,10 @@ class PublishSavedAnswerNotifier extends _$PublishSavedAnswerNotifier {
       state = AsyncError(Exception('Not authenticated'), StackTrace.current);
       return;
     }
-    state = await AsyncValue.guard(
-      () => ref
+    state = await AsyncValue.guard(() async {
+      await ref
           .read(publishSavedAnswerUseCaseProvider)
-          .call(questionId: questionId, userId: uid),
-    );
+          .call(questionId: questionId, userId: uid);
+    });
   }
 }

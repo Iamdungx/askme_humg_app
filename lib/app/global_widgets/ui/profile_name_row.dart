@@ -27,9 +27,9 @@ class ProfileNameRow extends StatelessWidget {
           child: Text(
             name,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
           ),

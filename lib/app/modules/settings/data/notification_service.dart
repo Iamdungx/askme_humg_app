@@ -99,9 +99,17 @@ class NotificationService {
   }) async {
     if (!_initialized) return;
     try {
-      OneSignal.User.addTagWithKey('notif_new_question', notifNewQuestion ? 'true' : 'false');
-      OneSignal.User.addTagWithKey('notif_new_comment', notifNewComment ? 'true' : 'false');
-      logger.d('OneSignal tags: question=$notifNewQuestion comment=$notifNewComment');
+      OneSignal.User.addTagWithKey(
+        'notif_new_question',
+        notifNewQuestion ? 'true' : 'false',
+      );
+      OneSignal.User.addTagWithKey(
+        'notif_new_comment',
+        notifNewComment ? 'true' : 'false',
+      );
+      logger.d(
+        'OneSignal tags: question=$notifNewQuestion comment=$notifNewComment',
+      );
     } catch (e, s) {
       logger.e('OneSignal syncTags failed', error: e, stackTrace: s);
     }
