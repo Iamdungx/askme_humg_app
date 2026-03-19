@@ -32,6 +32,10 @@ function getFirestore() {
     const sa = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
     if (sa) {
       const cred = JSON.parse(sa);
+      // Debug helper: only logs project_id (no secrets / no token).
+      if (cred?.project_id) {
+        console.log('[firebase-admin] init project_id:', cred.project_id);
+      }
       admin.initializeApp({ credential: admin.credential.cert(cred) });
     } else {
       admin.initializeApp();
@@ -62,7 +66,16 @@ function getAuthTokenFromReq(req, body) {
 
 async function verifyFirebaseIdToken(idToken) {
   if (!idToken) return null;
-  return admin.auth().verifyIdToken(idToken);
+  getFirestore();
+  try {
+    return await admin.auth().verifyIdToken(idToken);
+  } catch (e) {
+    // Do not leak token contents. Log only code/message for debugging.
+    const code = e?.code;
+    const message = e instanceof Error ? e.message : String(e);
+    console.error('[verifyIdToken] failed', { code, message });
+    return null;
+  }
 }
 
 function getClientIp(req) {
