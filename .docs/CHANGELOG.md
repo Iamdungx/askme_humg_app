@@ -91,6 +91,20 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] — v1.1 (kế hoạch)
 
+### Added (develop — 2026-03-22)
+
+- **QR quét profile (UC-2.1):** màn `ProfileQrScanScreen`, route `/scan-profile-qr` (full-screen, yêu cầu đăng nhập), dependency `mobile_scanner`; nút quét trên `ProfileScreen` khi platform hỗ trợ (`mobile_scanner_support.dart`).
+- **Deep link:** helper `parseProfileDeepLinkToPath` cho chuỗi quét được (HTTPS hoặc custom scheme `askme://user/{userId}`); redirect router: user đã đăng nhập mở `/user/{ownUid}` → `/me` (có bottom nav).
+- **Shell:** `AppShellTabController` + `AppShellTab` để chuyển tab programmatic (cùng animation với tap bottom bar).
+- **Chia sẻ / lưu ảnh:** `ShareAnswerCardWidget` và `ShareCardWidget` — lưu card PNG vào thư viện ảnh (`gal`); iOS `NSPhotoLibraryAddUsageDescription`; nút tải/xuất thay cho một số luồng chỉ copy link.
+- **Hosting:** meta Open Graph / Twitter Card trên `hosting/public/index.html` (preview link Zalo/Facebook/iMessage).
+- **Firestore / API:** xóa câu hỏi trong Inbox — batch: xóa `questions` + `isPublished: false` trên các `answers` cùng `questionId`; submit ẩn danh — nếu App Check token lỗi thì vẫn gọi API (không gửi header), tránh chặn hoàn toàn khi App Check không lấy được token.
+
+### Changed (develop — 2026-03-22)
+
+- **Android:** `JavaCompile` 11 toàn subproject; `release` tắt minify/shrink tạm thời; `android.javaCompile.suppressSourceTargetDeprecationWarning=true`.
+- **iOS:** mô tả camera mở rộng (avatar + quét QR).
+
 ### Added
 - UC-3.1 moved to Vercel backend (`askme-humg.vercel.app/api`) for production without Firebase Blaze plan.
 - New endpoints:

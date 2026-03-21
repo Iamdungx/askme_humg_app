@@ -119,15 +119,23 @@ class FirebaseQnaDatasource {
     required String content,
   }) async {
     try {
-      final appCheckToken = await FirebaseAppCheck.instance.getToken();
-      if (appCheckToken == null || appCheckToken.isEmpty) {
-        throw const AppCheckException();
+      String? appCheckToken;
+      try {
+        appCheckToken = await FirebaseAppCheck.instance.getToken();
+      } on FirebaseException catch (e) {
+        logger.w('AppCheck token unavailable, continue without header', error: e);
+        appCheckToken = null;
       }
       final fid = await FirebaseInstallations.id;
       final response = await _apiClient.post<Map<String, dynamic>>(
         '$_functionsBaseUrl/submitQuestion',
         data: {'toUserId': toUserId, 'content': content, 'fid': fid},
-        options: Options(headers: {'X-Firebase-AppCheck': appCheckToken}),
+        options: Options(
+          headers: {
+            if (appCheckToken != null && appCheckToken.isNotEmpty)
+              'X-Firebase-AppCheck': appCheckToken,
+          },
+        ),
       );
 
       final data = response.data;
@@ -143,9 +151,6 @@ class FirebaseQnaDatasource {
         questionId: questionId,
         trackingCode: trackingCode,
       );
-    } on DioException catch (e, s) {
-      logger.e('submitAnonymousQuestion failed', error: e, stackTrace: s);
-      _throwFromDioException(e);
     } on FirebaseException catch (e, s) {
       logger.e(
         'submitAnonymousQuestion firebase failed',
@@ -155,6 +160,9 @@ class FirebaseQnaDatasource {
       throw const NetworkException(
         'Failed to prepare anonymous question request',
       );
+    } on DioException catch (e, s) {
+      logger.e('submitAnonymousQuestion failed', error: e, stackTrace: s);
+      _throwFromDioException(e);
     } catch (e, s) {
       logger.e(
         'submitAnonymousQuestion unexpected error',
@@ -357,7 +365,20 @@ class FirebaseQnaDatasource {
 
   Future<void> deleteQuestion(String questionId) async {
     try {
-      await _firestore.collection('questions').doc(questionId).delete();
+      final questionRef = _firestore.collection('questions').doc(questionId);
+      final relatedAnswers = await _firestore
+          .collection('answers')
+          .where('questionId', isEqualTo: questionId)
+          .get();
+
+      final batch = _firestore.batch();
+      batch.delete(questionRef);
+      for (final answerDoc in relatedAnswers.docs) {
+        // Hide linked answers from Feed immediately when a host deletes
+        // an answered question in Inbox.
+        batch.update(answerDoc.reference, {'isPublished': false});
+      }
+      await batch.commit();
     } on FirebaseException catch (e, s) {
       logger.e('deleteQuestion failed', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore delete failed');

@@ -2,7 +2,12 @@
 // The actual GoRoute tree is declared in router.dart (StatefulShellRoute).
 
 /// Routes that require authentication. GoRouter checks `startsWith`.
-const protectedLocationPrefixes = ['/inbox', '/me/edit', '/admin'];
+const protectedLocationPrefixes = [
+  '/inbox',
+  '/me/edit',
+  '/admin',
+  '/scan-profile-qr',
+];
 
 /// Paths that are exempt from the HUMG-verification redirect (UC-1.3).
 /// Exact-match paths — checked with Set.contains for O(1) lookup.
@@ -12,6 +17,7 @@ const humgVerifyExemptPaths = <String>{
   AppRoutes.splash,
   AppRoutes.feed,
   AppRoutes.onboarding,
+  AppRoutes.scanProfileQr,
 };
 
 /// Path prefixes that are exempt from the HUMG-verification redirect (UC-1.3).
@@ -42,6 +48,7 @@ abstract final class AppRoutes {
   static const admin = '/admin';
   static const userProfile = '/user';
   static const trackQuestion = '/track-question';
+  static const scanProfileQr = '/scan-profile-qr';
 }
 
 /// External URLs opened via url_launcher.

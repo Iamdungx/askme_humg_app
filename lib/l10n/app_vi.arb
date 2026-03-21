@@ -119,6 +119,8 @@
   "@profileShareCardStyleLabel": { "description": "Nhãn nút mở style picker trên share card" },
   "profileShareCardStyleApply": "Áp dụng",
   "@profileShareCardStyleApply": { "description": "Nút xác nhận chọn style trên share card picker" },
+  "shareCardImageSaved": "Đã lưu ảnh vào thư viện",
+  "@shareCardImageSaved": { "description": "Snackbar sau khi lưu ảnh share card vào thư viện ảnh trên máy" },
   "profileTitle": "Hồ sơ",
   "@profileTitle": { "description": "Tiêu đề AppBar màn profile" },
   "profileYourLink": "Link hồ sơ của bạn",
@@ -444,6 +446,20 @@
   "@profileStatAnswers": { "description": "Nhãn thống kê số câu trả lời" },
   "profileStatLikes": "Lượt thích",
   "@profileStatLikes": { "description": "Nhãn thống kê tổng lượt thích" },
+  "profileScanQrTooltip": "Quét mã QR hồ sơ",
+  "@profileScanQrTooltip": { "description": "Tooltip nút mở màn quét QR trong app" },
+  "profileScanQrTitle": "Quét QR",
+  "@profileScanQrTitle": { "description": "Tiêu đề AppBar màn quét QR hồ sơ" },
+  "profileScanQrHint": "Hướng camera vào mã QR hồ sơ (cùng ứng dụng).",
+  "@profileScanQrHint": { "description": "Hướng dẫn trên màn quét QR hồ sơ" },
+  "profileScanQrInvalid": "Mã QR không phải liên kết hồ sơ hợp lệ.",
+  "@profileScanQrInvalid": { "description": "Snackbar khi QR không phải deep link profile" },
+  "profileScanQrUnsupportedPlatform": "Không thể quét QR trên nền tảng này. Hãy dùng app trên điện thoại/máy tính bảng, hoặc mở liên kết hồ sơ trên trình duyệt.",
+  "@profileScanQrUnsupportedPlatform": { "description": "Thông báo khi không có plugin quét QR (ví dụ Windows/Linux desktop)" },
+  "profileScanQrImportImage": "Nhập ảnh",
+  "@profileScanQrImportImage": { "description": "Nút chọn ảnh có QR từ thư viện trên màn quét QR hồ sơ" },
+  "profileScanQrFlashTooltip": "Bật/tắt đèn flash",
+  "@profileScanQrFlashTooltip": { "description": "Nhãn hỗ trợ tiếp cận cho nút đèn flash trên màn quét QR hồ sơ" },
   "settingsTagline": "Được phát triển bởi Sinh viên Mỏ & Địa chất",
   "@settingsTagline": { "description": "Tagline hiển thị ở cuối màn hình Cài đặt" },
   "feedAnonymousAsked": "hỏi:",
@@ -552,8 +568,14 @@
   ,"@settingsTrackQuestion": { "description": "Mục cài đặt mở màn hình tra cứu câu hỏi ẩn danh" }
   ,"settingsTrackQuestionSubtitle": "Nhập mã 6 ký tự (chữ và số) để xem trạng thái trả lời"
   ,"@settingsTrackQuestionSubtitle": { "description": "Mô tả phụ cho mục theo dõi phiếu hỏi bằng mã thủ công" }
-  ,"questionTrackingCodeDescription": "Hãy lưu mã 6 ký tự (chữ và số) này để tra cứu trạng thái câu hỏi sau."
+  ,"questionTrackingCodeDialogTitle": "Mã tra cứu của bạn"
+  ,"@questionTrackingCodeDialogTitle": { "description": "Tiêu đề dialog mã tra cứu sau khi gửi câu hỏi ẩn danh thành công" }
+  ,"questionTrackingCodeDescription": "Đây là cách duy nhất để xem trạng thái câu hỏi ẩn danh này sau này (không cần đăng nhập). Hãy sao chép và lưu mã 6 ký tự (chữ và số) ở nơi an toàn."
   ,"@questionTrackingCodeDescription": { "description": "Mô tả trong dialog sau khi gửi câu hỏi thành công, hướng dẫn dùng mã tra cứu" }
+  ,"questionTrackingCodeCopyPrimary": "Sao chép mã"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "Nút chính sao chép mã tra cứu trong dialog sau khi gửi thành công" }
+  ,"questionTrackingCodeCopyRequiredHint": "Vui lòng sao chép mã trước khi đóng."
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "Gợi ý và snackbar khi chưa sao chép mã mà đóng dialog tra cứu" }
   ,"questionTrackingCodeCopied": "Đã sao chép mã tra cứu"
   ,"@questionTrackingCodeCopied": { "description": "Snackbar sau khi người dùng sao chép mã tra cứu" }
   ,"questionTrackingCodeTrackNow": "Tra cứu ngay"

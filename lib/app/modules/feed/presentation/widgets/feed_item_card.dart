@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/core/widgets/app_shell_tab_controller.dart';
 import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
 import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
@@ -15,6 +17,7 @@ import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/share_answer_card_widget.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedItemCard extends ConsumerWidget {
@@ -41,6 +44,25 @@ class FeedItemCard extends ConsumerWidget {
     final uid = authUser?.uid;
     final isVerified = authUser?.isHumgVerified == true;
     final topicAccentColor = _resolveTopicAccentColor(item, topics, cs);
+    final canOpenHostProfile = item.hostUserId.isNotEmpty;
+    final isOwnProfile =
+        uid != null && item.hostUserId.isNotEmpty && item.hostUserId == uid;
+
+    void openHostProfile() {
+      if (!canOpenHostProfile) return;
+      // Own profile: use shell tab switcher (fade + goBranch) like tapping Profile.
+      // `go('/me')` jumps with no animation; `push('/user/self')` mis-highlights Feed.
+      if (isOwnProfile) {
+        final shell = AppShellTabController.maybeOf(context);
+        if (shell != null) {
+          shell.switchToTab(AppShellTab.profile);
+        } else {
+          context.go(AppRoutes.me);
+        }
+      } else {
+        context.push('${AppRoutes.userProfile}/${item.hostUserId}');
+      }
+    }
 
     return AppCard(
       margin: const EdgeInsets.symmetric(
@@ -54,46 +76,60 @@ class FeedItemCard extends ConsumerWidget {
           // Header
           Row(
             children: [
-              AppAvatar(
-                imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
-                name: item.hostName.isNotEmpty
-                    ? item.hostName
-                    : l10n.feedFallbackHostName,
-                size: 40,
+              InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: canOpenHostProfile ? openHostProfile : null,
+                child: AppAvatar(
+                  imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
+                  name: item.hostName.isNotEmpty
+                      ? item.hostName
+                      : l10n.feedFallbackHostName,
+                  size: 40,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: canOpenHostProfile ? openHostProfile : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 4,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            item.hostName.isNotEmpty
-                                ? item.hostName
-                                : l10n.feedFallbackHostName,
-                            style: tt.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                item.hostName.isNotEmpty
+                                    ? item.hostName
+                                    : l10n.feedFallbackHostName,
+                                style: tt.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            if (item.hostIsHumgVerified) ...[
+                              const SizedBox(width: 4),
+                              const VerifiedBadge(size: 14),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          context.timeAgo(item.createdAt),
+                          style: tt.labelSmall?.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
-                        if (item.hostIsHumgVerified) ...[
-                          const SizedBox(width: 4),
-                          const VerifiedBadge(size: 14),
-                        ],
                       ],
                     ),
-                    Text(
-                      context.timeAgo(item.createdAt),
-                      style: tt.labelSmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               // Questions are always anonymous per spec (UC-3.1)
