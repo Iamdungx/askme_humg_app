@@ -156,61 +156,10 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
   }
 
   Future<void> _showTrackingCodeDialog(String trackingCode) async {
-    final l10n = AppLocalizations.of(context);
     final shouldTrackNow = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.questionSubmitSuccess),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.questionTrackingCodeDescription),
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Text(
-                trackingCode,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  letterSpacing: 3,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: trackingCode));
-              if (!ctx.mounted) return;
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                SnackBar(content: Text(l10n.questionTrackingCodeCopied)),
-              );
-            },
-            child: Text(l10n.commonCopy),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.commonClose),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.questionTrackingCodeTrackNow),
-          ),
-        ],
-      ),
+      barrierDismissible: false,
+      builder: (ctx) => _TrackingCodeDialog(trackingCode: trackingCode),
     );
 
     if (!mounted) return;
@@ -233,6 +182,205 @@ class _AskQuestionSheetState extends ConsumerState<AskQuestionSheet> {
       idToken: token,
       toUserId: toUserId,
       content: content,
+    );
+  }
+}
+
+class _TrackingCodeDialog extends StatefulWidget {
+  const _TrackingCodeDialog({required this.trackingCode});
+
+  final String trackingCode;
+
+  @override
+  State<_TrackingCodeDialog> createState() => _TrackingCodeDialogState();
+}
+
+class _TrackingCodeDialogState extends State<_TrackingCodeDialog> {
+  bool _copied = false;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.trackingCode));
+    if (!mounted) return;
+    if (!_copied) {
+      setState(() => _copied = true);
+      return;
+    }
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.questionTrackingCodeCopied)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final trackingCode = widget.trackingCode;
+
+    return PopScope(
+      canPop: _copied,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || !mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.questionTrackingCodeCopyRequiredHint)),
+        );
+      },
+      child: AlertDialog(
+        titlePadding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.md,
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.sm,
+          AppSpacing.xl,
+          AppSpacing.md,
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.sm,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.circleCheck, color: cs.primary, size: 22),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.questionSubmitSuccess,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.questionTrackingCodeDialogTitle,
+              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.questionTrackingCodeDescription,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: cs.outlineVariant),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(LucideIcons.keyRound, size: 16, color: cs.primary),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          l10n.trackQuestionInputLabel,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: cs.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.lg,
+                        ),
+                        child: Text(
+                          trackingCode,
+                          textAlign: TextAlign.center,
+                          style: textTheme.headlineSmall?.copyWith(
+                            letterSpacing: 4,
+                            fontWeight: FontWeight.w800,
+                            color: cs.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              if (_copied)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(LucideIcons.circleCheck, size: 20, color: cs.primary),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        l10n.questionTrackingCodeCopied,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _copy,
+                      child: Text(l10n.commonCopy),
+                    ),
+                  ],
+                )
+              else ...[
+                FilledButton.icon(
+                  onPressed: _copy,
+                  icon: const Icon(LucideIcons.copy, size: 18),
+                  label: Text(l10n.questionTrackingCodeCopyPrimary),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  l10n.questionTrackingCodeCopyRequiredHint,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: _copied ? () => Navigator.of(context).pop(false) : null,
+            child: Text(l10n.commonClose),
+          ),
+          FilledButton(
+            onPressed: _copied ? () => Navigator.of(context).pop(true) : null,
+            child: Text(l10n.questionTrackingCodeTrackNow),
+          ),
+        ],
+      ),
     );
   }
 }

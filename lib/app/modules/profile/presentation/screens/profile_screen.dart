@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
+import 'package:askme_humg/app/core/utils/mobile_scanner_support.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
 import 'package:askme_humg/app/global_widgets/states/error_state.dart';
@@ -139,9 +140,15 @@ class _ProfileContent extends ConsumerWidget {
           if (isOwner) ...[
             IconButton(
               icon: Icon(LucideIcons.userPen, color: cs.onSurface),
-              tooltip: 'Edit Profile',
+              tooltip: l10n.settingsEditProfile,
               onPressed: () => context.push('/me/edit'),
             ),
+            if (isMobileScannerPlatformSupported)
+              IconButton(
+                icon: Icon(LucideIcons.scanLine, color: cs.onSurface),
+                tooltip: l10n.profileScanQrTooltip,
+                onPressed: () => context.push(AppRoutes.scanProfileQr),
+              ),
             IconButton(
               icon: Icon(LucideIcons.share2, color: cs.onSurface),
               onPressed: () => _showShareCard(context, deepLink),

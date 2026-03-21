@@ -117,6 +117,8 @@
   "@profileShareCardStyleLabel": { "description": "Button label to open share card style picker" },
   "profileShareCardStyleApply": "Apply",
   "@profileShareCardStyleApply": { "description": "Confirm button in share card style picker" },
+  "shareCardImageSaved": "Image saved to gallery",
+  "@shareCardImageSaved": { "description": "Snackbar after share card PNG is saved to the device photo library" },
   "profileTitle": "Profile",
   "@profileTitle": { "description": "AppBar title on profile screen" },
   "profileYourLink": "Your profile link",
@@ -137,6 +139,20 @@
   "@profileStatAnswers": { "description": "Stat label for answer count" },
   "profileStatLikes": "Likes",
   "@profileStatLikes": { "description": "Stat label for total likes" },
+  "profileScanQrTooltip": "Scan profile QR code",
+  "@profileScanQrTooltip": { "description": "Tooltip for app bar button that opens in-app QR scanner" },
+  "profileScanQrTitle": "Scan QR",
+  "@profileScanQrTitle": { "description": "App bar title on profile QR scan screen" },
+  "profileScanQrHint": "Point the camera at a profile QR code from this app.",
+  "@profileScanQrHint": { "description": "Instructions on profile QR scan screen" },
+  "profileScanQrInvalid": "This QR code is not a valid profile link.",
+  "@profileScanQrInvalid": { "description": "Snackbar when scanned QR is not a profile deep link" },
+  "profileScanQrUnsupportedPlatform": "QR scanning is not available on this platform. Use the app on a phone or tablet, or open the profile link in a browser.",
+  "@profileScanQrUnsupportedPlatform": { "description": "Message when mobile_scanner has no implementation (e.g. Windows/Linux desktop)" },
+  "profileScanQrImportImage": "Import image",
+  "@profileScanQrImportImage": { "description": "Outlined button label to pick a QR image from gallery on profile QR scan screen" },
+  "profileScanQrFlashTooltip": "Toggle flash",
+  "@profileScanQrFlashTooltip": { "description": "Accessibility label for torch flash button on profile QR scan screen" },
 
   "inboxTitle": "Inbox",
   "@inboxTitle": { "description": "AppBar title on inbox screen" },
@@ -549,8 +565,14 @@
   ,"@settingsTrackQuestion": { "description": "Settings item label to open anonymous question tracking screen" }
   ,"settingsTrackQuestionSubtitle": "Enter a 6-character code (letters and numbers) to check answer status"
   ,"@settingsTrackQuestionSubtitle": { "description": "Settings item subtitle describing manual tracking code lookup" }
-  ,"questionTrackingCodeDescription": "Save this 6-character code (letters and numbers) to track your question status later."
+  ,"questionTrackingCodeDialogTitle": "Your tracking code"
+  ,"@questionTrackingCodeDialogTitle": { "description": "Dialog title for the anonymous question tracking code after successful submit" }
+  ,"questionTrackingCodeDescription": "This is the only way to check this anonymous question later without signing in. Copy the 6-character code (letters and numbers) and keep it somewhere safe."
   ,"@questionTrackingCodeDescription": { "description": "Dialog body shown after anonymous submit success to explain tracking code usage" }
+  ,"questionTrackingCodeCopyPrimary": "Copy code"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "Primary button label to copy the tracking code in the submit success dialog" }
+  ,"questionTrackingCodeCopyRequiredHint": "Copy the code before closing."
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "Helper text and snackbar when user tries to dismiss tracking code dialog before copying" }
   ,"questionTrackingCodeCopied": "Tracking code copied"
   ,"@questionTrackingCodeCopied": { "description": "Snackbar shown after copying tracking code from submit success dialog" }
   ,"questionTrackingCodeTrackNow": "Track now"

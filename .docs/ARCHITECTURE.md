@@ -3,7 +3,7 @@
 > **Pattern:** Feature-First Clean Architecture
 > **State Management:** Riverpod (`riverpod_annotation` codegen)
 > **Routing:** GoRouter (Riverpod provider, `keepAlive: true`)
-> **Updated:** 02-03-2026 — v1.0.0
+> **Updated:** 22-03-2026 — develop (QR profile, shell tab controller)
 
 ---
 
@@ -50,9 +50,14 @@ lib/
     │   │   └── firebase_providers.dart  # @riverpod FirebaseAuth, Firestore, Storage
     │   ├── providers/
     │   │   └── theme_provider.dart      # ThemeModeNotifier + sharedPreferencesProvider
+    │   ├── widgets/
+    │   │   ├── app_shell.dart           # StatefulShellRoute body + NavigationBar
+    │   │   └── app_shell_tab_controller.dart  # InheritedWidget — shell tab switch (AppShellTab)
     │   ├── utils/
     │   │   ├── logger.dart              # Global logger instance (logger package)
-    │   │   └── validator.dart           # Input validation helpers
+    │   │   ├── validator.dart           # Input validation helpers
+    │   │   ├── profile_deep_link_parser.dart  # UC-2.1 — QR/pasted URL → /user/:id
+    │   │   └── mobile_scanner_support.dart   # Platform guard for QR scanner (mobile_scanner)
     │   └── values/
     │       ├── app_colors.dart          # AppDarkColors, AppLightColors, AppSemanticColors
     │       ├── app_theme.dart           # AppTheme.light / AppTheme.dark (Material 3)
@@ -116,7 +121,8 @@ lib/
 │   └── presentation/
 │       ├── profile_providers.dart
 │       ├── screens/
-│       │   └── profile_screen.dart
+│       │   ├── profile_screen.dart
+│       │   └── profile_qr_scan_screen.dart   # /scan-profile-qr (mobile_scanner)
 │       └── widgets/
 │           ├── ask_question_sheet.dart
 │           ├── share_card_widget.dart

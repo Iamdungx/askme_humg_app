@@ -1,5 +1,6 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,11 +26,20 @@ class AppBootstrap {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+    // App Check provider can be controlled by env for local/internal testing:
+    // APP_CHECK_PROVIDER=debug|release|auto (default auto).
+    final useReleaseAppCheck = switch (EnvReader.appCheckProvider) {
+      'debug' => false,
+      'release' => true,
+      // Auto follows build mode, but only enforces release provider for
+      // production app env. This keeps sideload/internal release builds usable.
+      _ => kReleaseMode && EnvReader.isRelease,
+    };
     await FirebaseAppCheck.instance.activate(
-      providerAndroid: EnvReader.isRelease
+      providerAndroid: useReleaseAppCheck
           ? const AndroidPlayIntegrityProvider()
           : const AndroidDebugProvider(),
-      providerApple: EnvReader.isRelease
+      providerApple: useReleaseAppCheck
           ? const AppleDeviceCheckProvider()
           : const AppleDebugProvider(),
     );

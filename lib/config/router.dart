@@ -17,6 +17,7 @@ import 'package:askme_humg/app/modules/feed/presentation/screens/feed_screen.dar
 import 'package:askme_humg/app/modules/feed/presentation/screens/answer_detail_screen.dart';
 import 'package:askme_humg/app/modules/onboarding/presentation/onboarding_providers.dart';
 import 'package:askme_humg/app/modules/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:askme_humg/app/modules/profile/presentation/screens/profile_qr_scan_screen.dart';
 import 'package:askme_humg/app/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/answer_compose_screen.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/screens/inbox_screen.dart';
@@ -28,6 +29,12 @@ import 'package:askme_humg/app/modules/auth/presentation/screens/verify_humg_scr
 import 'package:askme_humg/app/modules/splash/presentation/screens/splash_screen.dart';
 
 part 'router.g.dart';
+
+/// Root [NavigatorState] for [GoRouter] — shared with full-screen routes that
+/// must cover the [StatefulShellRoute] (e.g. profile QR scan).
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 // Instant no-animation transition for tab switches — preserves IndexedStack state.
 Widget _noTransition(
@@ -96,7 +103,11 @@ class _RouterNotifier extends ChangeNotifier {
     // /user/{userId} is a full-screen route without bottom nav; when the
     // logged-in user scans their own QR code they'd see no back button and no
     // shell navigation, so we bounce them to the /me shell tab instead.
-    if (isLoggedIn && state.pathParameters['userId'] == user.uid) {
+    // Only when the location is actually /user/:id (not e.g. /scan-profile-qr).
+    if (isLoggedIn &&
+        state.uri.pathSegments.length >= 2 &&
+        state.uri.pathSegments[0] == 'user' &&
+        state.pathParameters['userId'] == user.uid) {
       return AppRoutes.me;
     }
 
@@ -122,6 +133,7 @@ GoRouter appRouter(Ref ref) {
   ref.onDispose(notifier.dispose);
 
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: notifier,
@@ -186,6 +198,11 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: AppRoutes.trackQuestion,
         builder: (context, state) => const QuestionTrackingScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.scanProfileQr,
+        builder: (context, state) => const ProfileQrScanScreen(),
       ),
 
       // ── Shell: 4 tabs with persistent bottom NavigationBar ───────────────

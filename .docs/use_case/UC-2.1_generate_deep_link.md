@@ -44,6 +44,13 @@ Case B – App is NOT installed:
   2. Fallback web page shows app download links (App Store / Google Play)
 ```
 
+### 4b. Custom scheme & QR scan (in-app)
+
+- **HTTPS / HTTP:** `router.dart` resolves `Uri` → path (e.g. `/user/{userId}`) for `app_links` cold/warm start.
+- **Custom scheme:** `askme://user/{userId}` — `host == user`, first path segment = user id → `/user/{userId}`.
+- **QR scanner:** `ProfileQrScanScreen` (`/scan-profile-qr`, protected route). Raw string from barcode is parsed with `parseProfileDeepLinkToPath` in `profile_deep_link_parser.dart` (HTTPS profile URLs or `askme://` as above). Invalid payloads show an error; valid → `router.go(path)`.
+- **Own profile:** if the logged-in user opens `/user/{uid}` where `uid` is their own, redirect to `/me` (shell with bottom navigation) so they are not stuck on a full-screen profile without shell chrome.
+
 ---
 
 ## 5. Database Impact
@@ -64,14 +71,20 @@ lib/app/modules/profile/
 │   └── repositories/profile_repository_impl.dart  [CREATE]
     └── presentation/
     ├── screens/profile_screen.dart              [CREATE] route /user/:userId
+    ├── screens/profile_qr_scan_screen.dart      [CREATE] route /scan-profile-qr (QR scan)
     └── widgets/
         ├── share_card_widget.dart               [CREATE] renders QR + avatar card
         └── profile_header.dart                  [CREATE]
 
+lib/app/core/utils/profile_deep_link_parser.dart   [CREATE] parse QR / pasted URL → /user/:id
+lib/app/core/utils/mobile_scanner_support.dart     [CREATE] platform guard for scanner button
+lib/app/core/widgets/app_shell_tab_controller.dart [CREATE] InheritedWidget — switch shell tab
+
 lib/config/bootstrap.dart        [MODIFY] init app_links listener
 lib/config/router.dart           [MODIFY] handle incoming deep links from app_links
+lib/config/app_routes.dart       [MODIFY] /scan-profile-qr, protected prefixes
 android/app/src/main/AndroidManifest.xml  [MODIFY] intent-filter for deep link
-ios/Runner/Info.plist             [MODIFY] Associated Domains / URL Schemes
+ios/Runner/Info.plist             [MODIFY] Associated Domains / URL Schemes, camera (QR), photo library add (save card)
 ```
 
 ---

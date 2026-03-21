@@ -117,6 +117,8 @@
   "@profileShareCardStyleLabel": { "description": "シェアカードのスタイル選択ボタンラベル" },
   "profileShareCardStyleApply": "適用",
   "@profileShareCardStyleApply": { "description": "シェアカードスタイルピッカーの確定ボタン" },
+  "shareCardImageSaved": "画像をギャラリーに保存しました",
+  "@shareCardImageSaved": { "description": "シェアカード画像を端末のフォトライブラリに保存した後のスナックバー" },
   "profileTitle": "プロフィール",
   "@profileTitle": { "description": "プロフィール画面のAppBarタイトル" },
   "profileYourLink": "あなたのプロフィールリンク",
@@ -137,6 +139,20 @@
   "@profileStatAnswers": { "description": "回答数の統計ラベル" },
   "profileStatLikes": "いいね",
   "@profileStatLikes": { "description": "総いいね数の統計ラベル" },
+  "profileScanQrTooltip": "プロフィールQRをスキャン",
+  "@profileScanQrTooltip": { "description": "アプリ内QRスキャナーを開くAppBarボタンのツールチップ" },
+  "profileScanQrTitle": "QRをスキャン",
+  "@profileScanQrTitle": { "description": "プロフィールQRスキャン画面のAppBarタイトル" },
+  "profileScanQrHint": "このアプリのプロフィールQRコードにカメラを向けてください。",
+  "@profileScanQrHint": { "description": "プロフィールQRスキャン画面の説明文" },
+  "profileScanQrInvalid": "このQRコードは有効なプロフィールリンクではありません。",
+  "@profileScanQrInvalid": { "description": "スキャンしたQRがプロフィールのディープリンクでないときのスナックバー" },
+  "profileScanQrUnsupportedPlatform": "このプラットフォームではQRスキャンに対応していません。スマートフォンまたはタブレットのアプリを使うか、ブラウザでプロフィールリンクを開いてください。",
+  "@profileScanQrUnsupportedPlatform": { "description": "mobile_scannerが未対応のプラットフォーム（例: Windows/Linuxデスクトップ）向けメッセージ" },
+  "profileScanQrImportImage": "画像を読み込む",
+  "@profileScanQrImportImage": { "description": "プロフィールQRスキャン画面のギャラリーから画像を選ぶボタン" },
+  "profileScanQrFlashTooltip": "ライトを切り替え",
+  "@profileScanQrFlashTooltip": { "description": "プロフィールQRスキャン画面のライトボタンのアクセシビリティラベル" },
 
   "inboxTitle": "受信箱",
   "@inboxTitle": { "description": "受信箱画面のAppBarタイトル" },
@@ -549,8 +565,14 @@
   ,"@settingsTrackQuestion": { "description": "匿名質問の追跡画面を開く設定項目ラベル" }
   ,"settingsTrackQuestionSubtitle": "英数字6文字のコードで回答状況を確認"
   ,"@settingsTrackQuestionSubtitle": { "description": "手動コード入力による質問追跡の設定項目サブタイトル" }
-  ,"questionTrackingCodeDescription": "この英数字6文字コードを保存して、後で質問の状態を確認してください。"
+  ,"questionTrackingCodeDialogTitle": "あなたの追跡コード"
+  ,"@questionTrackingCodeDialogTitle": { "description": "匿名質問送信成功後の追跡コードダイアログのタイトル" }
+  ,"questionTrackingCodeDescription": "ログインなしで後からこの匿名質問の状態を確認できる唯一の方法です。英数字6文字のコードをコピーし、安全な場所に保存してください。"
   ,"@questionTrackingCodeDescription": { "description": "匿名質問送信成功後に表示する追跡コード説明テキスト" }
+  ,"questionTrackingCodeCopyPrimary": "コードをコピー"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "送信成功ダイアログで追跡コードをコピーする主ボタンのラベル" }
+  ,"questionTrackingCodeCopyRequiredHint": "閉じる前にコードをコピーしてください。"
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "コピー前にダイアログを閉じようとしたときのヒントとスナックバー" }
   ,"questionTrackingCodeCopied": "追跡コードをコピーしました"
   ,"@questionTrackingCodeCopied": { "description": "送信成功ダイアログで追跡コードをコピーした後のスナックバー" }
   ,"questionTrackingCodeTrackNow": "今すぐ確認"

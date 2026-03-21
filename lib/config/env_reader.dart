@@ -23,6 +23,7 @@ class _EnvKeys {
   static const gmailAppPassword = 'GMAIL_APP_PASSWORD';
   static const oneSignalAppId = 'ONESIGNAL_APP_ID';
   static const notifyWebhookUrl = 'NOTIFY_WEBHOOK_URL';
+  static const appCheckProvider = 'APP_CHECK_PROVIDER';
 }
 
 class EnvReader {
@@ -80,6 +81,16 @@ class EnvReader {
 
   /// URL webhook gửi thông báo (Vercel/Netlify). Gọi sau khi tạo question/comment.
   static String get notifyWebhookUrl => _envOrEmpty(_EnvKeys.notifyWebhookUrl);
+
+  /// App Check provider mode: auto | debug | release.
+  /// - auto: release provider only when APP_ENV is release and build is release
+  /// - debug: always use debug provider (for local/internal testing)
+  /// - release: always use production provider
+  static String get appCheckProvider {
+    final raw = _envOrEmpty(_EnvKeys.appCheckProvider).trim().toLowerCase();
+    if (raw == 'debug' || raw == 'release' || raw == 'auto') return raw;
+    return 'auto';
+  }
 
   /// Reads a boolean flag: "true" / "1" / "yes" → true (case-insensitive).
   static bool flag(String key, {bool defaultValue = false}) {
