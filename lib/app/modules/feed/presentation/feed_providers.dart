@@ -11,6 +11,7 @@ import 'package:askme_humg/app/modules/feed/domain/feed_use_cases.dart';
 import 'package:askme_humg/app/core/values/app_durations.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_sort_mode.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 part 'feed_providers.freezed.dart';
@@ -29,6 +30,7 @@ abstract class FeedState with _$FeedState {
     @Default(false) bool hasReachedEnd,
     String? lastDocId,
     String? selectedTopicTagId,
+    @Default(FeedSortMode.newest) FeedSortMode feedSortMode,
   }) = _FeedState;
 }
 
@@ -90,6 +92,16 @@ class SelectedFeedTopicTagId extends _$SelectedFeedTopicTagId {
   }
 }
 
+@riverpod
+class SelectedFeedSortMode extends _$SelectedFeedSortMode {
+  @override
+  FeedSortMode build() => FeedSortMode.newest;
+
+  void setMode(FeedSortMode mode) {
+    state = mode;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // User answers — for Profile screen "Recent Answers" section
 // ---------------------------------------------------------------------------
@@ -115,15 +127,17 @@ class FeedNotifier extends _$FeedNotifier {
   @override
   Future<FeedState> build() async {
     final selectedTopicTagId = ref.watch(selectedFeedTopicTagIdProvider);
+    final sortMode = ref.watch(selectedFeedSortModeProvider);
     final page = await ref
         .watch(getPublicFeedUseCaseProvider)
-        .call(topicTagId: selectedTopicTagId);
+        .call(topicTagId: selectedTopicTagId, sortMode: sortMode);
 
     return FeedState(
       items: page.items,
       lastDocId: page.lastDocId,
       hasReachedEnd: !page.hasMore,
       selectedTopicTagId: selectedTopicTagId,
+      feedSortMode: sortMode,
     );
   }
 
@@ -145,6 +159,7 @@ class FeedNotifier extends _$FeedNotifier {
             .call(
               lastDocId: current.lastDocId,
               topicTagId: current.selectedTopicTagId,
+              sortMode: current.feedSortMode,
             ),
         Future<void>.delayed(AppDuration.loadMoreMin),
       ).wait;
@@ -166,12 +181,14 @@ class FeedNotifier extends _$FeedNotifier {
 
   Future<void> refresh({bool keepExisting = false}) async {
     final selectedTopicTagId = ref.read(selectedFeedTopicTagIdProvider);
+    final sortMode = ref.read(selectedFeedSortModeProvider);
     final current = state.asData?.value;
     if (keepExisting && current != null) {
       state = AsyncData(
         current.copyWith(
           isRefreshing: true,
           selectedTopicTagId: selectedTopicTagId,
+          feedSortMode: sortMode,
           // Ensure paging state resets when filter context changes.
           hasReachedEnd: false,
           lastDocId: null,
@@ -184,7 +201,7 @@ class FeedNotifier extends _$FeedNotifier {
       final (page, _) = await (
         ref
             .read(getPublicFeedUseCaseProvider)
-            .call(topicTagId: selectedTopicTagId),
+            .call(topicTagId: selectedTopicTagId, sortMode: sortMode),
         Future<void>.delayed(AppDuration.loadMoreMin),
       ).wait;
       if (!ref.mounted) return;
@@ -195,6 +212,7 @@ class FeedNotifier extends _$FeedNotifier {
           isRefreshing: false,
           hasReachedEnd: !page.hasMore,
           selectedTopicTagId: selectedTopicTagId,
+          feedSortMode: sortMode,
         ),
       );
     } catch (e, s) {
@@ -208,9 +226,17 @@ class FeedNotifier extends _$FeedNotifier {
     }
   }
 
-  Future<void> selectTopic(String? topicTagId) async {
+  /// Updates topic only — [FeedNotifier.build] watches [selectedFeedTopicTagIdProvider]
+  /// and refetches once (avoids duplicate Firestore reads vs. also calling [refresh]).
+  void selectTopic(String? topicTagId) {
     ref.read(selectedFeedTopicTagIdProvider.notifier).setTopic(topicTagId);
-    await refresh(keepExisting: true);
+  }
+
+  /// Updates sort only — [FeedNotifier.build] watches [selectedFeedSortModeProvider]
+  /// and refetches once.
+  void selectSortMode(FeedSortMode mode) {
+    if (ref.read(selectedFeedSortModeProvider) == mode) return;
+    ref.read(selectedFeedSortModeProvider.notifier).setMode(mode);
   }
 
   /// Optimistic update — called by [ToggleLikeNotifier] before the network call.
@@ -229,7 +255,7 @@ class FeedNotifier extends _$FeedNotifier {
           : (List<String>.from(item.likedBy)..add(uid));
       return item.copyWith(
         likedBy: newLikedBy,
-        likeCount: item.likeCount + (isCurrentlyLiked ? -1 : 1),
+        likeCount: newLikedBy.length,
       );
     }).toList();
 

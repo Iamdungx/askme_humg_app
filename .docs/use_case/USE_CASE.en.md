@@ -105,11 +105,13 @@
 
 #### UC-4.1: View Public Feed
 * **Actor:** Viewer (both Guest and Logged-in)
+* **SRS:** FR-05 (default chronological sort; optional AI topic filter; trending/hot ranking is a future SRS item — see SRS v2.2).
 * **Main Flow:**
   1. Open the Feed tab.
-  2. System queries the `answers` collection with condition `isPublished == true`, sorted by `createdAt` descending.
-  3. Data is loaded with cursor-based Pagination.
-  4. Displays: Host Avatar, Question content, Answer content, Like count (`likeCount`), Comment count (`commentCount`).
+  2. System queries the `answers` collection with `isPublished == true`, sorted by `createdAt` descending (newest first).
+  3. (Optional) User selects a category/tag chip → query adds predicates on AI fields (`aiCategory`, `aiTagIds`).
+  4. Data is loaded with cursor-based pagination (`limit`, `startAfter`).
+  5. Displays: Host Avatar, Question, Answer, Like count (`likeCount`), Comment count (`commentCount`), optional AI topic chips when present.
 
 #### UC-4.2: Like an Answer
 * **Actor:** Logged-in Viewer / Host

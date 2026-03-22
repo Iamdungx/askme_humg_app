@@ -12,12 +12,23 @@
 - User opens the app (no login required)
 - At least one published answer exists in Firestore
 
-## 2. Main Flow
+## 2. Feed ordering & filters (SRS FR-05)
+
+**Implemented (v1):**
+- **Sort:** `isPublished == true`, **`orderBy('createdAt', descending: true)`** — newest first.
+- **Pagination:** `limit(20)`, `startAfterDocument(lastDoc)` for subsequent pages.
+- **Optional topic filter:** When user selects a main category or tag chip, add `where` on `aiCategory` and/or `array-contains` on `aiTagIds` (requires composite indexes; may fall back to unfiltered feed while indexes build).
+
+**Not implemented (documented as SRS future / “hot” mode):**
+- Sort by denormalized **`hotScore`** (Reddit-style engagement + time decay). No field or UI toggle until product decision.
+
+## 3. Main Flow
 
 ```
 1. FeedScreen is the initial route /
 2. feedProvider loads first page of data:
    - Query: answers where isPublished == true, orderBy createdAt desc, limit 20
+   - (Optional) AND topic predicates when a category/tag is selected
 3. For each answer, also fetch the corresponding question content and host user info
    (either via separate query or denormalized into FeedItem)
 4. Display FeedItemCard for each item:
@@ -33,14 +44,14 @@
 6. Pull-to-refresh → re-fetch from beginning
 ```
 
-## 3. Alternative Flow – Empty Feed
+## 4. Alternative Flow – Empty Feed
 
 ```
 A1. No published answers exist
 A2. Display EmptyState: illustration + l10n.feedEmpty
 ```
 
-## 4. Alternative Flow – Network Error
+## 5. Alternative Flow – Network Error
 
 ```
 B1. Firestore query fails → AsyncError
@@ -50,14 +61,15 @@ B3. Retry → re-fetch
 
 ---
 
-## 5. Database Impact
+## 6. Database Impact
 
 ### Collection: `answers`
 
 | Operation | Condition |
 |---|---|
-| `query` | `where('isPublished', isEqualTo: true)`, `orderBy('createdAt', descending: true)`, `limit(20)` |
+| `query` | `where('isPublished', isEqualTo: true)`, `orderBy('createdAt', descending: true)`, `limit(20)`; optional `where` on `aiCategory` / `aiTagIds` |
 | Pagination | `startAfterDocument(lastDoc)` |
+| Future | `orderBy('hotScore', descending: true)` when SRS trending mode is implemented |
 
 ### Collection: `questions` (for question content per feed item)
 
@@ -75,7 +87,7 @@ B3. Retry → re-fetch
 
 ---
 
-## 6. Files to Create / Modify
+## 7. Files to Create / Modify
 
 ```
 lib/app/modules/feed/
@@ -101,7 +113,7 @@ lib/app/modules/feed/
 
 ---
 
-## 7. Key Code Contracts
+## 8. Key Code Contracts
 
 ### Entity: `feed_item.dart`
 ```dart
@@ -169,7 +181,7 @@ NotificationListener<ScrollNotification>(
 
 ---
 
-## 8. FeedItemCard Layout Spec
+## 9. FeedItemCard Layout Spec
 
 ```
 ┌─────────────────────────────────────────┐
@@ -188,16 +200,23 @@ NotificationListener<ScrollNotification>(
 
 ---
 
-## 9. Firestore Composite Index Required
+## 10. Firestore Composite Index Required
 
 ```
 Collection: answers
 Fields: isPublished (ASC), createdAt (DESC)
 ```
 
+Additional indexes when **topic filter** is enabled (examples — align with `firestore.indexes.json`):
+
+```
+isPublished (ASC), aiCategory (ASC), createdAt (DESC)
+isPublished (ASC), aiTagIds (ARRAY), createdAt (DESC)
+```
+
 ---
 
-## 10. Acceptance Criteria (from SRS FR-05, NFR-02)
+## 11. Acceptance Criteria (from SRS FR-05, NFR-02)
 
 - [ ] Only answers with `isPublished == true` shown
 - [ ] Sorted by `createdAt` descending (newest first)
@@ -212,3 +231,5 @@ Fields: isPublished (ASC), createdAt (DESC)
 - [ ] LoadingShimmer shown on initial load
 - [ ] EmptyState shown when no published answers exist
 - [ ] Response time < 2 seconds (SRS NFR-02)
+- [ ] (Optional) Topic chip filter narrows results when AI labels exist; unfiltered feed still works if indexes missing (graceful fallback)
+- [ ] Trending / `hotScore` sort — **out of scope** until SRS future item is implemented

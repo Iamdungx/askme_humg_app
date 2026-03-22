@@ -8,6 +8,7 @@ import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/screens/comments_screen.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/feed_item_card.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_sort_mode.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
@@ -40,6 +41,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final feedAsync = ref.watch(feedProvider);
     final topicsAsync = ref.watch(aiTopicsProvider);
     final selectedTopicTagId = ref.watch(selectedFeedTopicTagIdProvider);
+    final feedSortMode = ref.watch(selectedFeedSortModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -72,6 +74,34 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             title: l10n.onboardingHintFeedTitle,
             message: l10n.onboardingHintFeedBody,
             icon: LucideIcons.sparkles,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.xs,
+            ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SegmentedButton<FeedSortMode>(
+                segments: [
+                  ButtonSegment<FeedSortMode>(
+                    value: FeedSortMode.newest,
+                    label: Text(l10n.feedSortNewest),
+                  ),
+                  ButtonSegment<FeedSortMode>(
+                    value: FeedSortMode.trending,
+                    label: Text(l10n.feedSortTrending),
+                  ),
+                ],
+                selected: {feedSortMode},
+                onSelectionChanged: (next) {
+                  if (next.isEmpty) return;
+                  ref.read(feedProvider.notifier).selectSortMode(next.first);
+                },
+              ),
+            ),
           ),
           SizedBox(
             height: 46,

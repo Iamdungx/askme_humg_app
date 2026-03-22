@@ -104,11 +104,13 @@
 
 #### UC-4.1: Xem bảng tin công khai (View Public Feed)
 * **Actor:** Viewer (Cả Guest và Logged-in)
+* **SRS:** FR-05 (sắp xếp mặc định theo thời gian; lọc chủ đề AI tùy chọn; xếp hạng “xu hướng”/hot là định hướng sau — xem SRS phiên bản 2.2).
 * **Main Flow:**
   1. Mở tab Feed.
-  2. Hệ thống truy vấn collection `answers` với điều kiện `isPublished == true`, sắp xếp theo `createdAt` giảm dần.
-  3. Load dữ liệu theo dạng phân trang (Pagination).
-  4. Hiển thị: Avatar Host, Câu hỏi, Câu trả lời, Số lượng Like (`likeCount`), Số lượng Comment (`commentCount`).
+  2. Hệ thống truy vấn collection `answers` với điều kiện `isPublished == true`, sắp xếp theo `createdAt` giảm dần (mới nhất trước).
+  3. (Tùy chọn) Người dùng chọn danh mục/tag → truy vấn thêm điều kiện trên trường phân loại AI (`aiCategory`, `aiTagIds`).
+  4. Load dữ liệu theo phân trang cursor (`limit`, `startAfter`).
+  5. Hiển thị: Avatar Host, Câu hỏi, Câu trả lời, Like (`likeCount`), Comment (`commentCount`), chip chủ đề AI nếu có.
 
 #### UC-4.2: Thả tim (Like Answer)
 * **Actor:** Logged-in Viewer / Host

@@ -2,14 +2,22 @@ import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_page.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_sort_mode.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 class GetPublicFeed {
   const GetPublicFeed(this._repo);
   final IFeedRepository _repo;
 
-  Future<FeedPage> call({String? lastDocId, String? topicTagId}) =>
-      _repo.getPublicFeed(lastDocId: lastDocId, topicTagId: topicTagId);
+  Future<FeedPage> call({
+    String? lastDocId,
+    String? topicTagId,
+    FeedSortMode sortMode = FeedSortMode.newest,
+  }) => _repo.getPublicFeed(
+    lastDocId: lastDocId,
+    topicTagId: topicTagId,
+    sortMode: sortMode,
+  );
 }
 
 class GetAiTopics {

@@ -7,6 +7,7 @@ import 'package:askme_humg/app/modules/feed/domain/comment.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_page.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_sort_mode.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 class FeedRepositoryImpl implements IFeedRepository {
@@ -17,11 +18,13 @@ class FeedRepositoryImpl implements IFeedRepository {
   Future<FeedPage> getPublicFeed({
     String? lastDocId,
     String? topicTagId,
+    FeedSortMode sortMode = FeedSortMode.newest,
   }) async {
     try {
       final result = await _datasource.getPublicFeed(
         lastDocId: lastDocId,
         topicTagId: topicTagId,
+        sortMode: sortMode,
       );
       return FeedPage(
         items: result.items.map((m) => m.toDomain()).toList(),

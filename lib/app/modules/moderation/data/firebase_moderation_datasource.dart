@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/utils/answer_hot_score.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/moderation/data/report_model.dart';
 import 'package:askme_humg/app/modules/moderation/domain/i_moderation_repository.dart';
@@ -80,9 +81,24 @@ class FirebaseModerationDatasource {
       } else if (targetType == 'comment') {
         batch.delete(_firestore.collection('comments').doc(targetId));
         if (parentAnswerId != null) {
-          batch.update(_firestore.collection('answers').doc(parentAnswerId), {
-            'commentCount': FieldValue.increment(-1),
-          });
+          final parentRef = _firestore.collection('answers').doc(parentAnswerId);
+          final parentSnap = await parentRef.get();
+          if (parentSnap.exists && parentSnap.data() != null) {
+            final pd = parentSnap.data()!;
+            final prevCc = pd['commentCount'] as int? ?? 0;
+            final newCc = prevCc > 0 ? prevCc - 1 : 0;
+            final lc = pd['likeCount'] as int? ?? 0;
+            final createdAtTs = pd['createdAt'] as Timestamp?;
+            final decUpdate = <String, dynamic>{'commentCount': newCc};
+            if (createdAtTs != null) {
+              decUpdate['hotScore'] = computeAnswerHotScore(
+                likeCount: lc,
+                commentCount: newCc,
+                createdAt: createdAtTs.toDate(),
+              );
+            }
+            batch.update(parentRef, decUpdate);
+          }
         }
       }
 

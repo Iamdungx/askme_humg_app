@@ -27,15 +27,15 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 ## Key Business Rules
 1. Any Google account can sign in; Host features unlock only after OTP-verifying a `@humg.edu.vn` email
 2. Anonymous questions: max 300 chars, rate-limited at 5/device/hour via App Check + Cloud Functions
-3. Likes: one per user per answer (enforced via `likedBy` array + `FieldValue.increment`)
+3. Likes: one per user per answer (enforced via `likedBy`; server keeps `likeCount` in sync)
 4. Answers → Batch Write updating both `answers` and `questions` (UC-3.3)
-5. Comments → Batch Write updating both `comments` and `answers.commentCount` (UC-4.3)
+5. Comments → Transaction: `comments` + `answers.commentCount` + `hotScore` (UC-4.3)
 6. No direct messaging or real-time chat
 
 ## Firestore Collections
 - `users`: uid, name, avatar, email, role, createdAt, isBlocked, isHumgVerified, humgEmail
 - `questions`: questionId, toUserId, content, createdAt, status (`unanswered`|`answered`)
-- `answers`: answerId, questionId, userId, content, createdAt, likeCount, likedBy[], isPublished, commentCount, **hostName**, **hostAvatar**, **hostIsHumgVerified** (denormalized for feed display)
+- `answers`: answerId, questionId, userId, content, createdAt, likeCount, likedBy[], isPublished, commentCount, `hotScore` (trending), **hostName**, **hostAvatar**, **hostIsHumgVerified** (denormalized for feed display)
 - `comments`: commentId, answerId, userId (nullable), content, isAnonymous, createdAt, **authorName**, **authorAvatar**, **authorIsHumgVerified** (denormalized for display)
 - `reports`: reportId, targetId, targetType, reportedBy, reason, status, createdAt, resolvedAt
 - `otpRequests`: email, otpHash, expiresAt, attempts
