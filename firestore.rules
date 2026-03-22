@@ -78,10 +78,12 @@ service cloud.firestore {
     }
 
     // ── reports ───────────────────────────────────────────────────────
-    // UC-5.1: any signed-in user can report
-    // UC-5.2: only admin can read/update reports
+    // UC-5.1: any signed-in user can report; users may read only their own
+    //         report docs (for duplicate-report checks). Admins read all.
+    // UC-5.2: admin updates report status / resolves
     match /reports/{reportId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.reportedBy == request.auth.uid);
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();

@@ -304,6 +304,8 @@
   "@reportSuccess": { "description": "Thông báo gửi báo cáo thành công" },
   "loginRequiredToReport": "Đăng nhập để báo cáo",
   "@loginRequiredToReport": { "description": "Snackbar khi khách cố báo cáo nội dung" },
+  "reportAlreadyReported": "Bạn đã báo cáo nội dung này rồi.",
+  "@reportAlreadyReported": { "description": "Snackbar khi người dùng báo cáo trùng cùng mục tiêu (UC-5.1)" },
 
   "adminDashboardTitle": "Admin Dashboard",
   "@adminDashboardTitle": { "description": "Tiêu đề màn admin" },

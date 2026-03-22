@@ -139,15 +139,6 @@ class ReportCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            l10n.adminReportReporter(report.reportedBy),
-            style: tt.labelSmall?.copyWith(
-              color: cs.onSurface.withValues(alpha: 0.45),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
           const SizedBox(height: AppSpacing.md),
 
           Material(

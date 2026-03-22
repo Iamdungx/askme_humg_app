@@ -12,6 +12,26 @@ class FirebaseModerationDatasource {
 
   final FirebaseFirestore _firestore;
 
+  Future<bool> hasUserReportedTarget({
+    required String reportedBy,
+    required String targetId,
+    required String targetType,
+  }) async {
+    try {
+      final snap = await _firestore
+          .collection('reports')
+          .where('reportedBy', isEqualTo: reportedBy)
+          .where('targetId', isEqualTo: targetId)
+          .where('targetType', isEqualTo: targetType)
+          .limit(1)
+          .get();
+      return snap.docs.isNotEmpty;
+    } on FirebaseException catch (e, s) {
+      logger.e('hasUserReportedTarget failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore error');
+    }
+  }
+
   Future<void> submitReport({
     required String targetId,
     required String targetType,
@@ -21,6 +41,15 @@ class FirebaseModerationDatasource {
     String? parentAnswerId,
   }) async {
     try {
+      final dup = await hasUserReportedTarget(
+        reportedBy: reportedBy,
+        targetId: targetId,
+        targetType: targetType,
+      );
+      if (dup) {
+        throw const DuplicateReportException();
+      }
+
       await _firestore.collection('reports').add({
         'targetId': targetId,
         'targetType': targetType,
@@ -32,6 +61,8 @@ class FirebaseModerationDatasource {
         'resolvedAt': null,
         'parentAnswerId': parentAnswerId,
       });
+    } on DuplicateReportException {
+      rethrow;
     } on FirebaseException catch (e, s) {
       logger.e('submitReport failed', error: e, stackTrace: s);
       throw FirestoreException(e.message ?? 'Firestore error');

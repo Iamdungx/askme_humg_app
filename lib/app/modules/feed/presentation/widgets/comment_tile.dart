@@ -9,6 +9,7 @@ import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
 import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/comment.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -27,7 +28,11 @@ class CommentTile extends ConsumerWidget {
     final currentUid = ref.watch(authStateProvider).asData?.value?.uid;
     final isLoggedIn = currentUid != null;
     final isOwnComment = currentUid != null && comment.userId == currentUid;
-    final showReportButton = isLoggedIn && !isOwnComment;
+    final alreadyReportedComment = ref
+        .watch(userHasReportedTargetProvider(comment.commentId, 'comment'))
+        .maybeWhen(data: (v) => v, orElse: () => false);
+    final showReportButton =
+        isLoggedIn && !isOwnComment && !alreadyReportedComment;
     final canOpenProfile =
         !comment.isAnonymous && (comment.userId?.isNotEmpty ?? false);
 
