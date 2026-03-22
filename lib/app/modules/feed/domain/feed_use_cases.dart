@@ -12,7 +12,7 @@ class GetPublicFeed {
   Future<FeedPage> call({
     String? lastDocId,
     String? topicTagId,
-    FeedSortMode sortMode = FeedSortMode.newest,
+    FeedSortMode sortMode = FeedSortMode.trending,
   }) => _repo.getPublicFeed(
     lastDocId: lastDocId,
     topicTagId: topicTagId,

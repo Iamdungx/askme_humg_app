@@ -18,7 +18,7 @@ class FeedRepositoryImpl implements IFeedRepository {
   Future<FeedPage> getPublicFeed({
     String? lastDocId,
     String? topicTagId,
-    FeedSortMode sortMode = FeedSortMode.newest,
+    FeedSortMode sortMode = FeedSortMode.trending,
   }) async {
     try {
       final result = await _datasource.getPublicFeed(

@@ -14,23 +14,21 @@
 
 ## 2. Feed ordering & filters (SRS FR-05)
 
-**Implemented (v1):**
-- **Sort:** `isPublished == true`, **`orderBy('createdAt', descending: true)`** — newest first.
-- **Pagination:** `limit(20)`, `startAfterDocument(lastDoc)` for subsequent pages.
-- **Optional topic filter:** When user selects a main category or tag chip, add `where` on `aiCategory` and/or `array-contains` on `aiTagIds` (requires composite indexes; may fall back to unfiltered feed while indexes build).
-
-**Not implemented (documented as SRS future / “hot” mode):**
-- Sort by denormalized **`hotScore`** (Reddit-style engagement + time decay). No field or UI toggle until product decision.
+**Implemented:**
+- **Default sort (trending):** `isPublished == true`, **`orderBy('hotScore', descending: true)`** — denormalized score (engagement + time decay; see `answer_hot_score.dart`).
+- **Fallback:** If Firestore reports a missing/building index for `hotScore`, or another query failure for trending, the client may retry with **`orderBy('createdAt', descending: true)`** so the feed stays usable (see `firebase_feed_datasource.getPublicFeed`).
+- **Pagination:** `limit(20)`, cursor via `startAfterDocument(lastDoc)` where `lastDoc` is the previous page’s answer document id.
+- **Optional topic filter:** When user selects a main category or tag chip, add `where` on `aiCategory` and/or `array-contains` on `aiTagIds` (composite indexes in `firestore.indexes.json`; may fall back to unfiltered feed while indexes build).
+- **UI:** No segmented control for “Newest vs Trending” — the home feed is **trending-only** by product decision.
 
 ## 3. Main Flow
 
 ```
 1. FeedScreen is the initial route /
 2. feedProvider loads first page of data:
-   - Query: answers where isPublished == true, orderBy createdAt desc, limit 20
+   - Query: answers where isPublished == true, orderBy hotScore desc (fallback: createdAt desc), limit 20
    - (Optional) AND topic predicates when a category/tag is selected
-3. For each answer, also fetch the corresponding question content and host user info
-   (either via separate query or denormalized into FeedItem)
+3. Question text and host info are read from fields **denormalized on `answers`** (`questionContent`, `hostName`, `hostAvatar`, …) — no per-item extra reads (UC-3.3 / NFR-02).
 4. Display FeedItemCard for each item:
    - Host avatar + display name (tap → navigate to /u/:userId)
    - Question content (anonymous badge shown)
@@ -67,23 +65,13 @@ B3. Retry → re-fetch
 
 | Operation | Condition |
 |---|---|
-| `query` | `where('isPublished', isEqualTo: true)`, `orderBy('createdAt', descending: true)`, `limit(20)`; optional `where` on `aiCategory` / `aiTagIds` |
+| `query` | `where('isPublished', isEqualTo: true)`, **`orderBy('hotScore', descending: true)`** (default); optional `where` on `aiCategory` / `aiTagIds` |
 | Pagination | `startAfterDocument(lastDoc)` |
-| Future | `orderBy('hotScore', descending: true)` when SRS trending mode is implemented |
+| Fallback | `orderBy('createdAt', descending: true)` when trending query/index unavailable |
 
-### Collection: `questions` (for question content per feed item)
+### Collection: `questions` / `users`
 
-| Operation | Description |
-|---|---|
-| `get questions/{questionId}` | Per answer, fetch the question text |
-
-### Collection: `users` (for host info per feed item)
-
-| Operation | Description |
-|---|---|
-| `get users/{userId}` | Per answer, fetch host name and avatar |
-
-> **Performance note (SRS NFR-02):** Consider denormalizing `questionContent`, `hostName`, `hostAvatar` into the `answers` document at write-time (UC-3.3) to reduce reads per feed item from 3 to 1.
+Not required for each feed row when UC-3.3 denormalizes `questionContent`, `hostName`, `hostAvatar`, `hostIsHumgVerified` onto `answers`.
 
 ---
 
@@ -200,26 +188,20 @@ NotificationListener<ScrollNotification>(
 
 ---
 
-## 10. Firestore Composite Index Required
+## 10. Firestore Composite Indexes
 
-```
-Collection: answers
-Fields: isPublished (ASC), createdAt (DESC)
-```
+Align with `firestore.indexes.json`, including:
 
-Additional indexes when **topic filter** is enabled (examples — align with `firestore.indexes.json`):
-
-```
-isPublished (ASC), aiCategory (ASC), createdAt (DESC)
-isPublished (ASC), aiTagIds (ARRAY), createdAt (DESC)
-```
+- `isPublished` + `hotScore` (default feed)
+- `isPublished` + `createdAt` (fallback / profile “recent answers”)
+- Topic filter variants: `aiCategory` or `aiTagIds` with `hotScore` or `createdAt` as ordered field
 
 ---
 
 ## 11. Acceptance Criteria (from SRS FR-05, NFR-02)
 
 - [ ] Only answers with `isPublished == true` shown
-- [ ] Sorted by `createdAt` descending (newest first)
+- [ ] Sorted by `hotScore` descending by default (trending); graceful fallback to `createdAt` when needed
 - [ ] First page loads 20 items max
 - [ ] Scrolling to bottom loads next 20 (cursor pagination, no duplicate items)
 - [ ] Pull-to-refresh resets feed from beginning
@@ -232,4 +214,3 @@ isPublished (ASC), aiTagIds (ARRAY), createdAt (DESC)
 - [ ] EmptyState shown when no published answers exist
 - [ ] Response time < 2 seconds (SRS NFR-02)
 - [ ] (Optional) Topic chip filter narrows results when AI labels exist; unfiltered feed still works if indexes missing (graceful fallback)
-- [ ] Trending / `hotScore` sort — **out of scope** until SRS future item is implemented

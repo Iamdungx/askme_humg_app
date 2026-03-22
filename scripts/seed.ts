@@ -24,6 +24,32 @@ const app = admin.initializeApp({
 });
 const db = admin.firestore(app);
 
+/**
+ * Reddit-style hot score — must match `lib/app/core/utils/answer_hot_score.dart`
+ * (`computeAnswerHotScore`). Required on `answers` for `orderBy('hotScore')` feed queries
+ * (documents without this field are excluded).
+ */
+function computeAnswerHotScore(
+  likeCount: number,
+  commentCount: number,
+  createdAt: Date,
+  now: Date = new Date()
+): number {
+  const ageSeconds = Math.max(
+    0,
+    Math.floor((now.getTime() - createdAt.getTime()) / 1000)
+  );
+  const ageHours = ageSeconds / 3600.0;
+  const wLike = 1.0;
+  const wComment = 2.0;
+  const engagement = wLike * likeCount + wComment * commentCount;
+  const gravity = 1.8;
+  const offsetHours = 2.0;
+  const denom = Math.pow(ageHours + offsetHours, gravity);
+  if (denom <= 0) return engagement;
+  return (engagement + 1) / denom;
+}
+
 type AiCategory = "hoc_tap" | "su_kien" | "doi_song" | "tuyen_dung" | "khac";
 
 type AiTagDef = {
@@ -648,6 +674,11 @@ async function seedQA() {
       likedBy,
       isPublished: true,
       commentCount: qa.comments.length,
+      hotScore: computeAnswerHotScore(
+        qa.likes,
+        qa.comments.length,
+        publishedAt.toDate()
+      ),
       // Denormalized host fields (UC-3.3)
       hostName: host.name,
       hostAvatar: avatar(host.name, host.avatarBg),

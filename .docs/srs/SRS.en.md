@@ -51,8 +51,8 @@ The system is designed for internal student use and does **not** replace officia
 | Anonymous Sender | A user who sends a question without revealing identity |
 | Host User | A logged-in student (`@humg.edu.vn`) who receives and answers questions |
 | Feed | Public list of published answered questions |
-| Chronological sort | Default ordering: newest publication first, by `createdAt` |
-| Hot / trending ranking | Ordering that boosts engagement while decaying by age; conceptually aligned with Reddit-style “hot” (planned implementation) |
+| Chronological sort | Order by `createdAt` descending — used as **fallback** when the trending query/index is unavailable, and for screens where “recency” is intended (e.g. profile recent answers) |
+| Hot / trending ranking | **Default** public Feed ordering: denormalized `hotScore` (engagement + time decay), aligned with Reddit-style “hot” |
 | AI feed labels | Optional category/tags on published answers for topic filtering on the Feed |
 | Moderation | Process of filtering or removing inappropriate content |
 | Deep Link | A unique URL that opens the app directly to a Host's profile page |
@@ -168,16 +168,14 @@ The system follows a client-server architecture with real-time database support.
 - Comment count
 - (Optional) AI-assigned category/tags for topic hints
 
-**Sorting & filtering — current release (v1):**
-- **Default:** Sort by answer publication time — **`createdAt` descending** (newest first).
+**Sorting & filtering — as implemented:**
+- **Default (trending):** **`hotScore` descending** for `isPublished == true` answers. The `hotScore` field is denormalized (engagement + time decay from `createdAt`), updated on like, comment, and publish flows; see `firestore.indexes.json` for composite indexes.
+- **Fallback:** If the trending query fails (e.g. index still building), the app may temporarily use **`createdAt` descending** so users can still browse the feed.
 - **Pagination:** Cursor-based (`limit`, `startAfterDocument`), no duplicate rows when loading more.
-- **Optional topic filter:** When the user selects a category or tag, the query adds predicates on AI classification fields (e.g. `aiCategory`, `aiTagIds`) — requires matching Firestore composite indexes when enabled.
+- **Optional topic filter:** When the user selects a category or tag, the query adds predicates on AI fields (`aiCategory`, `aiTagIds`) — requires matching composite indexes.
+- **UI:** Single default feed — **no** “Newest / Trending” segmented control on the main Feed screen.
 
-**Planned — “trending / hot” ranking (future):**
-- Additional sort mode (alongside chronological): combine **engagement** (e.g. `likeCount`, `commentCount`, or a weighted score) with **time decay** from `createdAt`, following Reddit-style “hot” principles (log-scaled score + time component) so old posts do not rank forever.
-- Implementation approach (target): denormalized **rank score** (e.g. `hotScore`) on `answers`, updated on interaction or on a schedule; query with `orderBy` and composite indexes.
-
-**Note:** Until `hotScore` (or equivalent) is implemented, only **`createdAt`** ordering applies as in “current release”.
+**Note:** Pure **`createdAt`** ordering remains appropriate for other queries (e.g. a host’s recent published answers on the profile screen).
 
 ---
 
@@ -355,9 +353,9 @@ Flutter App (Riverpod)
 | `aiTags` | Array\<String\> | Display labels for tags (optional) |
 | `aiTagIds` | Array\<String\> | Tag IDs for `array-contains` feed filtering |
 | `aiClassificationStatus` | String (nullable) | Pipeline status (e.g. `done`, `failed`, `pending`) |
-| `hotScore` | Number (nullable) | **Planned:** denormalized trending rank for `orderBy` (not required in v1) |
+| `hotScore` | Number (nullable) | Denormalized trending score for **default** public Feed `orderBy` (FR-05); updated on interactions |
 
-> **Design note:** Both `likeCount` and `commentCount` are denormalized caches updated atomically via `FieldValue.increment()`. For likes, the `likedBy` array is updated in the same operation. This avoids sub-collection reads for counts on every feed item render. Both updates use `WriteBatch` to ensure atomicity. AI fields and `hotScore` are optional extensions (UC-4.1, trending roadmap).
+> **Design note:** Like count is kept in sync with `likedBy` via transaction; comment count updates with comments in a transaction. AI fields support topic filtering on the Feed alongside `hotScore` sorting (UC-4.1).
 
 ### Collection: `comments`
 
@@ -416,7 +414,7 @@ Per UC-1.3: the client generates an OTP, hashes it with SHA-256, writes `otpRequ
 
 ### Version 3+ (Future Consideration)
 
-- **Feed — full “hot” trending:** implement FR-05 trending mode (`hotScore`, UI toggle New / Trending if needed)
+- **Feed — optional UX:** e.g. explicit “newest-only” mode on the UI if product asks for it (current app defaults to trending only)
 - AI-based answer suggestion using an LLM API
 - Analytics dashboard for popular questions and trending topics
 - Trend analysis segmented by faculty or department

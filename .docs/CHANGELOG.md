@@ -39,12 +39,12 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Localization `timeago` đa ngôn ngữ (vi/en/ja)
 
 #### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3)
-- Feed công khai: `isPublished == true`, sort `createdAt desc`, cursor pagination limit 20
-- Like / Unlike: `arrayUnion/arrayRemove` + `FieldValue.increment(±1)` — yêu cầu `isHumgVerified`
-- Bình luận: Batch Write `comments` + `answers.commentCount++` — yêu cầu `isHumgVerified`
+- Feed công khai: `isPublished == true`, sort mặc định **`hotScore` desc** (xu hướng), dự phòng `createdAt` khi cần; phân trang cursor limit 20; không toggle UI “Mới nhất / Xu hướng”
+- Like / Unlike: **Transaction** cập nhật `likedBy`, `likeCount` (khớp mảng), `hotScore` — yêu cầu `isHumgVerified`
+- Bình luận: **Transaction** tạo `comments` + cập nhật `answers.commentCount` và `hotScore` — yêu cầu `isHumgVerified`
 - Guard cho Like/Comment: snackbar `verifyRequiredToLike` / `verifyRequiredToComment`
 - `VerifiedBadge` trên `FeedItemCard` và `CommentTile`
-- Composite Firestore index đã deploy (`isPublished ASC, createdAt DESC, __name__ DESC`)
+- Composite Firestore indexes: cặp `isPublished` + `hotScore` (và biến thể lọc `aiCategory` / `aiTagIds`); `createdAt` dùng khi fallback
 
 #### Phase 4.5 — Navigation Shell & Settings
 - `AppShell` (`StatefulShellRoute`): 4 tab — Feed / Inbox / Profile / Settings

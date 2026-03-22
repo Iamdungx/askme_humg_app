@@ -30,7 +30,7 @@ abstract class FeedState with _$FeedState {
     @Default(false) bool hasReachedEnd,
     String? lastDocId,
     String? selectedTopicTagId,
-    @Default(FeedSortMode.newest) FeedSortMode feedSortMode,
+    @Default(FeedSortMode.trending) FeedSortMode feedSortMode,
   }) = _FeedState;
 }
 
@@ -95,7 +95,7 @@ class SelectedFeedTopicTagId extends _$SelectedFeedTopicTagId {
 @riverpod
 class SelectedFeedSortMode extends _$SelectedFeedSortMode {
   @override
-  FeedSortMode build() => FeedSortMode.newest;
+  FeedSortMode build() => FeedSortMode.trending;
 
   void setMode(FeedSortMode mode) {
     state = mode;
@@ -230,13 +230,6 @@ class FeedNotifier extends _$FeedNotifier {
   /// and refetches once (avoids duplicate Firestore reads vs. also calling [refresh]).
   void selectTopic(String? topicTagId) {
     ref.read(selectedFeedTopicTagIdProvider.notifier).setTopic(topicTagId);
-  }
-
-  /// Updates sort only — [FeedNotifier.build] watches [selectedFeedSortModeProvider]
-  /// and refetches once.
-  void selectSortMode(FeedSortMode mode) {
-    if (ref.read(selectedFeedSortModeProvider) == mode) return;
-    ref.read(selectedFeedSortModeProvider.notifier).setMode(mode);
   }
 
   /// Optimistic update — called by [ToggleLikeNotifier] before the network call.

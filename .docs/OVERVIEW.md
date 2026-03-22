@@ -98,7 +98,7 @@ ProfileScreen (`/u/:userId`), UserProfile entity, FirebaseProfileDatasource, dee
 - Xóa field `questionId` thừa trong Firestore document write
 
 ### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3) ✅ XONG
-Feed công khai, like/unlike, bình luận đã implement. Composite Firestore indexes đã deploy.
+Feed công khai (mặc định **`hotScore`** / xu hướng, có fallback `createdAt`), like/unlike và bình luận qua transaction (`likedBy`/`likeCount`/`hotScore`, `commentCount`/`hotScore`). Composite Firestore indexes đã deploy (kể cả biến thể lọc chủ đề AI).
 
 ### Phase 4.5 — Navigation Shell & Settings ✅ XONG
 

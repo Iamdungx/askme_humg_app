@@ -40,7 +40,7 @@ class FirebaseFeedDatasource {
   Future<({List<FeedItemModel> items, String? lastDocId})> getPublicFeed({
     String? lastDocId,
     String? topicTagId,
-    FeedSortMode sortMode = FeedSortMode.newest,
+    FeedSortMode sortMode = FeedSortMode.trending,
   }) async {
     try {
       final normalizedTopicId = topicTagId?.trim();

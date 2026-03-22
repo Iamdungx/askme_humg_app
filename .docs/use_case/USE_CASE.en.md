@@ -105,36 +105,36 @@
 
 #### UC-4.1: View Public Feed
 * **Actor:** Viewer (both Guest and Logged-in)
-* **SRS:** FR-05 (default chronological sort; optional AI topic filter; trending/hot ranking is a future SRS item — see SRS v2.2).
+* **SRS:** FR-05 — default sort by **`hotScore`** (trending); optional AI topic filter; **`createdAt`** fallback when the trending query/index fails (see SRS and `UC-4.1_view_public_feed.md`).
 * **Main Flow:**
-  1. Open the Feed tab.
-  2. System queries the `answers` collection with `isPublished == true`, sorted by `createdAt` descending (newest first).
+  1. Open the Feed tab (single stream — **no** “Newest / Trending” segmented control).
+  2. System queries `answers` with `isPublished == true`, ordered by **`hotScore` descending**; may retry with **`createdAt` descending** if needed.
   3. (Optional) User selects a category/tag chip → query adds predicates on AI fields (`aiCategory`, `aiTagIds`).
   4. Data is loaded with cursor-based pagination (`limit`, `startAfter`).
   5. Displays: Host Avatar, Question, Answer, Like count (`likeCount`), Comment count (`commentCount`), optional AI topic chips when present.
 
 #### UC-4.2: Like an Answer
 * **Actor:** Logged-in Viewer / Host
-* **Pre-condition:** Must be logged in.
+* **Pre-condition:** Must be logged in; user must be **`isHumgVerified == true`** (see in-app guard).
 * **Main Flow:**
   1. User taps the Like button on an answer.
   2. System checks whether `currentUser.uid` is already in the answer's `likedBy` array.
-  3. If not present: Add UID to `likedBy`, increment `likeCount` by 1. UI updates the Like icon to red/filled.
-  4. If already present: Remove UID from `likedBy`, decrement `likeCount` by 1. UI updates the Like icon to outline/empty.
+  3. If not present: Add UID to `likedBy`, keep `likeCount` equal to `likedBy.length`, update `hotScore` when `createdAt` exists. UI updates the Like icon to red/filled.
+  4. If already present: Remove UID from `likedBy`, sync `likeCount`, update `hotScore`. UI updates the Like icon to outline/empty.
 * **Database Impact:**
-  * Collection `answers`: Update the `likedBy` array (`arrayUnion`/`arrayRemove`) and `likeCount` (`increment` 1 or -1).
+  * Collection `answers`: **Transaction** — update `likedBy`, `likeCount` (consistent with array length), `hotScore`.
 
 #### UC-4.3: Comment on an Answer
 * **Actor:** Logged-in Viewer / Host
-* **Pre-condition:** Must be logged in.
+* **Pre-condition:** Must be logged in; **`isHumgVerified == true`**.
 * **Main Flow:**
   1. User taps the Comment icon under an Answer.
   2. Types comment content. Optionally enables "Comment anonymously".
   3. Taps "Submit".
 * **Database Impact:**
-  *(Use Batch Write)*
-  * Collection `comments`: Creates a new document (`answerId`, `userId` (null if anonymous), `content`, `isAnonymous`, `createdAt`).
-  * Collection `answers`: Updates `commentCount` field (`increment` 1) on the corresponding answer.
+  *(Transaction — keeps `commentCount` / `hotScore` consistent under concurrency)*
+  * Collection `comments`: Creates a new document (`answerId`, `userId` (null if anonymous), `content`, `isAnonymous`, `createdAt`, denormalized author fields from `users` where applicable).
+  * Collection `answers`: Increment `commentCount`, update `hotScore`.
 
 ---
 

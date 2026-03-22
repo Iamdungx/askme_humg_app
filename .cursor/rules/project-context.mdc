@@ -47,6 +47,7 @@ Anonymous Q&A mobile app for HUMG university students. Anyone can send anonymous
 - Locations: ProfileHeader (next to name + subtitle row), FeedItemCard (next to host name), CommentTile (next to author name, hidden for anonymous)
 
 ## Feed Interaction Rules
+- **Default feed sort:** `hotScore` descending (trending). App may temporarily fall back to `createdAt` if the trending composite index is building or the query fails.
 - **View feed**: open to all (guest, logged-in, unverified)
 - **Like / Comment**: requires `isHumgVerified == true`; unverified users see a snackbar directing them to verify
 - Guard implemented via `BuildContextX.requireVerified()` in `lib/app/core/extensions/context_extensions.dart`

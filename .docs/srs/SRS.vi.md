@@ -51,8 +51,8 @@ Hệ thống được thiết kế **chỉ dành cho sinh viên nội bộ HUMG*
 | Người gửi ẩn danh | Người dùng gửi câu hỏi mà không tiết lộ danh tính |
 | Host (Người chủ) | Sinh viên đã đăng nhập bằng tài khoản `@humg.edu.vn`, nhận và trả lời câu hỏi |
 | Feed (Bảng tin) | Danh sách công khai các câu hỏi đã được trả lời và công bố |
-| Sắp xếp theo thời gian (chronological) | Thứ tự mặc định: bài mới đăng lên trước, dựa trên `createdAt` |
-| Xếp hạng xu hướng (hot / trending) | Thứ tự ưu tiên bài có tương tác cao nhưng vẫn suy giảm theo thời gian; tham chiếu mô hình tương tự Reddit (định hướng triển khai) |
+| Sắp xếp theo thời gian (chronological) | Thứ tự theo `createdAt` giảm dần — dùng làm **fallback** khi truy vấn xu hướng gặp lỗi chỉ mục hoặc tạm thời không dùng được |
+| Xếp hạng xu hướng (hot / trending) | Thứ tự **mặc định** trên Feed công khai: điểm denormalized `hotScore` (tương tác + suy giảm theo thời gian); tham chiếu nguyên lý tương tự Reddit “hot” |
 | Phân loại AI (feed) | Gán nhãn danh mục/tag cho câu trả lời đã xuất bản nhằm lọc chủ đề trên Feed (tùy cấu hình) |
 | Kiểm duyệt | Quá trình lọc hoặc gỡ bỏ nội dung không phù hợp |
 | Deep Link | Đường dẫn URL duy nhất mở thẳng vào trang hồ sơ của Host trong ứng dụng |
@@ -168,16 +168,14 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 - Số lượng bình luận
 - (Tùy cấu hình) Nhãn phân loại AI: danh mục và/hoặc tag gợi ý chủ đề
 
-**Sắp xếp và lọc — phiên bản hiện tại (v1):**
-- **Mặc định:** Sắp xếp theo thời gian đăng câu trả lời đã xuất bản — **`createdAt` giảm dần** (mới nhất trước).
+**Sắp xếp và lọc — triển khai hiện tại:**
+- **Mặc định (xu hướng):** Truy vấn **`hotScore` giảm dần** trên các câu trả lời `isPublished == true`. Trường `hotScore` là điểm denormalized (kết hợp tương tác và suy giảm theo thời gian từ `createdAt`), cập nhật khi thích / bình luận / xuất bản (xem tài liệu kỹ thuật và `firestore.indexes.json`).
+- **Dự phòng:** Nếu chỉ mục composite cho `hotScore` chưa sẵn sàng hoặc truy vấn thất bại, ứng dụng có thể tạm dùng **`createdAt` giảm dần** để người dùng vẫn xem được bảng tin.
 - **Phân trang:** Cursor-based (`limit` cố định, `startAfterDocument`), không trùng mục khi tải thêm.
-- **Lọc chủ đề (tùy chọn):** Khi người dùng chọn danh mục hoặc tag, truy vấn bổ sung điều kiện trên các trường phân loại AI (ví dụ `aiCategory`, `aiTagIds`) — yêu cầu chỉ mục Firestore tương ứng khi bật lọc.
+- **Lọc chủ đề (tùy chọn):** Khi người dùng chọn danh mục hoặc tag, truy vấn bổ sung điều kiện trên `aiCategory` và/hoặc `aiTagIds` — cần chỉ mục Firestore tương ứng.
+- **Giao diện:** Một luồng feed mặc định xu hướng; **không** có chuyển tab “Mới nhất / Xu hướng” trên màn Feed chính.
 
-**Định hướng — xếp hạng “xu hướng” (hot / trending, phiên bản sau):**
-- Chế độ sắp xếp bổ sung (song song với chế độ mới nhất): ưu tiên bài có **tương tác** (tham chiếu `likeCount`, `commentCount` hoặc điểm tổng hợp có trọng số) **kết hợp suy giảm theo thời gian** kể từ `createdAt`, theo nguyên lý tương tự thuật **hot** của Reddit (log điểm số + thành phần thời gian), tránh để bài cũ chiếm hạng vĩnh viễn.
-- Triển khai kỹ thuật (định hướng): lưu trước **điểm xếp hạng** denormalized (ví dụ `hotScore`) trong `answers`, cập nhật khi tương tác thay đổi hoặc theo lịch; truy vấn Firestore `orderBy` theo trường đó — đủ composite index.
-
-**Ghi chú:** Cho đến khi `hotScore` (hoặc tương đương) được triển khai, **chỉ** áp dụng sắp xếp theo `createdAt` như mục “phiên bản hiện tại”.
+**Ghi chú:** Sắp xếp thuần **`createdAt`** vẫn được dùng ở các màn hợp lệ khác (ví dụ “câu trả lời gần đây” trên hồ sơ người dùng).
 
 ---
 
@@ -355,9 +353,9 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | `aiTags` | Array\<String\> | Danh sách nhãn tag hiển thị (tùy pipeline AI) |
 | `aiTagIds` | Array\<String\> | ID tag để lọc `array-contains` trên Feed |
 | `aiClassificationStatus` | String (nullable) | Trạng thái pipeline phân loại (ví dụ `done`, `failed`, `pending`) |
-| `hotScore` | Number (nullable) | **Định hướng:** điểm xếp hạng xu hướng denormalized để `orderBy` khi triển khai FR-05 (chưa bắt buộc trong v1) |
+| `hotScore` | Number (nullable) | Điểm xếp hạng xu hướng denormalized cho **`orderBy` mặc định** trên Feed công khai (FR-05); cập nhật khi thích / bình luận / xuất bản |
 
-> **Ghi chú thiết kế:** Cả `likeCount` và `commentCount` đều là bộ đệm denormalized được cập nhật nguyên tử qua `FieldValue.increment()`. Với lượt thích, mảng `likedBy` được cập nhật trong cùng thao tác. Cách này tránh việc đọc sub-collection để lấy số đếm mỗi khi render item trên Feed. Cả hai cập nhật đều dùng `WriteBatch` để đảm bảo tính nguyên tử. Trường phân loại AI và `hotScore` là mở rộng tùy tính năng (UC-4.1, định hướng xu hướng).
+> **Ghi chú thiết kế:** `likeCount` đồng bộ với độ dài `likedBy` (transaction); `commentCount` cập nhật trong transaction cùng bình luận. Phân loại AI và `hotScore` phục vụ UC-4.1 (lọc chủ đề + feed xu hướng).
 
 ### Collection: `comments` (Bình luận)
 
@@ -416,7 +414,7 @@ Theo UC-1.3: client sinh OTP, băm SHA-256, ghi vào `otpRequests/{uid}`; gửi 
 
 ### Phiên bản 3+ (Định hướng dài hạn)
 
-- **Feed — xếp hạng xu hướng (hot):** triển khai đầy đủ FR-05 (điểm denormalized, chuyển đổi chế độ Mới nhất / Xu hướng trên UI nếu cần)
+- **Feed — tùy chọn nâng cao:** ví dụ chế độ “chỉ mới nhất” tách biệt trên UI nếu sau này có nhu cầu sản phẩm (hiện mặc định một chế độ xu hướng)
 - Gợi ý câu trả lời bằng AI (tích hợp LLM API)
 - Bảng phân tích thống kê câu hỏi phổ biến và xu hướng nổi bật
 - Phân tích xu hướng theo khoa/bộ môn

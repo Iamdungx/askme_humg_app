@@ -55,12 +55,12 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isSignedIn() && (
         resource.data.userId == request.auth.uid || isAdmin() ||
-        // Like/unlike: only likeCount and likedBy change
+        // Like/unlike: likedBy, likeCount (kept in sync), hotScore (UC-4.2)
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['likeCount', 'likedBy'])) ||
-        // Comment: only commentCount incremented by any signed-in user (UC-4.3)
+          .hasOnly(['likeCount', 'likedBy', 'hotScore'])) ||
+        // Comment path: commentCount + hotScore (UC-4.3 transaction)
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['commentCount']))
+          .hasOnly(['commentCount', 'hotScore']))
       );
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }

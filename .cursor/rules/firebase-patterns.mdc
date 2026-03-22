@@ -51,10 +51,11 @@ await batch.commit();
 ### Cursor Pagination (UC-4.1)
 
 ```dart
+// UC-4.1 default: trending (hotScore). Chronological (createdAt) is fallback only.
 Query query = firestore
     .collection('answers')
     .where('isPublished', isEqualTo: true)
-    .orderBy('createdAt', descending: true) // or 'hotScore' for Trending
+    .orderBy('hotScore', descending: true)
     .limit(20);
 if (lastDoc != null) query = query.startAfterDocument(lastDoc);
 ```

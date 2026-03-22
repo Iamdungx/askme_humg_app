@@ -8,7 +8,7 @@ abstract class IFeedRepository {
   Future<FeedPage> getPublicFeed({
     String? lastDocId,
     String? topicTagId,
-    FeedSortMode sortMode = FeedSortMode.newest,
+    FeedSortMode sortMode = FeedSortMode.trending,
   });
 
   Future<List<FeedTopic>> getAiTopics();

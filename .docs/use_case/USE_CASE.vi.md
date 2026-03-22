@@ -104,36 +104,36 @@
 
 #### UC-4.1: Xem bảng tin công khai (View Public Feed)
 * **Actor:** Viewer (Cả Guest và Logged-in)
-* **SRS:** FR-05 (sắp xếp mặc định theo thời gian; lọc chủ đề AI tùy chọn; xếp hạng “xu hướng”/hot là định hướng sau — xem SRS phiên bản 2.2).
+* **SRS:** FR-05 — mặc định xếp theo **`hotScore`** (xu hướng); lọc chủ đề AI tùy chọn; dự phòng **`createdAt`** khi truy vấn xu hướng lỗi chỉ mục (xem SRS và `UC-4.1_view_public_feed.md`).
 * **Main Flow:**
-  1. Mở tab Feed.
-  2. Hệ thống truy vấn collection `answers` với điều kiện `isPublished == true`, sắp xếp theo `createdAt` giảm dần (mới nhất trước).
+  1. Mở tab Feed (một luồng duy nhất — **không** chuyển tab “Mới nhất / Xu hướng”).
+  2. Hệ thống truy vấn collection `answers` với điều kiện `isPublished == true`, sắp xếp theo **`hotScore` giảm dần**; nếu cần, thử lại với **`createdAt` giảm dần**.
   3. (Tùy chọn) Người dùng chọn danh mục/tag → truy vấn thêm điều kiện trên trường phân loại AI (`aiCategory`, `aiTagIds`).
   4. Load dữ liệu theo phân trang cursor (`limit`, `startAfter`).
   5. Hiển thị: Avatar Host, Câu hỏi, Câu trả lời, Like (`likeCount`), Comment (`commentCount`), chip chủ đề AI nếu có.
 
 #### UC-4.2: Thả tim (Like Answer)
 * **Actor:** Logged-in Viewer / Host
-* **Pre-condition:** Bắt buộc phải đăng nhập.
+* **Pre-condition:** Bắt buộc phải đăng nhập; Host/Viewer phải **`isHumgVerified == true`** (xem guard trong app).
 * **Main Flow:**
   1. Người dùng nhấn nút Like trên một câu trả lời.
   2. Hệ thống kiểm tra xem `currentUser.uid` đã có trong mảng `likedBy` của answer đó chưa.
-  3. Nếu chưa: Thêm UID vào `likedBy`, tăng `likeCount` lên 1. UI cập nhật icon màu đỏ.
-  4. Nếu đã có: Xóa UID khỏi `likedBy`, giảm `likeCount` đi 1. UI cập nhật icon viền trắng.
+  3. Nếu chưa: Thêm UID vào `likedBy`, đồng bộ `likeCount` với số phần tử `likedBy`, cập nhật `hotScore` khi có `createdAt`. UI cập nhật icon màu đỏ.
+  4. Nếu đã có: Xóa UID khỏi `likedBy`, đồng bộ `likeCount`, cập nhật `hotScore`. UI cập nhật icon viền trắng.
 * **Database Impact:**
-  * Collection `answers`: Update mảng `likedBy` (arrayUnion/arrayRemove) và `likeCount` (increment 1 hoặc -1).
+  * Collection `answers`: **Transaction** — cập nhật `likedBy`, `likeCount` (khớp độ dài mảng), `hotScore`.
 
 #### UC-4.3: Bình luận (Comment)
 * **Actor:** Logged-in Viewer / Host
-* **Pre-condition:** Bắt buộc phải đăng nhập.
+* **Pre-condition:** Bắt buộc phải đăng nhập; **`isHumgVerified == true`**.
 * **Main Flow:**
   1. Người dùng nhấn vào icon Bình luận dưới một Answer.
   2. Nhập nội dung. Tùy chọn bật "Bình luận ẩn danh".
   3. Nhấn "Gửi".
 * **Database Impact:**
-  *(Dùng Batch Write)*
-  * Collection `comments`: Tạo document mới (`answerId`, `userId` (null nếu ẩn danh), `content`, `isAnonymous`, `createdAt`).
-  * Collection `answers`: Update trường `commentCount` (increment 1) của answer tương ứng.
+  *(Transaction — đồng bộ `commentCount` và `hotScore` khi có nhiều client)*
+  * Collection `comments`: Tạo document mới (`answerId`, `userId` (null nếu ẩn danh), `content`, `isAnonymous`, `createdAt`, các trường denormalized từ `users` nếu có).
+  * Collection `answers`: Tăng `commentCount`, cập nhật `hotScore`.
 
 ---
 
