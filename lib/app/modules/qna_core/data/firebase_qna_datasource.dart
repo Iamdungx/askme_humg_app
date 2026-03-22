@@ -6,6 +6,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_installations/firebase_installations.dart';
 import 'package:askme_humg/app/core/error/exceptions.dart';
+import 'package:askme_humg/app/core/utils/answer_hot_score.dart';
 import 'package:askme_humg/app/core/utils/logger.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question_submission_receipt.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question_tracking_status.dart';
@@ -283,6 +284,7 @@ class FirebaseQnaDatasource {
       final batch = _firestore.batch();
 
       final answerRef = _firestore.collection('answers').doc();
+      final createdAtForScore = DateTime.now();
       batch.set(answerRef, {
         'questionId': questionId,
         'userId': userId,
@@ -292,6 +294,11 @@ class FirebaseQnaDatasource {
         'likeCount': 0,
         'commentCount': 0,
         'createdAt': FieldValue.serverTimestamp(),
+        'hotScore': computeAnswerHotScore(
+          likeCount: 0,
+          commentCount: 0,
+          createdAt: createdAtForScore,
+        ),
         // Denormalized fields for UC-4.1 feed display (SRS NFR-02)
         'questionContent': questionContent,
         'hostName': hostName,
@@ -351,10 +358,22 @@ class FirebaseQnaDatasource {
       }
 
       final answerDoc = snap.docs.first;
-      final isPublished = answerDoc.data()['isPublished'] as bool? ?? false;
+      final answerData = answerDoc.data();
+      final isPublished = answerData['isPublished'] as bool? ?? false;
       if (isPublished) return answerDoc.id;
 
-      await answerDoc.reference.update({'isPublished': true});
+      final createdAtTs = answerData['createdAt'] as Timestamp?;
+      final lc = answerData['likeCount'] as int? ?? 0;
+      final cc = answerData['commentCount'] as int? ?? 0;
+      final hotUpdate = <String, dynamic>{'isPublished': true};
+      if (createdAtTs != null) {
+        hotUpdate['hotScore'] = computeAnswerHotScore(
+          likeCount: lc,
+          commentCount: cc,
+          createdAt: createdAtTs.toDate(),
+        );
+      }
+      await answerDoc.reference.update(hotUpdate);
       unawaited(classifyPublishedAnswer(answerId: answerDoc.id));
       return answerDoc.id;
     } on FirebaseException catch (e, s) {

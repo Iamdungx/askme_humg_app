@@ -13,8 +13,17 @@
       "collectionGroup": "answers",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "aiCategory", "order": "ASCENDING" },
         { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "hotScore", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "answers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "aiCategory", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" },
         { "fieldPath": "__name__", "order": "DESCENDING" }
       ]
@@ -23,9 +32,29 @@
       "collectionGroup": "answers",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "aiTagIds", "arrayConfig": "CONTAINS" },
         { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "aiCategory", "order": "ASCENDING" },
+        { "fieldPath": "hotScore", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "answers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "aiTagIds", "arrayConfig": "CONTAINS" },
         { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "answers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublished", "order": "ASCENDING" },
+        { "fieldPath": "aiTagIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "hotScore", "order": "DESCENDING" },
         { "fieldPath": "__name__", "order": "DESCENDING" }
       ]
     },

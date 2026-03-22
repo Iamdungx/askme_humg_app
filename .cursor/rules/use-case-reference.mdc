@@ -14,12 +14,12 @@ When implementing a feature, find the UC code and follow its Database Impact exa
 | UC-1.3 | HUMG Email Verify (OTP) | Client generates 6-digit OTP → SHA-256 hash → store in `otpRequests/{uid}` (ttl 10 min, max 3 attempts). Send plain-text email via Gmail SMTP (`mailer` pkg). On success: **Batch Write** `users.isHumgVerified=true` + `users.humgEmail` + delete `otpRequests/{uid}`. Route guard redirects unverified users to `/verify-humg` (except `/` feed). |
 | UC-2.1 | Generate Deep Link | URL format: `askme-humg-app.web.app/user/{userId}`. Export shareable card image. |
 | UC-2.2 | View Profile | Show: name, avatar, answer count, total likes. Show `VerifiedBadge` (badgeCheck icon) next to name when `isHumgVerified == true`. |
-| UC-3.1 | Submit Anonymous Question | App Check required. 300 char max. Rate limit via Cloud Function. |
+| UC-3.1 | Submit Anonymous Question | 300 char max. Rate limit server-side (HTTP API / Cloud Function per SRS). Request verification per deployment (App Check target). |
 | UC-3.2 | Manage Inbox | Query `questions` where `toUserId == currentUser.uid`. Two tabs: unanswered / answered. |
 | UC-3.3 | Answer & Publish | **Batch Write** `answers` (new doc) + `questions` (set `status: 'answered'`). Denormalize `hostName`, `hostAvatar`, `hostIsHumgVerified` from `users` into `answers` doc. |
-| UC-4.1 | View Feed | `isPublished == true`, `orderBy createdAt desc`, cursor pagination, limit 20. Show `VerifiedBadge` next to host name when `hostIsHumgVerified == true`. |
-| UC-4.2 | Like/Unlike | `arrayUnion/arrayRemove` on `likedBy` + `FieldValue.increment(±1)` on `likeCount`. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToLike` snackbar. |
-| UC-4.3 | Comment | **Batch Write** `comments` (new doc) + `answers` (`commentCount` increment). Denormalize `authorName`, `authorAvatar`, `authorIsHumgVerified` from `users` into `comments` doc. Show `VerifiedBadge` next to commenter name when `authorIsHumgVerified == true`. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToComment` snackbar. |
+| UC-4.1 | View Feed | `isPublished == true`, default **`orderBy hotScore desc`** (xu hướng; điểm denormalized). Có thể **fallback** sang `createdAt desc` khi chỉ mục chưa sẵn sàng / lỗi truy vấn (xem `firebase_feed_datasource`). Cursor pagination, limit 20. Lọc chủ đề tùy chọn (`aiCategory` / `aiTagIds`). Không có chuyển tab Mới nhất / Xu hướng trên UI — một luồng feed mặc định xu hướng. Show `VerifiedBadge` when `hostIsHumgVerified == true`. |
+| UC-4.2 | Like/Unlike | **Transaction**: update `likedBy` + `likeCount` (kept equal to `likedBy.length`) + `hotScore` when `createdAt` exists. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToLike` snackbar. |
+| UC-4.3 | Comment | **Transaction**: `comments` (new doc) + `answers` (`commentCount` + `hotScore`). Denormalize `authorName`, `authorAvatar`, `authorIsHumgVerified` from `users` into `comments` doc. Show `VerifiedBadge` next to commenter name when `authorIsHumgVerified == true`. **Requires `isHumgVerified == true`** — unverified users see `verifyRequiredToComment` snackbar. |
 | UC-5.1 | Report Content | Create `reports` doc with `status: 'pending'`. |
 | UC-5.2 | Admin Moderate | Update `reports.status` + delete or set `isPublished: false` on content. |
 

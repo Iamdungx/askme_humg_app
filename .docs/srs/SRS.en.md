@@ -1,6 +1,6 @@
 # AskmeHUMG – Software Requirements Specification (SRS)
 
-> **Version:** 2.1 | **Last Updated:** 2026-03-01
+> **Version:** 2.2 | **Last Updated:** 2026-03-23
 
 ---
 
@@ -51,6 +51,9 @@ The system is designed for internal student use and does **not** replace officia
 | Anonymous Sender | A user who sends a question without revealing identity |
 | Host User | A logged-in student (`@humg.edu.vn`) who receives and answers questions |
 | Feed | Public list of published answered questions |
+| Chronological sort | Order by `createdAt` descending — used as **fallback** when the trending query/index is unavailable, and for screens where “recency” is intended (e.g. profile recent answers) |
+| Hot / trending ranking | **Default** public Feed ordering: denormalized `hotScore` (engagement + time decay), aligned with Reddit-style “hot” |
+| AI feed labels | Optional category/tags on published answers for topic filtering on the Feed |
 | Moderation | Process of filtering or removing inappropriate content |
 | Deep Link | A unique URL that opens the app directly to a Host's profile page |
 | Rate Limiting | A mechanism to restrict the number of requests a client can make in a time window |
@@ -67,7 +70,7 @@ AskmeHUMG is a standalone mobile application using:
 - **Flutter** (Frontend)
 - **Firebase** (Backend services)
 
-The system follows a client-server architecture with real-time database support. Anonymous question submissions are protected by Firebase App Check to prevent automated bot attacks.
+The system follows a client-server architecture with real-time database support. Anonymous submissions are rate-limited and request authenticity is verified (target: App Check and/or server API — see FR-01).
 
 ### 2.2 User Classes
 
@@ -99,8 +102,8 @@ The system follows a client-server architecture with real-time database support.
 **Processing:**
 1. Validate content length and format
 2. Filter inappropriate words via keyword list
-3. Verify request authenticity using **Firebase App Check** (blocks bots and emulator calls)
-4. Apply **rate limiting**: a maximum of **5 questions per device per hour** enforced via Cloud Functions
+3. Verify request authenticity (design target: **Firebase App Check**; implementation may use an HTTPS API with equivalent controls)
+4. Apply **rate limiting**: a maximum of **5 questions per device per hour** (server-side — Cloud Functions or deployed HTTP service)
 5. Save to the `questions` collection
 
 **Outputs:**
@@ -115,8 +118,8 @@ The system follows a client-server architecture with real-time database support.
 **Description:** Any Google account may sign in to the application. Full Host features (receiving questions, answering, publishing to Feed) require additional HUMG identity verification.
 
 **Two-tier authentication model:**
-- **Tier 1 — Google Sign-In:** Any Google account can sign in. A `users` document is created on first login. The user can browse the Feed and interact (like, comment).
-- **Tier 2 — HUMG Verification:** To unlock Host features, the user must verify ownership of a `@humg.edu.vn` email address. Upon successful verification, `isHumgVerified: true` and `humgEmail` are saved to the `users` document.
+- **Tier 1 — Google Sign-In:** Any Google account can sign in. A `users` document is created on first login. The user can **browse the public Feed**. **Likes and comments** require **Tier 2** (`isHumgVerified == true`).
+- **Tier 2 — HUMG Verification:** Required for full **Host** features and for **like/comment** on the Feed. The user verifies ownership of a `@humg.edu.vn` email address. Upon success, `isHumgVerified: true` and `humgEmail` are saved to the `users` document.
 
 **Processing (Tier 1):**
 1. User initiates Google Sign-In
@@ -155,14 +158,24 @@ The system follows a client-server architecture with real-time database support.
 
 ### FR-05: Public Feed
 
-**Description:** Display all published answers from students.
+**Description:** Display published answers (`isPublished == true`) from Hosts.
 
-**Display:**
-- Host name & avatar
-- Question
-- Answer
+**Display (each item):**
+- Host name & avatar (verified badge when applicable)
+- Question text
+- Answer text
 - Like count
 - Comment count
+- (Optional) AI-assigned category/tags for topic hints
+
+**Sorting & filtering — as implemented:**
+- **Default (trending):** **`hotScore` descending** for `isPublished == true` answers. The `hotScore` field is denormalized (engagement + time decay from `createdAt`), updated on like, comment, and publish flows; see `firestore.indexes.json` for composite indexes.
+- **Fallback:** If the trending query fails (e.g. index still building), the app may temporarily use **`createdAt` descending** so users can still browse the feed.
+- **Pagination:** Cursor-based (`limit`, `startAfterDocument`), no duplicate rows when loading more.
+- **Optional topic filter:** When the user selects a category or tag, the query adds predicates on AI fields (`aiCategory`, `aiTagIds`) — requires matching composite indexes.
+- **UI:** Single default feed — **no** “Newest / Trending” segmented control on the main Feed screen.
+
+**Note:** Pure **`createdAt`** ordering remains appropriate for other queries (e.g. a host’s recent published answers on the profile screen).
 
 ---
 
@@ -274,7 +287,8 @@ The system follows a client-server architecture with real-time database support.
 | **Firebase Authentication** | User login & identity |
 | **Cloud Firestore** | Real-time NoSQL database |
 | **Firebase Storage** | Avatar and media storage |
-| **Cloud Functions** | Rate limiting for anonymous submissions, OTP delivery (Resend API), server-side content moderation |
+| **Cloud Functions** | (Optional deployment) Rate limiting, server-side moderation; anonymous submit may be handled by HTTP API instead |
+| **HTTP service (e.g. Vercel)** | Anonymous submission and/or AI classification endpoints when configured |
 | **Firebase App Check** | Attestation of legitimate app instances for anonymous endpoints |
 | **`app_links` package** | Deep link handling for `askme-humg-app.web.app/user/{userId}` — replaces deprecated Firebase Dynamic Links |
 
@@ -335,8 +349,13 @@ Flutter App (Riverpod)
 | `likedBy` | Array\<String\> | List of `userId`s who liked this answer — enforces one-like-per-user rule |
 | `commentCount` | Number | Cached total comment count (for display performance) |
 | `isPublished` | Boolean | Whether the answer is visible on the public Feed |
+| `aiCategory` | String (nullable) | Main category from AI classification (when enabled) |
+| `aiTags` | Array\<String\> | Display labels for tags (optional) |
+| `aiTagIds` | Array\<String\> | Tag IDs for `array-contains` feed filtering |
+| `aiClassificationStatus` | String (nullable) | Pipeline status (e.g. `done`, `failed`, `pending`) |
+| `hotScore` | Number (nullable) | Denormalized trending score for **default** public Feed `orderBy` (FR-05); updated on interactions |
 
-> **Design note:** Both `likeCount` and `commentCount` are denormalized caches updated atomically via `FieldValue.increment()`. For likes, the `likedBy` array is updated in the same operation. This avoids sub-collection reads for counts on every feed item render. Both updates use `WriteBatch` to ensure atomicity.
+> **Design note:** Like count is kept in sync with `likedBy` via transaction; comment count updates with comments in a transaction. AI fields support topic filtering on the Feed alongside `hotScore` sorting (UC-4.1).
 
 ### Collection: `comments`
 
@@ -364,7 +383,7 @@ Flutter App (Riverpod)
 
 ### Collection: `otpRequests`
 
-Managed entirely by Cloud Functions. Client has no direct read/write access.
+Per UC-1.3: the client generates an OTP, hashes it with SHA-256, writes `otpRequests/{uid}`, and sends email via Gmail SMTP (`mailer`). Successful verification updates `users` and removes the OTP request.
 
 | Field | Type | Description |
 |---|---|---|
@@ -395,6 +414,7 @@ Managed entirely by Cloud Functions. Client has no direct read/write access.
 
 ### Version 3+ (Future Consideration)
 
+- **Feed — optional UX:** e.g. explicit “newest-only” mode on the UI if product asks for it (current app defaults to trending only)
 - AI-based answer suggestion using an LLM API
 - Analytics dashboard for popular questions and trending topics
 - Trend analysis segmented by faculty or department

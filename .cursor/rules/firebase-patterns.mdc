@@ -37,28 +37,25 @@ batch.set(answersCol.doc(), answerData);
 batch.update(questionsCol.doc(questionId), {'status': 'answered'});
 await batch.commit();
 
-// UC-4.3: Comment
-batch.set(commentsCol.doc(), commentData);
-batch.update(answersCol.doc(answerId), {'commentCount': FieldValue.increment(1)});
-await batch.commit();
+// UC-4.3: Comment — use a transaction so commentCount / hotScore stay consistent
+// under concurrent comments (see firebase_feed_datasource.postComment).
 ```
 
 ### Like Toggle (UC-4.2)
 
 ```dart
-await answersCol.doc(answerId).update({
-  'likedBy': isLiked ? FieldValue.arrayRemove([userId]) : FieldValue.arrayUnion([userId]),
-  'likeCount': FieldValue.increment(isLiked ? -1 : 1),
-});
+// Transaction: rewrite likedBy, set likeCount == likedBy.length, recompute hotScore.
+// (arrayUnion + increment alone drift if data was inconsistent.)
 ```
 
 ### Cursor Pagination (UC-4.1)
 
 ```dart
+// UC-4.1 default: trending (hotScore). Chronological (createdAt) is fallback only.
 Query query = firestore
     .collection('answers')
     .where('isPublished', isEqualTo: true)
-    .orderBy('createdAt', descending: true)
+    .orderBy('hotScore', descending: true)
     .limit(20);
 if (lastDoc != null) query = query.startAfterDocument(lastDoc);
 ```
