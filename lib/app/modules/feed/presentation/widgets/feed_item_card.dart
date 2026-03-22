@@ -16,6 +16,7 @@ import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/share_answer_card_widget.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -42,6 +43,9 @@ class FeedItemCard extends ConsumerWidget {
     final topics = ref.watch(aiTopicsProvider).asData?.value ?? const [];
     final authUser = ref.watch(authStateProvider).asData?.value;
     final uid = authUser?.uid;
+    final alreadyReportedAnswer = ref
+        .watch(userHasReportedTargetProvider(item.answerId, 'answer'))
+        .maybeWhen(data: (v) => v, orElse: () => false);
     final isVerified = authUser?.isHumgVerified == true;
     final topicAccentColor = _resolveTopicAccentColor(item, topics, cs);
     final canOpenHostProfile = item.hostUserId.isNotEmpty;
@@ -145,7 +149,12 @@ class FeedItemCard extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
-                onPressed: () => _showMoreMenu(context, l10n, ref),
+                onPressed: () => _showMoreMenu(
+                  context,
+                  l10n,
+                  ref,
+                  alreadyReportedAnswer,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -254,9 +263,17 @@ class FeedItemCard extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     WidgetRef ref,
+    bool alreadyReported,
   ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
+
+    if (alreadyReported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.reportAlreadyReported)),
+      );
+      return;
+    }
 
     showAppBottomSheet<void>(
       context: context,

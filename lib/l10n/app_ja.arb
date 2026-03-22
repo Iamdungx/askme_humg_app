@@ -324,6 +324,8 @@
   "@reportSuccess": { "description": "報告送信成功後のスナックバー" },
   "loginRequiredToReport": "報告するにはサインインしてください",
   "@loginRequiredToReport": { "description": "未認証ユーザーがコンテンツを報告しようとした時のスナックバー" },
+  "reportAlreadyReported": "このコンテンツは既に報告済みです。",
+  "@reportAlreadyReported": { "description": "同じ対象への重複報告を試みたときのスナックバー（UC-5.1）" },
 
   "adminDashboardTitle": "管理ダッシュボード",
   "@adminDashboardTitle": { "description": "管理者ダッシュボード画面のAppBarタイトル" },

@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:askme_humg/app/core/network/firebase_providers.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/moderation/data/firebase_moderation_datasource.dart';
 import 'package:askme_humg/app/modules/moderation/data/moderation_repository_impl.dart';
@@ -38,6 +39,31 @@ ResolveReport resolveReportUseCase(Ref ref) =>
     ResolveReport(ref.watch(moderationRepositoryProvider));
 
 // ---------------------------------------------------------------------------
+// UC-5.1 — duplicate report guard (same user + target)
+// ---------------------------------------------------------------------------
+
+@riverpod
+Future<bool> userHasReportedTarget(
+  Ref ref,
+  String targetId,
+  String targetType,
+) async {
+  final uid = ref.watch(authStateProvider).asData?.value?.uid;
+  if (uid == null) return false;
+  try {
+    return await ref
+        .read(moderationRepositoryProvider)
+        .hasUserReportedTarget(
+          reportedBy: uid,
+          targetId: targetId,
+          targetType: targetType,
+        );
+  } on FirestoreFailure {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Stream provider — pending reports list
 // ---------------------------------------------------------------------------
 
@@ -64,8 +90,8 @@ class ReportNotifier extends _$ReportNotifier {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (uid == null) return;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref
+    try {
+      await ref
           .read(submitReportUseCaseProvider)
           .call(
             targetId: targetId,
@@ -74,8 +100,14 @@ class ReportNotifier extends _$ReportNotifier {
             reason: reason,
             content: content,
             parentAnswerId: parentAnswerId,
-          ),
-    );
+          );
+      if (!ref.mounted) return;
+      state = const AsyncData(null);
+    } catch (e, s) {
+      if (!ref.mounted) return;
+      state = AsyncError(e, s);
+      rethrow;
+    }
   }
 }
 

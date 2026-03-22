@@ -31,6 +31,11 @@ class FirestoreException extends AppException {
   const FirestoreException(super.message);
 }
 
+/// UC-5.1 — user already has a report doc for this target (no duplicate reports).
+class DuplicateReportException extends AppException {
+  const DuplicateReportException() : super('duplicate_report');
+}
+
 class StorageException extends AppException {
   const StorageException(super.message);
 }

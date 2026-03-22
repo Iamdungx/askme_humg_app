@@ -18,6 +18,7 @@ import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_previ
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
 import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
@@ -77,9 +78,17 @@ class _ProfileContent extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     WidgetRef ref,
+    bool alreadyReported,
   ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
+
+    if (alreadyReported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.reportAlreadyReported)),
+      );
+      return;
+    }
 
     showAppBottomSheet<void>(
       context: context,
@@ -110,6 +119,11 @@ class _ProfileContent extends ConsumerWidget {
     final deepLink = ref
         .read(generateDeepLinkUseCaseProvider)
         .call(profile.userId);
+    final alreadyReportedUser = !isOwner
+        ? ref
+              .watch(userHasReportedTargetProvider(profile.userId, 'user'))
+              .maybeWhen(data: (v) => v, orElse: () => false)
+        : false;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -156,7 +170,8 @@ class _ProfileContent extends ConsumerWidget {
           ] else
             IconButton(
               icon: Icon(LucideIcons.ellipsisVertical, color: cs.onSurface),
-              onPressed: () => _showMoreMenu(context, l10n, ref),
+              onPressed: () =>
+                  _showMoreMenu(context, l10n, ref, alreadyReportedUser),
             ),
         ],
       ),

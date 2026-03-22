@@ -324,6 +324,8 @@
   "@reportSuccess": { "description": "Snackbar after successful report submission" },
   "loginRequiredToReport": "Sign in to report",
   "@loginRequiredToReport": { "description": "Snackbar when unauthenticated user tries to report content" },
+  "reportAlreadyReported": "You already reported this content.",
+  "@reportAlreadyReported": { "description": "Snackbar when user tries to report the same target again (UC-5.1)" },
 
   "adminDashboardTitle": "Admin Dashboard",
   "@adminDashboardTitle": { "description": "AppBar title on admin dashboard screen" },

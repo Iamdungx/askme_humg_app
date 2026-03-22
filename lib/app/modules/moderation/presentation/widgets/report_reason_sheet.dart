@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -34,23 +35,36 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
     final reason = _selectedReason;
     if (reason == null) return;
 
-    await ref
-        .read(reportProvider.notifier)
-        .submit(
-          targetId: widget.targetId,
-          targetType: widget.targetType,
-          reason: reason,
-          content: widget.content,
-          parentAnswerId: widget.parentAnswerId,
-        );
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await ref
+          .read(reportProvider.notifier)
+          .submit(
+            targetId: widget.targetId,
+            targetType: widget.targetType,
+            reason: reason,
+            content: widget.content,
+            parentAnswerId: widget.parentAnswerId,
+          );
+    } on DuplicateReportFailure {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.reportAlreadyReported)));
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.commonError)));
+      return;
+    }
 
     if (!mounted) return;
 
-    // Capture messenger before popping — context is invalid after pop.
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(context);
-    Navigator.of(context).pop();
+    ref.invalidate(
+      userHasReportedTargetProvider(widget.targetId, widget.targetType),
+    );
 
+    Navigator.of(context).pop();
     messenger.showSnackBar(SnackBar(content: Text(l10n.reportSubmitted)));
   }
 

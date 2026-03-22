@@ -9,6 +9,27 @@ class ModerationRepositoryImpl implements IModerationRepository {
   final FirebaseModerationDatasource _datasource;
 
   @override
+  Future<bool> hasUserReportedTarget({
+    required String reportedBy,
+    required String targetId,
+    required String targetType,
+  }) async {
+    try {
+      return await _datasource.hasUserReportedTarget(
+        reportedBy: reportedBy,
+        targetId: targetId,
+        targetType: targetType,
+      );
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } on AppException catch (e) {
+      throw UnknownFailure(e.message);
+    } catch (e) {
+      throw UnknownFailure(e.toString());
+    }
+  }
+
+  @override
   Future<void> submitReport({
     required String targetId,
     required String targetType,
@@ -26,6 +47,8 @@ class ModerationRepositoryImpl implements IModerationRepository {
         content: content,
         parentAnswerId: parentAnswerId,
       );
+    } on DuplicateReportException {
+      throw const DuplicateReportFailure();
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } on AppException catch (e) {

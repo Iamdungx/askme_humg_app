@@ -26,6 +26,12 @@ final class FirestoreFailure extends Failure {
   const FirestoreFailure(super.message);
 }
 
+/// UC-5.1 — user already reported this target; show [reportAlreadyReported] snackbar.
+final class DuplicateReportFailure extends Failure {
+  const DuplicateReportFailure()
+    : super('You have already reported this content.');
+}
+
 final class StorageFailure extends Failure {
   const StorageFailure(super.message);
 }
