@@ -69,7 +69,7 @@ seed-user-questions: ## Seed 5 câu hỏi đa chủ đề cho user test mặc đ
 seed-clear:   ## Xoá toàn bộ dữ liệu Firestore (users/questions/answers/comments...)
 	cd scripts && npx ts-node clear.ts
 
-seed-clear-ai: ## Chỉ xoá nhãn AI trên answers (giữ nguyên dữ liệu bài viết)
+seed-clear-ai: ## Chỉ xoá nhãn AI trên answers (giữ nguyên dữ liệu bài viết) 
 	cd scripts && npx ts-node clear_ai_tags.ts
 
 admin-set:    ## Set custom claim admin=true
