@@ -308,3 +308,19 @@ Level is `Level.debug` in debug/stg, `Level.warning` in release.
 - **Immutable models** — use Freezed for all domain entities and DTOs.
 - **Error propagation** — data layer throws `AppException`, domain layer catches and rethrows as `Failure`.
 - **Dart 3 style** — prefer switch expressions, pattern matching, and `enum.name` over old `switch` statements and `describeEnum`.
+
+---
+
+## License
+
+This repository uses a dual-license model:
+
+- **AGPL-3.0-or-later** for open-source usage with copyleft obligations.
+- **Commercial license** for closed-source/commercial usage that does not follow AGPL obligations.
+
+See:
+
+- `LICENSE`
+- `COMMERCIAL_LICENSE.md`
+
+For commercial permission, contact: `buidxng299@gmail.com`.
