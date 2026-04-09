@@ -10,6 +10,7 @@
 ## 1. Pre-conditions
 
 - User is logged in (like requires authentication)
+- User is **`isHumgVerified == true`** (in-app guard; unverified users see `verifyRequiredToLike`)
 - User is viewing the Feed (FeedScreen)
 - The answer exists in Firestore with `isPublished == true`
 
@@ -22,11 +23,11 @@
 3. Optimistic UI update immediately:
    - Like icon changes to filled/red
    - likeCount increments by 1 in local state
-4. System calls toggleLike(answerId, userId):
-   - answers/{answerId}.update({
-       likedBy: FieldValue.arrayUnion([userId]),
-       likeCount: FieldValue.increment(1)
-     })
+4. System calls toggleLike(answerId, userId, isCurrentlyLiked) → Firestore **runTransaction**:
+   - Read answers/{answerId}
+   - Build new likedBy list (add uid if not liked on server)
+   - Set likeCount == newLikedBy.length
+   - If createdAt exists: set hotScore = computeAnswerHotScore(likeCount, commentCount, createdAt)
 5. On success: state confirmed (no change needed, optimistic was correct)
 6. On failure: revert optimistic update, show error snackbar
 ```
@@ -40,11 +41,7 @@
 3. Optimistic UI update immediately:
    - Like icon changes to outline/empty
    - likeCount decrements by 1 in local state
-4. System calls toggleLike(answerId, userId):
-   - answers/{answerId}.update({
-       likedBy: FieldValue.arrayRemove([userId]),
-       likeCount: FieldValue.increment(-1)
-     })
+4. Same toggleLike → transaction removes uid from likedBy, syncs likeCount and hotScore
 5. On success: confirmed
 6. On failure: revert optimistic update
 ```
@@ -74,12 +71,13 @@ B4. User can navigate to /settings → HUMG Verification to verify
 
 | Operation | Fields Updated |
 |---|---|
-| `update` | `likedBy: arrayUnion([userId])` + `likeCount: increment(1)` (like) |
-| `update` | `likedBy: arrayRemove([userId])` + `likeCount: increment(-1)` (unlike) |
+| `runTransaction` + `update` | `likedBy` (full list), `likeCount` (equals `likedBy.length`), `hotScore` (when `createdAt` is set) |
 
-> **One-like-per-user enforcement (SRS FR-06):** The `likedBy` array stores UIDs. `arrayUnion` is idempotent — calling it twice with the same UID has no effect. This is the client-side enforcement. Firestore Security Rules should also validate this server-side.
+> **One-like-per-user enforcement (SRS FR-06):** The `likedBy` array stores UIDs. The transaction reads the current array, toggles membership, and writes the new list — concurrent toggles stay consistent.
 
-> **Note:** `likeCount` is a denormalized cache. It is NEVER recalculated from the array length — only updated via `FieldValue.increment()`.
+> **Note:** `likeCount` is kept **equal** to `likedBy.length` in the same write. `hotScore` is recomputed from engagement + time decay (`computeAnswerHotScore` in `answer_hot_score.dart`).
+
+**Implementation:** `lib/app/modules/feed/data/firebase_feed_datasource.dart` → `toggleLike`.
 
 ---
 
@@ -88,13 +86,12 @@ B4. User can navigate to /settings → HUMG Verification to verify
 ```
 lib/app/modules/feed/
 ├── domain/
-│   └── use_cases/toggle_like.dart                  [CREATE]
+│   └── use_cases/toggle_like.dart
 ├── data/
-│   └── datasources/feed_datasource.dart            [MODIFY] add toggleLike()
+│   └── datasources/firebase_feed_datasource.dart   # toggleLike (transaction)
 └── presentation/
-    ├── widgets/
-    │   └── like_button.dart                        [CREATE] animated like button
-    └── providers/feed_providers.dart               [MODIFY] add toggleLikeNotifier
+    ├── widgets/like_button.dart
+    └── providers/feed_providers.dart               # ToggleLikeNotifier
 ```
 
 ---
@@ -102,78 +99,30 @@ lib/app/modules/feed/
 ## 7. Key Code Contracts
 
 ### Use Case: `toggle_like.dart`
-```dart
-class ToggleLike {
-  const ToggleLike(this._repo);
-  final IFeedRepository _repo;
 
-  Future<void> call({required String answerId, required String userId}) =>
-      _repo.toggleLike(answerId: answerId, userId: userId);
-}
-```
+Delegates to `IFeedRepository.toggleLike` → datasource `toggleLike`.
 
-### Data Source: `feed_datasource.dart`
-```dart
-Future<void> toggleLike({
-  required String answerId,
-  required String userId,
-}) async {
-  final docRef = firestore.collection('answers').doc(answerId);
-  final doc = await docRef.get();
-  final likedBy = List<String>.from(doc.data()?['likedBy'] ?? []);
-  final isLiked = likedBy.contains(userId);
+### Data source (conceptual)
 
-  await docRef.update({
-    'likedBy': isLiked
-        ? FieldValue.arrayRemove([userId])
-        : FieldValue.arrayUnion([userId]),
-    'likeCount': FieldValue.increment(isLiked ? -1 : 1),
-  });
-}
-```
-
-### LikeButton Widget (with flutter_animate)
-```dart
-class LikeButton extends ConsumerWidget {
-  const LikeButton({super.key, required this.answerId, required this.likeCount, required this.likedBy});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final uid = ref.watch(authStateProvider).valueOrNull?.uid;
-    final isLiked = uid != null && likedBy.contains(uid);
-
-    return GestureDetector(
-      onTap: () {
-        if (uid == null) { /* show login prompt */ return; }
-        ref.read(toggleLikeNotifierProvider.notifier).toggle(answerId, uid);
-      },
-      child: Row(children: [
-        Icon(isLiked ? Icons.favorite : Icons.favorite_border,
-             color: isLiked ? AppColors.like : AppColors.textSecondary)
-            .animate(target: isLiked ? 1 : 0)
-            .scale(begin: const Offset(1, 1), end: const Offset(1.3, 1.3), duration: 150.ms)
-            .then()
-            .scale(begin: const Offset(1.3, 1.3), end: const Offset(1, 1), duration: 100.ms),
-        const SizedBox(width: 4),
-        Text('$likeCount'),
-      ]),
-    );
-  }
-}
-```
+Use `FirebaseFirestore.runTransaction`: read answer, mutate `likedBy`, set `likeCount`, optionally `hotScore`. Do **not** use `arrayUnion` + `increment` alone — they can drift if data was inconsistent.
 
 ---
 
 ## 8. Firestore Security Rule
 
+Like/unlike updates must allow `likedBy`, `likeCount`, and `hotScore`:
+
 ```javascript
 match /answers/{answerId} {
-  // Like/unlike: only update likedBy and likeCount
-  allow update: if request.auth != null
-    && request.resource.data.diff(resource.data).affectedKeys()
-         .hasOnly(['likedBy', 'likeCount']);
+  allow update: if isSignedIn() && (
+    // ...
+    (request.resource.data.diff(resource.data).affectedKeys()
+      .hasOnly(['likeCount', 'likedBy', 'hotScore']))
+  );
 }
 ```
+
+(See `firestore.rules` in repo for full `answers` match.)
 
 ---
 
@@ -181,10 +130,9 @@ match /answers/{answerId} {
 
 - [ ] Unauthenticated user taps like → snackbar `loginRequiredToLike`, no Firestore write
 - [ ] Authenticated but unverified (HUMG) user taps like → snackbar `verifyRequiredToLike`, no Firestore write
-- [ ] Like: `arrayUnion([uid])` + `increment(1)` in single `update()` call
-- [ ] Unlike: `arrayRemove([uid])` + `increment(-1)` in single `update()` call
-- [ ] Tapping like twice → no net change (idempotent via arrayUnion)
+- [ ] Like/unlike: **transaction** updates `likedBy`, `likeCount` (synced with array), `hotScore` when applicable
+- [ ] Tapping like twice → no net change (server-side list reflects final state)
 - [ ] Like icon: filled red when `likedBy.contains(currentUser.uid)`, outline otherwise
 - [ ] likeCount display updates immediately (optimistic UI)
 - [ ] On write failure: optimistic update reverted
-- [ ] Like button has bounce animation (flutter_animate)
+- [ ] Like button uses project styling (e.g. Lucide + `flutter_animate` where applicable)

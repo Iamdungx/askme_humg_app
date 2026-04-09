@@ -1,7 +1,7 @@
 name: askme_humg
 description: AskMe HUMG
 publish_to: 'none'
-version: 1.0.0
+version: 1.1.0
 
 environment:
   sdk: '>=3.10.3 <4.0.0'
@@ -24,6 +24,7 @@ dependencies:
   firebase_storage: ^13.0.6
   firebase_app_check: ^0.4.1+4
   firebase_messaging: ^16.1.1
+  onesignal_flutter: ^5.1.2
 
   # Google Sign-In
   google_sign_in: ^7.2.0
@@ -73,6 +74,8 @@ dependencies:
   package_info_plus: ^9.0.0
   mailer: ^7.1.0
   flutter_image_compress: ^2.4.0
+  gal: ^2.3.2
+  mobile_scanner: ^7.2.0
 
 dev_dependencies:
   flutter_test:

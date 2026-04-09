@@ -3,6 +3,13 @@ import 'package:askme_humg/app/modules/moderation/domain/report.dart';
 enum ResolveAction { remove, dismiss }
 
 abstract interface class IModerationRepository {
+  /// UC-5.1 — true if this user already has any report for the same target.
+  Future<bool> hasUserReportedTarget({
+    required String reportedBy,
+    required String targetId,
+    required String targetType,
+  });
+
   Future<void> submitReport({
     required String targetId,
     required String targetType,

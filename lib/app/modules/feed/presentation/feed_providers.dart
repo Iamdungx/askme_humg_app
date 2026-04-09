@@ -11,6 +11,8 @@ import 'package:askme_humg/app/modules/feed/domain/feed_use_cases.dart';
 import 'package:askme_humg/app/core/values/app_durations.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/modules/feed/domain/i_feed_repository.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_sort_mode.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
 
 part 'feed_providers.freezed.dart';
 part 'feed_providers.g.dart';
@@ -24,8 +26,11 @@ abstract class FeedState with _$FeedState {
   const factory FeedState({
     @Default([]) List<FeedItem> items,
     @Default(false) bool isLoadingMore,
+    @Default(false) bool isRefreshing,
     @Default(false) bool hasReachedEnd,
     String? lastDocId,
+    String? selectedTopicTagId,
+    @Default(FeedSortMode.trending) FeedSortMode feedSortMode,
   }) = _FeedState;
 }
 
@@ -50,6 +55,18 @@ GetPublicFeed getPublicFeedUseCase(Ref ref) =>
     GetPublicFeed(ref.watch(feedRepositoryProvider));
 
 @riverpod
+GetAiTopics getAiTopicsUseCase(Ref ref) =>
+    GetAiTopics(ref.watch(feedRepositoryProvider));
+
+@riverpod
+GetPublishedAnswerById getPublishedAnswerByIdUseCase(Ref ref) =>
+    GetPublishedAnswerById(ref.watch(feedRepositoryProvider));
+
+@riverpod
+GenerateAnswerDeepLink generateAnswerDeepLinkUseCase(Ref ref) =>
+    const GenerateAnswerDeepLink();
+
+@riverpod
 ToggleLike toggleLikeUseCase(Ref ref) =>
     ToggleLike(ref.watch(feedRepositoryProvider));
 
@@ -65,6 +82,26 @@ PostComment postCommentUseCase(Ref ref) =>
 GetUserAnswers getUserAnswersUseCase(Ref ref) =>
     GetUserAnswers(ref.watch(feedRepositoryProvider));
 
+@riverpod
+class SelectedFeedTopicTagId extends _$SelectedFeedTopicTagId {
+  @override
+  String? build() => null;
+
+  void setTopic(String? topicTagId) {
+    state = topicTagId;
+  }
+}
+
+@riverpod
+class SelectedFeedSortMode extends _$SelectedFeedSortMode {
+  @override
+  FeedSortMode build() => FeedSortMode.trending;
+
+  void setMode(FeedSortMode mode) {
+    state = mode;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // User answers — for Profile screen "Recent Answers" section
 // ---------------------------------------------------------------------------
@@ -72,6 +109,14 @@ GetUserAnswers getUserAnswersUseCase(Ref ref) =>
 @riverpod
 Future<List<FeedItem>> userAnswers(Ref ref, String userId) =>
     ref.watch(getUserAnswersUseCaseProvider).call(userId: userId);
+
+@riverpod
+Future<FeedItem?> publishedAnswerById(Ref ref, String answerId) =>
+    ref.watch(getPublishedAnswerByIdUseCaseProvider).call(answerId);
+
+@riverpod
+Future<List<FeedTopic>> aiTopics(Ref ref) =>
+    ref.watch(getAiTopicsUseCaseProvider).call();
 
 // ---------------------------------------------------------------------------
 // Feed notifier — UC-4.1 cursor pagination
@@ -81,14 +126,20 @@ Future<List<FeedItem>> userAnswers(Ref ref, String userId) =>
 class FeedNotifier extends _$FeedNotifier {
   @override
   Future<FeedState> build() async {
-    final page = await ref.watch(getPublicFeedUseCaseProvider).call();
+    final selectedTopicTagId = ref.watch(selectedFeedTopicTagIdProvider);
+    final sortMode = ref.watch(selectedFeedSortModeProvider);
+    final page = await ref
+        .watch(getPublicFeedUseCaseProvider)
+        .call(topicTagId: selectedTopicTagId, sortMode: sortMode);
+
     return FeedState(
       items: page.items,
       lastDocId: page.lastDocId,
       hasReachedEnd: !page.hasMore,
+      selectedTopicTagId: selectedTopicTagId,
+      feedSortMode: sortMode,
     );
   }
-
 
   Future<void> loadMore() async {
     final current = state.asData?.value;
@@ -103,7 +154,13 @@ class FeedNotifier extends _$FeedNotifier {
       // always visible for at least AppDuration.loadMoreMin — prevents a flash
       // when Firestore responds faster than one animation frame.
       final (page, _) = await (
-        ref.read(getPublicFeedUseCaseProvider).call(lastDocId: current.lastDocId),
+        ref
+            .read(getPublicFeedUseCaseProvider)
+            .call(
+              lastDocId: current.lastDocId,
+              topicTagId: current.selectedTopicTagId,
+              sortMode: current.feedSortMode,
+            ),
         Future<void>.delayed(AppDuration.loadMoreMin),
       ).wait;
       if (!ref.mounted) return;
@@ -122,24 +179,57 @@ class FeedNotifier extends _$FeedNotifier {
     }
   }
 
-  Future<void> refresh() async {
-    state = const AsyncLoading();
+  Future<void> refresh({bool keepExisting = false}) async {
+    final selectedTopicTagId = ref.read(selectedFeedTopicTagIdProvider);
+    final sortMode = ref.read(selectedFeedSortModeProvider);
+    final current = state.asData?.value;
+    if (keepExisting && current != null) {
+      state = AsyncData(
+        current.copyWith(
+          isRefreshing: true,
+          selectedTopicTagId: selectedTopicTagId,
+          feedSortMode: sortMode,
+          // Ensure paging state resets when filter context changes.
+          hasReachedEnd: false,
+          lastDocId: null,
+        ),
+      );
+    } else {
+      state = const AsyncLoading();
+    }
     try {
       final (page, _) = await (
-        ref.read(getPublicFeedUseCaseProvider).call(),
+        ref
+            .read(getPublicFeedUseCaseProvider)
+            .call(topicTagId: selectedTopicTagId, sortMode: sortMode),
         Future<void>.delayed(AppDuration.loadMoreMin),
       ).wait;
       if (!ref.mounted) return;
-      state = AsyncData(FeedState(
-        items: page.items,
-        lastDocId: page.lastDocId,
-        hasReachedEnd: !page.hasMore,
-      ));
+      state = AsyncData(
+        FeedState(
+          items: page.items,
+          lastDocId: page.lastDocId,
+          isRefreshing: false,
+          hasReachedEnd: !page.hasMore,
+          selectedTopicTagId: selectedTopicTagId,
+          feedSortMode: sortMode,
+        ),
+      );
     } catch (e, s) {
       logger.e('FeedNotifier.refresh failed', error: e, stackTrace: s);
       if (!ref.mounted) return;
+      if (keepExisting && current != null) {
+        state = AsyncData(current.copyWith(isRefreshing: false));
+        return;
+      }
       state = AsyncError(e, s);
     }
+  }
+
+  /// Updates topic only — [FeedNotifier.build] watches [selectedFeedTopicTagIdProvider]
+  /// and refetches once (avoids duplicate Firestore reads vs. also calling [refresh]).
+  void selectTopic(String? topicTagId) {
+    ref.read(selectedFeedTopicTagIdProvider.notifier).setTopic(topicTagId);
   }
 
   /// Optimistic update — called by [ToggleLikeNotifier] before the network call.
@@ -158,8 +248,22 @@ class FeedNotifier extends _$FeedNotifier {
           : (List<String>.from(item.likedBy)..add(uid));
       return item.copyWith(
         likedBy: newLikedBy,
-        likeCount: item.likeCount + (isCurrentlyLiked ? -1 : 1),
+        likeCount: newLikedBy.length,
       );
+    }).toList();
+
+    state = AsyncData(current.copyWith(items: updatedItems));
+  }
+
+  /// Local update — called after posting a comment so the feed card reflects
+  /// the latest comment count without requiring a refresh.
+  void incrementItemCommentCount(String answerId) {
+    final current = state.asData?.value;
+    if (current == null) return;
+
+    final updatedItems = current.items.map((item) {
+      if (item.answerId != answerId) return item;
+      return item.copyWith(commentCount: item.commentCount + 1);
     }).toList();
 
     state = AsyncData(current.copyWith(items: updatedItems));
@@ -191,7 +295,9 @@ class ToggleLikeNotifier extends _$ToggleLikeNotifier {
   }) async {
     if (state.isLoading) return;
 
-    ref.read(feedProvider.notifier).updateItemLike(
+    ref
+        .read(feedProvider.notifier)
+        .updateItemLike(
           answerId: answerId,
           uid: uid,
           isCurrentlyLiked: isCurrentlyLiked,
@@ -199,7 +305,9 @@ class ToggleLikeNotifier extends _$ToggleLikeNotifier {
 
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(toggleLikeUseCaseProvider).call(
+      () => ref
+          .read(toggleLikeUseCaseProvider)
+          .call(
             answerId: answerId,
             userId: uid,
             isCurrentlyLiked: isCurrentlyLiked,
@@ -208,7 +316,9 @@ class ToggleLikeNotifier extends _$ToggleLikeNotifier {
 
     if (state is AsyncError) {
       logger.w('toggleLike failed for $answerId, reverting optimistic update');
-      ref.read(feedProvider.notifier).revertItemLike(
+      ref
+          .read(feedProvider.notifier)
+          .revertItemLike(
             answerId: answerId,
             uid: uid,
             wasLiked: isCurrentlyLiked,
@@ -234,21 +344,31 @@ class PostCommentNotifier extends _$PostCommentNotifier {
   @override
   FutureOr<void> build() {}
 
-  /// Returns a [Failure] if validation fails or the call errors, null on success.
-  Future<Failure?> post({
+  /// Returns submission result including normalized persisted content.
+  Future<PostCommentSubmissionResult> post({
     required String answerId,
     required String content,
     required bool isAnonymous,
   }) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty) return const ValidationFailure('errorCommentEmpty');
-    if (trimmed.length > 500) return const ValidationFailure('errorCommentTooLong');
+    if (trimmed.isEmpty) {
+      return const PostCommentSubmissionResult(
+        failure: ValidationFailure('errorCommentEmpty'),
+      );
+    }
+    if (trimmed.length > 500) {
+      return const PostCommentSubmissionResult(
+        failure: ValidationFailure('errorCommentTooLong'),
+      );
+    }
 
     final uid = ref.read(authStateProvider).asData?.value?.uid;
 
     state = const AsyncLoading();
     final result = await AsyncValue.guard(
-      () => ref.read(postCommentUseCaseProvider).call(
+      () => ref
+          .read(postCommentUseCaseProvider)
+          .call(
             answerId: answerId,
             userId: isAnonymous ? null : uid,
             content: trimmed,
@@ -263,10 +383,22 @@ class PostCommentNotifier extends _$PostCommentNotifier {
         error: result.error,
         stackTrace: result.stackTrace,
       );
-      return result.error is Failure
-          ? result.error as Failure
-          : UnknownFailure(result.error.toString());
+      return PostCommentSubmissionResult(
+        failure: result.error is Failure
+            ? result.error as Failure
+            : UnknownFailure(result.error.toString()),
+      );
     }
-    return null;
+
+    // Keep the feed card in sync (commentCount) without forcing a full refresh.
+    ref.read(feedProvider.notifier).incrementItemCommentCount(answerId);
+    return PostCommentSubmissionResult(persistedContent: trimmed);
   }
+}
+
+class PostCommentSubmissionResult {
+  const PostCommentSubmissionResult({this.failure, this.persistedContent});
+
+  final Failure? failure;
+  final String? persistedContent;
 }

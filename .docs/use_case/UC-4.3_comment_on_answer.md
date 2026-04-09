@@ -10,6 +10,7 @@
 ## 1. Pre-conditions
 
 - User is logged in
+- User is **`isHumgVerified == true`** (unverified → `verifyRequiredToComment`)
 - User is viewing the Feed (FeedScreen)
 - The answer exists with `isPublished == true`
 
@@ -23,15 +24,14 @@
 5. Optionally toggles "Comment anonymously" switch
 6. User taps "Send"
 7. Client validates: comment not empty, reasonable length (< 500 chars)
-8. System performs a Batch Write (MANDATORY):
-   a. comments collection: ADD new document:
-      { answerId, userId (null if anonymous), content, isAnonymous, createdAt: serverTimestamp() }
-   b. answers collection: UPDATE answers/{answerId}:
-      { commentCount: FieldValue.increment(1) }
+8. System performs a **Firestore transaction** (MANDATORY for atomicity + hotScore):
+   a. Read answers/{answerId} for current commentCount, likeCount, createdAt
+   b. comments collection: set new document with serverTimestamp, denormalized author fields from users/{uid}
+   c. answers collection: update commentCount (prev + 1) and hotScore when createdAt exists
 9. On success:
    - New comment appears at bottom of list
    - CommentInputBar clears
-10. On failure: show error snackbar, batch rolled back
+10. On failure: show error snackbar, no partial write
 ```
 
 ## 3. Alternative Flow A – Unauthenticated User Taps Comment
@@ -63,29 +63,33 @@ C3. No Firebase call made
 
 ## 5. Database Impact
 
-### MANDATORY: WriteBatch
+### MANDATORY: `runTransaction` (not WriteBatch alone)
+
+`WriteBatch` cannot atomically read-increment `commentCount` under concurrent comments; use a **transaction** so `commentCount` and `hotScore` stay consistent.
 
 ```dart
-final batch = firestore.batch();
-
-// Operation 1: Create new comment document
 final commentRef = firestore.collection('comments').doc();
-batch.set(commentRef, {
-  'answerId': answerId,
-  'userId': isAnonymous ? null : currentUser.uid,
-  'content': content,
-  'isAnonymous': isAnonymous,
-  'createdAt': FieldValue.serverTimestamp(),
+await firestore.runTransaction((tx) async {
+  final answerSnap = await tx.get(answerRef);
+  // ... prevCc, lc, createdAt ...
+  tx.set(commentRef, {
+    'answerId': answerId,
+    'userId': isAnonymous ? null : userId,
+    'content': content,
+    'isAnonymous': isAnonymous,
+    'createdAt': FieldValue.serverTimestamp(),
+    'authorName': authorName,
+    'authorAvatar': authorAvatar,
+    'authorIsHumgVerified': authorIsHumgVerified,
+  });
+  tx.update(answerRef, {
+    'commentCount': newCc,
+    if (createdAtTs != null) 'hotScore': computeAnswerHotScore(...),
+  });
 });
-
-// Operation 2: Increment commentCount on the answer
-final answerRef = firestore.collection('answers').doc(answerId);
-batch.update(answerRef, {
-  'commentCount': FieldValue.increment(1),
-});
-
-await batch.commit();
 ```
+
+**Implementation:** `lib/app/modules/feed/data/firebase_feed_datasource.dart` → `postComment`.
 
 ### Collection: `comments`
 
@@ -96,12 +100,14 @@ await batch.commit();
 | `content` | comment text |
 | `isAnonymous` | `true` or `false` |
 | `createdAt` | `FieldValue.serverTimestamp()` |
+| `authorName`, `authorAvatar`, `authorIsHumgVerified` | Denormalized from `users` for display (UC-4.3) |
 
 ### Collection: `answers`
 
 | Field | Value |
 |---|---|
-| `commentCount` | `FieldValue.increment(1)` |
+| `commentCount` | Previous count + 1 (in transaction) |
+| `hotScore` | Recomputed when `createdAt` present |
 
 ---
 
@@ -110,69 +116,22 @@ await batch.commit();
 ```
 lib/app/modules/feed/
 ├── domain/
-│   ├── entities/comment.dart                       [CREATE] @freezed
-│   └── use_cases/post_comment.dart                 [CREATE]
+│   └── use_cases/post_comment.dart
 ├── data/
-│   ├── datasources/feed_datasource.dart            [MODIFY] add getComments(), postComment()
-│   └── models/comment_model.dart                   [CREATE] @freezed
+│   └── datasources/firebase_feed_datasource.dart   # postComment (transaction)
 └── presentation/
-    ├── screens/comments_screen.dart                [CREATE] bottom sheet or full screen
-    ├── widgets/
-    │   ├── comment_tile.dart                       [CREATE]
-    │   └── comment_input_bar.dart                  [CREATE]
-    └── providers/feed_providers.dart               [MODIFY] add commentsProvider, postCommentNotifier
+    ├── screens/comments_screen.dart
+    ├── widgets/comment_tile.dart, comment_input_bar.dart
+    └── providers/feed_providers.dart
 ```
 
 ---
 
 ## 7. Key Code Contracts
 
-### Entity: `comment.dart`
-```dart
-@freezed
-class Comment with _$Comment {
-  const factory Comment({
-    required String commentId,
-    required String answerId,
-    String? userId,           // null if anonymous
-    required String content,
-    required bool isAnonymous,
-    required DateTime createdAt,
-  }) = _Comment;
-}
-```
-
 ### Use Case: `post_comment.dart`
-```dart
-class PostComment {
-  const PostComment(this._repo);
-  final IFeedRepository _repo;
 
-  Future<void> call({
-    required String answerId,
-    required String? userId,
-    required String content,
-    required bool isAnonymous,
-  }) => _repo.postComment(
-    answerId: answerId,
-    userId: userId,
-    content: content,
-    isAnonymous: isAnonymous,
-  );
-}
-```
-
-### Comments Provider
-```dart
-@riverpod
-Stream<List<Comment>> comments(CommentsRef ref, String answerId) {
-  return ref.read(feedDatasourceProvider)
-      .getComments(answerId)
-      .map((snap) => snap.docs
-          .map((d) => CommentModel.fromFirestore(d).toDomain())
-          .toList());
-}
-```
+Delegates to `IFeedRepository.postComment` → `postComment` on datasource.
 
 ---
 
@@ -203,9 +162,9 @@ AppBar: "Comments (8)"           [← close]
 ## 9. Acceptance Criteria (from SRS FR-07)
 
 - [ ] Unauthenticated user taps comment → snackbar `loginRequiredToComment`, no write
-- [ ] Authenticated but unverified user taps comment → snackbar `verifyRequiredToComment`, no write (checked both when opening sheet and when tapping Send)
-- [ ] WriteBatch ALWAYS used — `comments` add + `answers.commentCount` increment in one commit
-- [ ] If batch fails, NEITHER write is applied
+- [ ] Authenticated but unverified user taps comment → snackbar `verifyRequiredToComment`, no write (checked when opening sheet and when tapping Send)
+- [ ] **Transaction** used — new `comments` doc + `answers.commentCount` / `hotScore` update commit together
+- [ ] If transaction fails, neither write is applied
 - [ ] `isAnonymous: true` → `userId` stored as `null` in Firestore
 - [ ] `isAnonymous: false` → `userId` stores `currentUser.uid`
 - [ ] Anonymous comment displays generic avatar + "Anonymous" label in UI

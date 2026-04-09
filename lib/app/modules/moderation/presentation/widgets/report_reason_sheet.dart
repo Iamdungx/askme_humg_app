@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -16,8 +17,10 @@ class ReportReasonSheet extends ConsumerStatefulWidget {
 
   final String targetId;
   final String targetType;
+
   /// Snapshot of the reported content, stored in Firestore for admin review.
   final String content;
+
   /// Required when [targetType] == 'comment' so admin resolve can decrement commentCount.
   final String? parentAnswerId;
 
@@ -32,21 +35,36 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
     final reason = _selectedReason;
     if (reason == null) return;
 
-    await ref.read(reportProvider.notifier).submit(
-          targetId: widget.targetId,
-          targetType: widget.targetType,
-          reason: reason,
-          content: widget.content,
-          parentAnswerId: widget.parentAnswerId,
-        );
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await ref
+          .read(reportProvider.notifier)
+          .submit(
+            targetId: widget.targetId,
+            targetType: widget.targetType,
+            reason: reason,
+            content: widget.content,
+            parentAnswerId: widget.parentAnswerId,
+          );
+    } on DuplicateReportFailure {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.reportAlreadyReported)));
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.commonError)));
+      return;
+    }
 
     if (!mounted) return;
 
-    // Capture messenger before popping — context is invalid after pop.
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(context);
-    Navigator.of(context).pop();
+    ref.invalidate(
+      userHasReportedTargetProvider(widget.targetId, widget.targetType),
+    );
 
+    Navigator.of(context).pop();
     messenger.showSnackBar(SnackBar(content: Text(l10n.reportSubmitted)));
   }
 
@@ -56,8 +74,7 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final isLoading =
-        ref.watch(reportProvider).isLoading;
+    final isLoading = ref.watch(reportProvider).isLoading;
 
     final reasons = [
       ('inappropriate_language', l10n.reportReasonInappropriate),
@@ -100,11 +117,7 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
-                    Icon(
-                      LucideIcons.flag,
-                      size: 20,
-                      color: cs.primary,
-                    ),
+                    Icon(LucideIcons.flag, size: 20, color: cs.primary),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       l10n.reportTitle,
@@ -158,9 +171,7 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                             ),
                             onTap: isLoading
                                 ? null
-                                : () => setState(
-                                      () => _selectedReason = value,
-                                    ),
+                                : () => setState(() => _selectedReason = value),
                           ),
                           if (!isLast)
                             Divider(
@@ -173,10 +184,7 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                   ),
                 ),
 
-                Divider(
-                  height: 1,
-                  color: cs.outline.withValues(alpha: 0.3),
-                ),
+                Divider(height: 1, color: cs.outline.withValues(alpha: 0.3)),
                 const SizedBox(height: AppSpacing.lg),
 
                 // Action buttons
@@ -184,8 +192,9 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                   children: [
                     Expanded(
                       child: TextButton(
-                        onPressed:
-                            isLoading ? null : () => Navigator.of(context).pop(),
+                        onPressed: isLoading
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: Text(
                           l10n.commonCancel,
                           style: tt.bodyMedium?.copyWith(
@@ -199,8 +208,9 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                     Expanded(
                       flex: 2,
                       child: FilledButton(
-                        onPressed:
-                            (_selectedReason == null || isLoading) ? null : _submit,
+                        onPressed: (_selectedReason == null || isLoading)
+                            ? null
+                            : _submit,
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(double.infinity, 48),
                           shape: const StadiumBorder(),
@@ -219,7 +229,9 @@ class _ReportReasonSheetState extends ConsumerState<ReportReasonSheet> {
                     ),
                   ],
                 ),
-                SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.lg),
+                SizedBox(
+                  height: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
+                ),
               ],
             ),
           ),

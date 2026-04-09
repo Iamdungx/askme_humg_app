@@ -1,0 +1,325 @@
+const admin = require('firebase-admin');
+const crypto = require('crypto');
+
+const TRACKING_CODE_LENGTH = 6;
+const TRACKING_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const TRACKING_CODE_MAX_GENERATE_ATTEMPTS = 20;
+
+const SUBMIT_LIMIT = 5;
+const SUBMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+const LOOKUP_LIMIT = 8;
+const LOOKUP_WINDOW_MS = 10 * 60 * 1000; // 10 mins
+const LOOKUP_COOLDOWN_MS = 15 * 60 * 1000; // 15 mins
+const CLASSIFY_LIMIT = 60;
+const CLASSIFY_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+// Keep tag colors aligned with .docs/UI_UX_SPECS.md palette tokens.
+const UI_SPEC_TAG_COLORS = new Set([
+  '#1A3A8C', // primary
+  '#2D9BD8', // dark accent
+  '#1A7AAF', // light accent
+  '#2A4FA8', // primaryLight mapping
+  '#22C55E', // success
+  '#F59E0B', // warning
+  '#EF4444', // error / like
+  '#7FA8C9', // dark secondary text
+  '#475569', // light secondary text
+  '#9AA0A6', // neutral fallback for uncategorized tags
+]);
+
+function getFirestore() {
+  if (!admin.apps.length) {
+    const sa = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (sa) {
+      const cred = JSON.parse(sa);
+      // Debug helper: only logs project_id (no secrets / no token).
+      if (cred?.project_id) {
+        console.log('[firebase-admin] init project_id:', cred.project_id);
+      }
+      admin.initializeApp({ credential: admin.credential.cert(cred) });
+    } else {
+      admin.initializeApp();
+    }
+  }
+  return admin.firestore();
+}
+
+function parseBody(req) {
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return {};
+    }
+  }
+  return req.body || {};
+}
+
+function getAuthTokenFromReq(req, body) {
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+  const bodyToken = typeof body?.idToken === 'string' ? body.idToken.trim() : '';
+  return bodyToken;
+}
+
+async function verifyFirebaseIdToken(idToken) {
+  if (!idToken) return null;
+  getFirestore();
+  try {
+    return await admin.auth().verifyIdToken(idToken);
+  } catch (e) {
+    // Do not leak token contents. Log only code/message for debugging.
+    const code = e?.code;
+    const message = e instanceof Error ? e.message : String(e);
+    console.error('[verifyIdToken] failed', { code, message });
+    return null;
+  }
+}
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    return forwarded[0].split(',')[0].trim();
+  }
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+function getTrackingPepper() {
+  const pepper = (process.env.TRACKING_CODE_PEPPER || '').trim();
+  if (!pepper) {
+    throw new Error('Missing TRACKING_CODE_PEPPER environment variable');
+  }
+  return pepper;
+}
+
+function hashTrackingCode(code) {
+  return crypto
+    .createHash('sha256')
+    .update(`${code}:${getTrackingPepper()}`)
+    .digest('hex');
+}
+
+function generateTrackingCode() {
+  let code = '';
+  for (let i = 0; i < TRACKING_CODE_LENGTH; i += 1) {
+    const idx = crypto.randomInt(0, TRACKING_CODE_ALPHABET.length);
+    code += TRACKING_CODE_ALPHABET[idx];
+  }
+  return code;
+}
+
+async function createUniqueTrackingCode(db) {
+  for (let i = 0; i < TRACKING_CODE_MAX_GENERATE_ATTEMPTS; i += 1) {
+    const code = generateTrackingCode();
+    const hash = hashTrackingCode(code);
+    const snap = await db
+      .collection('questions')
+      .where('trackingCodeHash', '==', hash)
+      .limit(1)
+      .get();
+    if (snap.empty) return code;
+  }
+  throw new Error('tracking_code_generation_failed');
+}
+
+async function checkWindowedRateLimit({
+  db,
+  collectionName,
+  key,
+  limit,
+  windowMs,
+  cooldownMs = 0,
+}) {
+  const ref = db.collection(collectionName).doc(key);
+  const now = Date.now();
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) {
+      tx.set(ref, { count: 1, windowStart: now, blockedUntil: 0 });
+      return true;
+    }
+    const data = snap.data() || {};
+    const blockedUntil = Number(data.blockedUntil || 0);
+    if (blockedUntil > now) return false;
+
+    const windowStart = Number(data.windowStart || now);
+    const count = Number(data.count || 0);
+    if (now - windowStart > windowMs) {
+      tx.set(ref, { count: 1, windowStart: now, blockedUntil: 0 }, { merge: true });
+      return true;
+    }
+    if (count >= limit) {
+      if (cooldownMs > 0) {
+        tx.set(ref, { blockedUntil: now + cooldownMs, count, windowStart }, { merge: true });
+      }
+      return false;
+    }
+    tx.update(ref, { count: admin.firestore.FieldValue.increment(1) });
+    return true;
+  });
+}
+
+async function checkSubmitRateLimit({ db, key }) {
+  return checkWindowedRateLimit({
+    db,
+    collectionName: 'rateLimits',
+    key,
+    limit: SUBMIT_LIMIT,
+    windowMs: SUBMIT_WINDOW_MS,
+  });
+}
+
+async function checkLookupRateLimit({ db, key }) {
+  return checkWindowedRateLimit({
+    db,
+    collectionName: 'trackingLookups',
+    key,
+    limit: LOOKUP_LIMIT,
+    windowMs: LOOKUP_WINDOW_MS,
+    cooldownMs: LOOKUP_COOLDOWN_MS,
+  });
+}
+
+async function checkClassifyRateLimit({ db, key }) {
+  return checkWindowedRateLimit({
+    db,
+    collectionName: 'aiClassifyLimits',
+    key,
+    limit: CLASSIFY_LIMIT,
+    windowMs: CLASSIFY_WINDOW_MS,
+  });
+}
+
+function getGeminiApiKey() {
+  return (process.env.GEMINI_API_KEY || '').trim();
+}
+
+function getGeminiModel() {
+  return (process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite').trim();
+}
+
+function getGeminiFallbackModel() {
+  return (process.env.GEMINI_FALLBACK_MODEL || 'gemini-2.5-flash').trim();
+}
+
+function normalizeUiSpecColor(rawColor, fallbackColor = '#9AA0A6') {
+  const fallback = UI_SPEC_TAG_COLORS.has(fallbackColor) ? fallbackColor : '#9AA0A6';
+  if (typeof rawColor !== 'string') return fallback;
+  const normalized = rawColor.trim().toUpperCase();
+  if (!/^#[0-9A-F]{6}$/.test(normalized)) return fallback;
+  return UI_SPEC_TAG_COLORS.has(normalized) ? normalized : fallback;
+}
+
+function normalizeTag(rawTag) {
+  if (typeof rawTag !== 'string') return '';
+  return rawTag.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+}
+
+function normalizeCategory(rawCategory, categories) {
+  const fallback = categories.includes('khac') ? 'khac' : categories[0];
+  if (typeof rawCategory !== 'string') return fallback;
+  const normalized = rawCategory.trim().toLowerCase();
+  return categories.includes(normalized) ? normalized : fallback;
+}
+
+function extractTextFromGeminiPayload(payload) {
+  const parts = payload?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts
+    .map((part) => (typeof part?.text === 'string' ? part.text : ''))
+    .filter(Boolean)
+    .join('\n')
+    .trim();
+}
+
+async function requestGeminiClassification({
+  content,
+  categories,
+  maxTags,
+  promptHint,
+  model,
+  allowedTagSlugs = [],
+}) {
+  const key = getGeminiApiKey();
+  if (!key) {
+    throw new Error('missing_gemini_api_key');
+  }
+  const prompt = [
+    'Ban la bo phan phan loai noi dung cho ung dung hoi dap.',
+    `Danh muc bat buoc chon 1: ${categories.join(', ')}.`,
+    `Tra ve toi da ${maxTags} tags.`,
+    allowedTagSlugs.length
+      ? `Danh sach tag hop le (chi duoc chon trong danh sach nay): ${allowedTagSlugs.join(', ')}.`
+      : '',
+    'Tra ve JSON dung schema:',
+    '{"category":"string","tags":["string"],"confidence":0.0}',
+    'Quy tac: category phai nam trong danh muc bat buoc; tags ngan gon, lower_snake_case, khong trung lap.',
+    promptHint ? `Goi y bo sung: ${promptHint}` : '',
+    `Noi dung can phan loai:\n${content}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const endpoint =
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}` +
+    `:generateContent?key=${encodeURIComponent(key)}`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      },
+    }),
+  });
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`gemini_http_${response.status}:${errorBody.slice(0, 240)}`);
+  }
+  const payload = await response.json();
+  const outputText = extractTextFromGeminiPayload(payload);
+  if (!outputText) throw new Error('gemini_empty_output');
+  let parsed;
+  try {
+    parsed = JSON.parse(outputText);
+  } catch {
+    throw new Error('gemini_invalid_json');
+  }
+  const category = normalizeCategory(parsed.category, categories);
+  const tagsRaw = Array.isArray(parsed.tags) ? parsed.tags : [];
+  const normalizedTags = [...new Set(tagsRaw.map(normalizeTag).filter(Boolean))];
+  const tags =
+    allowedTagSlugs.length > 0
+      ? normalizedTags.filter((tag) => allowedTagSlugs.includes(tag)).slice(0, maxTags)
+      : normalizedTags.slice(0, maxTags);
+  const confidenceRaw = Number(parsed.confidence);
+  const confidence =
+    Number.isFinite(confidenceRaw) && confidenceRaw >= 0 && confidenceRaw <= 1
+      ? confidenceRaw
+      : 0;
+  return { category, tags, confidence };
+}
+
+module.exports = {
+  admin,
+  parseBody,
+  getFirestore,
+  getAuthTokenFromReq,
+  verifyFirebaseIdToken,
+  getClientIp,
+  hashTrackingCode,
+  createUniqueTrackingCode,
+  checkSubmitRateLimit,
+  checkLookupRateLimit,
+  checkClassifyRateLimit,
+  getGeminiModel,
+  getGeminiFallbackModel,
+  normalizeUiSpecColor,
+  requestGeminiClassification,
+};

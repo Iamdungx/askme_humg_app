@@ -23,9 +23,8 @@ FirebaseAuthDatasource firebaseAuthDatasource(Ref ref) =>
     );
 
 @riverpod
-OtpDatasource otpDatasource(Ref ref) => OtpDatasource(
-  firestore: ref.watch(firestoreProvider),
-);
+OtpDatasource otpDatasource(Ref ref) =>
+    OtpDatasource(firestore: ref.watch(firestoreProvider));
 
 // keepAlive: authStateProvider (keepAlive) watches this — if it were
 // auto-disposed, authState would lose its stream on the next rebuild.
@@ -124,9 +123,7 @@ class VerifyOtpNotifier extends _$VerifyOtpNotifier {
   Future<void> verify({required String otp, required String uid}) async {
     state = const AsyncLoading();
     final useCase = ref.read(verifyOtpUseCaseProvider);
-    final next = await AsyncValue.guard(
-      () => useCase.call(otp: otp, uid: uid),
-    );
+    final next = await AsyncValue.guard(() => useCase.call(otp: otp, uid: uid));
     if (!ref.mounted) return;
     state = next;
   }

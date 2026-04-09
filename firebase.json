@@ -16,6 +16,10 @@
       {
         "source": "/user/**",
         "destination": "/index.html"
+      },
+      {
+        "source": "/answer/**",
+        "destination": "/index.html"
       }
     ]
   },

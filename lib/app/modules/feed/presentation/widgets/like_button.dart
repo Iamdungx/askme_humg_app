@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
-import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart' show toggleLikeProvider;
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart'
+    show toggleLikeProvider;
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class LikeButton extends ConsumerWidget {
@@ -13,11 +14,13 @@ class LikeButton extends ConsumerWidget {
     required this.answerId,
     required this.likeCount,
     required this.likedBy,
+    this.onToggleSuccess,
   });
 
   final String answerId;
   final int likeCount;
   final List<String> likedBy;
+  final VoidCallback? onToggleSuccess;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,23 +32,26 @@ class LikeButton extends ConsumerWidget {
     final isLiked = uid != null && likedBy.contains(uid);
     final isLoading = ref.watch(toggleLikeProvider(answerId)).isLoading;
 
-    void handleTap() {
+    Future<void> handleTap() async {
       if (!context.requireVerified(
         uid: uid,
         isVerified: isVerified,
         loginMessage: l10n.loginRequiredToLike,
         verifyMessage: l10n.verifyRequiredToLike,
-      )) { return; }
-      ref.read(toggleLikeProvider(answerId).notifier).toggle(
-            uid: uid!,
-            isCurrentlyLiked: isLiked,
-          );
+      )) {
+        return;
+      }
+      await ref
+          .read(toggleLikeProvider(answerId).notifier)
+          .toggle(uid: uid!, isCurrentlyLiked: isLiked);
+      final result = ref.read(toggleLikeProvider(answerId));
+      if (result is! AsyncError<void>) {
+        onToggleSuccess?.call();
+      }
     }
 
     return Semantics(
-      label: isLiked
-          ? '$likeCount likes, liked'
-          : '$likeCount likes',
+      label: isLiked ? '$likeCount likes, liked' : '$likeCount likes',
       button: true,
       child: Material(
         color: Colors.transparent,
@@ -58,12 +64,12 @@ class LikeButton extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  LucideIcons.heart,
-                  color: isLiked
-                      ? cs.error
-                      : cs.onSurface.withValues(alpha: 0.5),
-                  size: 20,
-                )
+                      LucideIcons.heart,
+                      color: isLiked
+                          ? cs.error
+                          : cs.onSurface.withValues(alpha: 0.5),
+                      size: 20,
+                    )
                     .animate(target: isLiked ? 1.0 : 0.0)
                     .scale(
                       begin: const Offset(1, 1),
@@ -80,11 +86,11 @@ class LikeButton extends ConsumerWidget {
                 Text(
                   '$likeCount',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: isLiked
-                            ? cs.error
-                            : cs.onSurface.withValues(alpha: 0.6),
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: isLiked
+                        ? cs.error
+                        : cs.onSurface.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),

@@ -11,6 +11,7 @@ import 'package:askme_humg/app/global_widgets/states/loading_shimmer.dart';
 import 'package:askme_humg/app/modules/qna_core/domain/question.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/widgets/answer_publish_toggle.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class AnswerComposeScreen extends ConsumerStatefulWidget {
@@ -46,18 +47,19 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
     ref.listen(answerProvider, (_, next) {
       if (!next.isLoading && !next.hasError && next.hasValue) {
         if (!context.mounted) return;
+        if (_isPublished) {
+          // Ensure the newly published answer appears in the public feed.
+          ref.read(feedProvider.notifier).refresh();
+        }
         final msg = _isPublished ? l10n.answerPublishSuccess : l10n.answerSaved;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
         context.pop();
       } else if (next.hasError) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.commonError),
-            backgroundColor: cs.error,
-          ),
+          SnackBar(content: Text(l10n.commonError), backgroundColor: cs.error),
         );
       }
     });
@@ -130,7 +132,9 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
-            label: _isPublished ? l10n.answerPublishButton : l10n.answerSaveButton,
+            label: _isPublished
+                ? l10n.answerPublishButton
+                : l10n.answerSaveButton,
             variant: AppButtonVariant.primary,
             isLoading: answerState.isLoading,
             onPressed: answerState.isLoading ? null : _submit,
@@ -153,11 +157,13 @@ class _AnswerComposeScreenState extends ConsumerState<AnswerComposeScreen> {
       return;
     }
 
-    await ref.read(answerProvider.notifier).submit(
-      questionId: widget.questionId,
-      content: content,
-      isPublished: _isPublished,
-    );
+    await ref
+        .read(answerProvider.notifier)
+        .submit(
+          questionId: widget.questionId,
+          content: content,
+          isPublished: _isPublished,
+        );
   }
 }
 
@@ -179,9 +185,7 @@ class _QuestionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,12 +229,10 @@ class _QuestionCard extends StatelessWidget {
               Icon(LucideIcons.clock, size: 12, color: cs.onSurfaceVariant),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                l10n.answerReceivedTimeAgo(
-                  context.timeAgo(question.createdAt),
-                ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                l10n.answerReceivedTimeAgo(context.timeAgo(question.createdAt)),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),

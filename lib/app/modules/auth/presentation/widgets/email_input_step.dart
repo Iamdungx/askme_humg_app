@@ -70,7 +70,11 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
     if (!_validate(mssv, l10n)) return;
     final email = _fullEmail;
 
-    final recipientName = ref.read(authStateProvider).asData?.value?.displayName;
+    final recipientName = ref
+        .read(authStateProvider)
+        .asData
+        ?.value
+        ?.displayName;
 
     await ref
         .read(generateOtpProvider.notifier)
@@ -167,7 +171,9 @@ class _EmailInputStepState extends ConsumerState<EmailInputStep> {
                 onTap: _cycleDomain,
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(0, 6, 8, 6),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.secondaryContainer,
                     borderRadius: BorderRadius.circular(AppRadius.sm),

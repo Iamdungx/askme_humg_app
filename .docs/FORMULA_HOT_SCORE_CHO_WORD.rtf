@@ -1,0 +1,21 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}}
+\f0\fs24\b C\'f4ng th\u7913 c hotScore (AskmeHUMG)\b0\par
+\par
+Ngu\u7891 n: computeAnswerHotScore (answer_hot_score.dart)\par
+\par
+\b Bi\u7871 n:\b0\par
+t = max(0, now - createdAt theo gi\'e2y) / 3600   \u8594   tu\u7893 i b\'e0i theo gi\u7901 .\par
+E = 1\'b7L + 2\'b7C   v\u7899 i L = likeCount, C = commentCount.\par
+\par
+\b M\u7851 u s\u7889  suy gi\u7843 m theo th\u7901 i gian:\b0\par
+D = (t + 2){\super 1.8}\par
+\par
+\b \u272 i\u7875 m l\u432 u Firestore:\b0\par
+hotScore = (E + 1) / D\par
+\par
+N\u7871 u D \u8804  0 (bi\'ean): hotScore = E (theo code).\par
+\par
+\b Tham s\u7889  c\u7889  \u273 \u7883 nh:\b0\par
+offset = 2 gi\u7901 ; gravity = 1.8 ; tr\u7885 ng s\u7889  like = 1 ; comment = 2.\par
+}

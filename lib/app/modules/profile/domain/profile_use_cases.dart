@@ -24,10 +24,9 @@ class UpdateProfile {
     required String userId,
     String? name,
     String? avatarLocalPath,
-  }) =>
-      _repository.updateProfile(
-        userId: userId,
-        name: name,
-        avatarLocalPath: avatarLocalPath,
-      );
+  }) => _repository.updateProfile(
+    userId: userId,
+    name: name,
+    avatarLocalPath: avatarLocalPath,
+  );
 }

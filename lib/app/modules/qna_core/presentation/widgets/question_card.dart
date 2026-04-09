@@ -12,12 +12,18 @@ class QuestionCard extends StatelessWidget {
     required this.question,
     this.onReply,
     this.onDelete,
+    this.onPublish,
+    this.isPublished = true,
+    this.isPublishing = false,
     this.showReply = true,
   });
 
   final Question question;
   final VoidCallback? onReply;
   final Future<void> Function()? onDelete;
+  final Future<void> Function()? onPublish;
+  final bool isPublished;
+  final bool isPublishing;
   final bool showReply;
 
   @override
@@ -58,9 +64,7 @@ class QuestionCard extends StatelessWidget {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.5),
-          ),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -69,17 +73,13 @@ class QuestionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    LucideIcons.clock,
-                    size: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  Icon(LucideIcons.clock, size: 14, color: cs.onSurfaceVariant),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     context.timeAgo(question.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -105,6 +105,24 @@ class QuestionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
+                  ],
+                  if (!showReply && !isPublished && onPublish != null) ...[
+                    AppButton(
+                      label: l10n.answerPublishButton,
+                      variant: AppButtonVariant.primary,
+                      leading: Icon(
+                        LucideIcons.send,
+                        size: 16,
+                        color: cs.onPrimary,
+                      ),
+                      isLoading: isPublishing,
+                      isFullWidth: false,
+                      minimumHeight: 40,
+                      onPressed: () async {
+                        if (!isPublishing) await onPublish!();
+                      },
+                    ),
+                    if (onDelete != null) const SizedBox(width: AppSpacing.md),
                   ],
                   if (onDelete != null)
                     AppButton(
@@ -149,9 +167,7 @@ class QuestionCard extends StatelessWidget {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               l10n.commonDelete,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -195,4 +211,3 @@ class _ReplyButton extends StatelessWidget {
     );
   }
 }
-

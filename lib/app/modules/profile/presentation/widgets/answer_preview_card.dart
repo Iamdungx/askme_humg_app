@@ -8,9 +8,14 @@ import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dar
 
 /// Read-only answer preview card shown in the Profile screen's "Recent Answers" section.
 class AnswerPreviewCard extends StatelessWidget {
-  const AnswerPreviewCard({super.key, required this.item});
+  const AnswerPreviewCard({
+    super.key,
+    required this.item,
+    this.onLikeToggleSuccess,
+  });
 
   final FeedItem item;
+  final VoidCallback? onLikeToggleSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +61,24 @@ class AnswerPreviewCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.lg + AppSpacing.md,
+              ),
               child: Text(
                 item.answerContent,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
+                style: tt.bodyMedium?.copyWith(
+                  color: cs.onSurface,
+                  height: 1.5,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.lg + AppSpacing.md),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.lg + AppSpacing.md,
+              ),
               child: Column(
                 children: [
                   Divider(
@@ -81,6 +93,7 @@ class AnswerPreviewCard extends StatelessWidget {
                         answerId: item.answerId,
                         likeCount: item.likeCount,
                         likedBy: item.likedBy,
+                        onToggleSuccess: onLikeToggleSuccess,
                       ),
                       const SizedBox(width: AppSpacing.lg),
                       _CommentChip(
@@ -122,9 +135,9 @@ class _CommentChip extends StatelessWidget {
         Text(
           count.toString(),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
+            color: color,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

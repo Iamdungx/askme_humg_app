@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
+import 'package:askme_humg/app/core/widgets/app_shell_tab_controller.dart';
 import 'package:askme_humg/app/global_widgets/ui/app_avatar.dart';
 import 'package:askme_humg/app/global_widgets/ui/verified_badge.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
@@ -10,12 +12,24 @@ import 'package:askme_humg/app/global_widgets/layout/app_card.dart';
 import 'package:askme_humg/app/global_widgets/layout/left_accent_block.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/feed/domain/feed_item.dart';
+import 'package:askme_humg/app/modules/feed/domain/feed_topic.dart';
+import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/like_button.dart';
+import 'package:askme_humg/app/modules/feed/presentation/widgets/share_answer_card_widget.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
+import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class FeedItemCard extends ConsumerWidget {
   const FeedItemCard({super.key, required this.item, this.onCommentTap});
+  static const Map<String, String> _mainCategoryLabelBySlug = {
+    'hoc_tap': 'Học Tập',
+    'doi_song': 'Đời Sống',
+    'tuyen_dung': 'Chuyên Ngành',
+    'su_kien': 'Sinh Viên',
+    'khac': 'Khác',
+  };
 
   final FeedItem item;
   final VoidCallback? onCommentTap;
@@ -25,9 +39,34 @@ class FeedItemCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
+    final topics = ref.watch(aiTopicsProvider).asData?.value ?? const [];
     final authUser = ref.watch(authStateProvider).asData?.value;
     final uid = authUser?.uid;
+    final alreadyReportedAnswer = ref
+        .watch(userHasReportedTargetProvider(item.answerId, 'answer'))
+        .maybeWhen(data: (v) => v, orElse: () => false);
     final isVerified = authUser?.isHumgVerified == true;
+    final topicAccentColor = _resolveTopicAccentColor(item, topics, cs);
+    final canOpenHostProfile = item.hostUserId.isNotEmpty;
+    final isOwnProfile =
+        uid != null && item.hostUserId.isNotEmpty && item.hostUserId == uid;
+
+    void openHostProfile() {
+      if (!canOpenHostProfile) return;
+      // Own profile: use shell tab switcher (fade + goBranch) like tapping Profile.
+      // `go('/me')` jumps with no animation; `push('/user/self')` mis-highlights Feed.
+      if (isOwnProfile) {
+        final shell = AppShellTabController.maybeOf(context);
+        if (shell != null) {
+          shell.switchToTab(AppShellTab.profile);
+        } else {
+          context.go(AppRoutes.me);
+        }
+      } else {
+        context.push('${AppRoutes.userProfile}/${item.hostUserId}');
+      }
+    }
 
     return AppCard(
       margin: const EdgeInsets.symmetric(
@@ -41,46 +80,60 @@ class FeedItemCard extends ConsumerWidget {
           // Header
           Row(
             children: [
-              AppAvatar(
-                imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
-                name: item.hostName.isNotEmpty
-                    ? item.hostName
-                    : l10n.feedFallbackHostName,
-                size: 40,
+              InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: canOpenHostProfile ? openHostProfile : null,
+                child: AppAvatar(
+                  imageUrl: item.hostAvatar.isNotEmpty ? item.hostAvatar : null,
+                  name: item.hostName.isNotEmpty
+                      ? item.hostName
+                      : l10n.feedFallbackHostName,
+                  size: 40,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: canOpenHostProfile ? openHostProfile : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 4,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            item.hostName.isNotEmpty
-                                ? item.hostName
-                                : l10n.feedFallbackHostName,
-                            style: tt.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                item.hostName.isNotEmpty
+                                    ? item.hostName
+                                    : l10n.feedFallbackHostName,
+                                style: tt.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            if (item.hostIsHumgVerified) ...[
+                              const SizedBox(width: 4),
+                              const VerifiedBadge(size: 14),
+                            ],
+                          ],
+                        ),
+                        Text(
+                          context.timeAgo(item.createdAt),
+                          style: tt.labelSmall?.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
-                        if (item.hostIsHumgVerified) ...[
-                          const SizedBox(width: 4),
-                          const VerifiedBadge(size: 14),
-                        ],
                       ],
                     ),
-                    Text(
-                      context.timeAgo(item.createdAt),
-                      style: tt.labelSmall?.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               // Questions are always anonymous per spec (UC-3.1)
@@ -96,7 +149,12 @@ class FeedItemCard extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
-                onPressed: () => _showMoreMenu(context, l10n, ref),
+                onPressed: () => _showMoreMenu(
+                  context,
+                  l10n,
+                  ref,
+                  alreadyReportedAnswer,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -135,11 +193,26 @@ class FeedItemCard extends ConsumerWidget {
 
           // Answer block with left border accent
           LeftAccentBlock(
+            accentColor: topicAccentColor,
             child: Text(
               item.answerContent,
               style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
             ),
           ),
+          if (item.aiCategory != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                _AiChip(
+                  label: _displayMainCategoryLabel(item.aiCategory!),
+                  accentColor: topicAccentColor,
+                  brightness: brightness,
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
 
           Divider(color: cs.outline.withValues(alpha: 0.3)),
@@ -162,7 +235,9 @@ class FeedItemCard extends ConsumerWidget {
                           isVerified: isVerified,
                           loginMessage: l10n.loginRequiredToComment,
                           verifyMessage: l10n.verifyRequiredToComment,
-                        )) { return; }
+                        )) {
+                          return;
+                        }
                         onCommentTap!();
                       }
                     : null,
@@ -174,7 +249,7 @@ class FeedItemCard extends ConsumerWidget {
                   size: 20,
                   color: cs.onSurface.withValues(alpha: 0.5),
                 ),
-                onPressed: () => _onShare(context, l10n),
+                onPressed: () => _onShare(context, l10n, ref),
                 visualDensity: VisualDensity.compact,
               ),
             ],
@@ -184,9 +259,21 @@ class FeedItemCard extends ConsumerWidget {
     );
   }
 
-  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+  void _showMoreMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+    bool alreadyReported,
+  ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
+
+    if (alreadyReported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.reportAlreadyReported)),
+      );
+      return;
+    }
 
     showAppBottomSheet<void>(
       context: context,
@@ -210,11 +297,67 @@ class FeedItemCard extends ConsumerWidget {
     );
   }
 
-  void _onShare(BuildContext context, AppLocalizations l10n) {
-    // TODO(UC-2.1): Implement share via share_plus package
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.commonFeatureComingSoon)),
+  Future<void> _onShare(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+  ) async {
+    final deepLink = ref
+        .read(generateAnswerDeepLinkUseCaseProvider)
+        .call(item.answerId);
+    showAppBottomSheet<void>(
+      context: context,
+      builder: (_) => ShareAnswerCardWidget(item: item, deepLink: deepLink),
     );
+  }
+
+  static String _toDisplayLabel(String raw) {
+    final compact = raw.trim();
+    if (compact.isEmpty) return raw;
+    final words = compact
+        .replaceAll(RegExp(r'[_\s]+'), ' ')
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return compact;
+    return words
+        .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+        .join(' ');
+  }
+
+  static String _displayMainCategoryLabel(String slug) {
+    final normalizedSlug = slug.trim().toLowerCase();
+    return _mainCategoryLabelBySlug[normalizedSlug] ?? _toDisplayLabel(slug);
+  }
+
+  static Color _resolveTopicAccentColor(
+    FeedItem item,
+    List<FeedTopic> topics,
+    ColorScheme cs,
+  ) {
+    final normalizedCategory = item.aiCategory?.trim().toLowerCase() ?? '';
+    for (final topic in topics) {
+      final topicSlug = topic.slug.trim().toLowerCase();
+      if (topicSlug == normalizedCategory) {
+        return _colorFromHex(topic.color, cs.primary);
+      }
+    }
+    for (final ref in item.aiTagRefs) {
+      final color = _colorFromHex(ref.color, cs.primary);
+      if (color != cs.primary || ref.color.trim().isNotEmpty) return color;
+    }
+    return cs.primary;
+  }
+
+  static Color _colorFromHex(String rawHex, Color fallback) {
+    final normalized = rawHex.trim().toUpperCase();
+    final hex = normalized.startsWith('#')
+        ? normalized.substring(1)
+        : normalized;
+    if (hex.length != 6) return fallback;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return fallback;
+    return Color(0xFF000000 | value);
   }
 }
 
@@ -256,6 +399,51 @@ class _CommentButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AiChip extends StatelessWidget {
+  const _AiChip({
+    required this.label,
+    required this.accentColor,
+    required this.brightness,
+  });
+
+  final String label;
+  final Color accentColor;
+  final Brightness brightness;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final overlayAlpha = brightness == Brightness.dark ? 0.28 : 0.16;
+    final background = Color.alphaBlend(
+      accentColor.withValues(alpha: overlayAlpha),
+      cs.surfaceContainerHighest,
+    );
+    final borderColor = accentColor.withValues(
+      alpha: brightness == Brightness.dark ? 0.55 : 0.35,
+    );
+    final foreground = cs.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Text(
+        label,
+        style: tt.labelSmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

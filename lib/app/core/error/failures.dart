@@ -26,6 +26,12 @@ final class FirestoreFailure extends Failure {
   const FirestoreFailure(super.message);
 }
 
+/// UC-5.1 — user already reported this target; show [reportAlreadyReported] snackbar.
+final class DuplicateReportFailure extends Failure {
+  const DuplicateReportFailure()
+    : super('You have already reported this content.');
+}
+
 final class StorageFailure extends Failure {
   const StorageFailure(super.message);
 }
@@ -43,13 +49,22 @@ final class RateLimitFailure extends Failure {
     : super('Too many requests. Please try again later.');
 }
 
+final class InvalidTrackingCodeFailure extends Failure {
+  const InvalidTrackingCodeFailure() : super('Invalid tracking code.');
+}
+
+final class TrackingNotFoundFailure extends Failure {
+  const TrackingNotFoundFailure() : super('Tracking code not found.');
+}
+
 final class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'An unknown error occurred']);
 }
 
 /// UC-1.3 — OTP-specific failures surfaced to presentation layer.
 final class OtpExpiredFailure extends Failure {
-  const OtpExpiredFailure() : super('OTP has expired. Please request a new one.');
+  const OtpExpiredFailure()
+    : super('OTP has expired. Please request a new one.');
 }
 
 final class OtpInvalidFailure extends Failure {
@@ -58,7 +73,7 @@ final class OtpInvalidFailure extends Failure {
 
 final class OtpMaxAttemptsFailure extends Failure {
   const OtpMaxAttemptsFailure()
-      : super('Too many failed attempts. Please request a new OTP.');
+    : super('Too many failed attempts. Please request a new OTP.');
 }
 
 final class OtpSendFailure extends Failure {
@@ -68,7 +83,7 @@ final class OtpSendFailure extends Failure {
 /// Surfaced to the presentation layer when the avatar 7-day cooldown is active.
 final class AvatarCooldownFailure extends Failure {
   const AvatarCooldownFailure(this.nextAllowedAt)
-      : super('Avatar can only be changed once every 7 days');
+    : super('Avatar can only be changed once every 7 days');
 
   /// The earliest DateTime the user may change their avatar again.
   final DateTime nextAllowedAt;

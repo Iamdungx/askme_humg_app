@@ -59,6 +59,8 @@ B2. Display ErrorState with retry button
 | `stream` query | `where('toUserId', isEqualTo: uid)`, `orderBy('createdAt', descending: true)` |
 | `delete` (optional) | Host can delete a question they don't want to answer |
 
+**Implementation note (2026-03):** `deleteQuestion` uses a batch write: delete the `questions` doc and set `isPublished: false` on every `answers` doc with matching `questionId`, so published feed cards disappear immediately when an answered question is removed from the inbox.
+
 > **Firestore Index required:** Composite index on `questions(toUserId ASC, createdAt DESC)`
 
 ---

@@ -45,11 +45,13 @@ class _VerifyHumgScreenState extends ConsumerState<VerifyHumgScreen> {
 
   void _onResend() {
     final user = ref.read(authStateProvider).asData?.value;
-    ref.read(generateOtpProvider.notifier).send(
-      email: _sentEmail,
-      uid: user?.uid ?? '',
-      recipientName: user?.displayName,
-    );
+    ref
+        .read(generateOtpProvider.notifier)
+        .send(
+          email: _sentEmail,
+          uid: user?.uid ?? '',
+          recipientName: user?.displayName,
+        );
   }
 
   void _onBack() {

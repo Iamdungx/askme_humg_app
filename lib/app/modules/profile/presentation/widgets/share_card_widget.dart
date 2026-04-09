@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -40,6 +42,7 @@ class ShareCardWidget extends ConsumerStatefulWidget {
 class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
   final _cardKey = GlobalKey();
   bool _isSharing = false;
+  bool _isSaving = false;
 
   Future<void> _copyLink(BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: widget.deepLink));
@@ -69,6 +72,58 @@ class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
       );
     } finally {
       if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  Future<File?> _captureCardFile() async {
+    final boundary =
+        _cardKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return null;
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) return null;
+    final bytes = byteData.buffer.asUint8List();
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/askme_profile_card.png');
+    await file.writeAsBytes(bytes);
+    return file;
+  }
+
+  Future<void> _saveImage(BuildContext context) async {
+    if (_isSharing || _isSaving) return;
+    setState(() => _isSaving = true);
+    final l10n = AppLocalizations.of(context);
+    try {
+      if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.editProfilePickerUnavailable)),
+        );
+        return;
+      }
+      final file = await _captureCardFile();
+      if (file == null || !context.mounted) return;
+      await Gal.putImage(file.path);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.shareCardImageSaved)));
+    } on GalException catch (e) {
+      if (!context.mounted) return;
+      final message = e.type == GalExceptionType.accessDenied
+          ? l10n.editProfilePickerPermissionDenied
+          : l10n.commonError;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } on MissingPluginException {
+      if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.editProfilePickerUnavailable)),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -111,13 +166,14 @@ class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: ShareCardStyle.values
-                  .map((s) => _StyleChip(
-                        style: s,
-                        isSelected: style == s,
-                        onTap: () => ref
-                            .read(shareCardStyleProvider.notifier)
-                            .setStyle(s),
-                      ))
+                  .map(
+                    (s) => _StyleChip(
+                      style: s,
+                      isSelected: style == s,
+                      onTap: () =>
+                          ref.read(shareCardStyleProvider.notifier).setStyle(s),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -128,9 +184,9 @@ class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  icon: const Icon(LucideIcons.link2, size: 18),
-                  label: Text(l10n.profileShareLink),
-                  onPressed: () => _copyLink(context),
+                  icon: const Icon(LucideIcons.download, size: 18),
+                  label: Text(l10n.commonSave),
+                  onPressed: () => _saveImage(context),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 48),
                     side: BorderSide(color: cs.outline),
@@ -148,9 +204,15 @@ class _ShareCardWidgetState extends ConsumerState<ShareCardWidget> {
                     size: 18,
                     color: cs.onPrimary,
                   ),
-                  isLoading: _isSharing,
+                  isLoading: _isSharing || _isSaving,
                   onPressed: () => _shareImage(context),
                 ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton(
+                tooltip: l10n.commonCopyLink,
+                onPressed: () => _copyLink(context),
+                icon: const Icon(LucideIcons.link2, size: 18),
               ),
             ],
           ),
@@ -180,6 +242,7 @@ class _ShareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
 
     return AspectRatio(
       aspectRatio: 4 / 5,
@@ -250,12 +313,17 @@ class _ShareCard extends StatelessWidget {
 
                   // App pill badge
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: style.pillBgColor,
                       borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: style.pillBorderColor, width: 1),
+                      border: Border.all(
+                        color: style.pillBorderColor,
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       '${l10n.appBrandName} ${l10n.appBrandSuffix}',
@@ -286,11 +354,11 @@ class _ShareCard extends StatelessWidget {
                   // ── Center: big QR code ───────────────────────────────────
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cs.surface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
+                          color: cs.shadow.withValues(alpha: 0.25),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -301,14 +369,14 @@ class _ShareCard extends StatelessWidget {
                       data: deepLink,
                       version: QrVersions.auto,
                       size: 140,
-                      backgroundColor: Colors.white,
-                      eyeStyle: const QrEyeStyle(
+                      backgroundColor: cs.surface,
+                      eyeStyle: QrEyeStyle(
                         eyeShape: QrEyeShape.square,
-                        color: Color(0xFF000000),
+                        color: cs.onSurface,
                       ),
-                      dataModuleStyle: const QrDataModuleStyle(
+                      dataModuleStyle: QrDataModuleStyle(
                         dataModuleShape: QrDataModuleShape.square,
-                        color: Color(0xFF000000),
+                        color: cs.onSurface,
                       ),
                     ),
                   ),
@@ -319,8 +387,11 @@ class _ShareCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(LucideIcons.messageCircle,
-                          size: 13, color: style.accentTextColor),
+                      Icon(
+                        LucideIcons.messageCircle,
+                        size: 13,
+                        color: style.accentTextColor,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${l10n.appBrandName} ${l10n.appBrandSuffix}',
@@ -393,8 +464,7 @@ class _StyleChip extends StatelessWidget {
                 style.assetPath,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => DecoratedBox(
-                  decoration:
-                      BoxDecoration(gradient: style.fallbackGradient),
+                  decoration: BoxDecoration(gradient: style.fallbackGradient),
                 ),
               ),
 
@@ -426,8 +496,11 @@ class _StyleChip extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 8,
                     backgroundColor: Colors.white,
-                    child: Icon(LucideIcons.check,
-                        size: 10, color: Colors.black87),
+                    child: Icon(
+                      LucideIcons.check,
+                      size: 10,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
             ],

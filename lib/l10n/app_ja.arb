@@ -111,12 +111,14 @@
   "@profileLinkCopied": { "description": "プロフィールリンクコピー後のスナックバー" },
   "profileShareCardTitle": "何でも聞いてください！",
   "@profileShareCardTitle": { "description": "シェア用プロフィールカード画像のタイトル" },
-  "profileShareCardTagline": "聞いてみて 👀\n誰が送ったかわからないから安心して",
+  "profileShareCardTagline": "何でも聞いてね 👀\n匿名で質問できます",
   "@profileShareCardTagline": { "description": "シェアカードの好奇心を刺激するタグライン" },
   "profileShareCardStyleLabel": "スタイル変更",
   "@profileShareCardStyleLabel": { "description": "シェアカードのスタイル選択ボタンラベル" },
   "profileShareCardStyleApply": "適用",
   "@profileShareCardStyleApply": { "description": "シェアカードスタイルピッカーの確定ボタン" },
+  "shareCardImageSaved": "画像をギャラリーに保存しました",
+  "@shareCardImageSaved": { "description": "シェアカード画像を端末のフォトライブラリに保存した後のスナックバー" },
   "profileTitle": "プロフィール",
   "@profileTitle": { "description": "プロフィール画面のAppBarタイトル" },
   "profileYourLink": "あなたのプロフィールリンク",
@@ -137,6 +139,20 @@
   "@profileStatAnswers": { "description": "回答数の統計ラベル" },
   "profileStatLikes": "いいね",
   "@profileStatLikes": { "description": "総いいね数の統計ラベル" },
+  "profileScanQrTooltip": "プロフィールQRをスキャン",
+  "@profileScanQrTooltip": { "description": "アプリ内QRスキャナーを開くAppBarボタンのツールチップ" },
+  "profileScanQrTitle": "QRをスキャン",
+  "@profileScanQrTitle": { "description": "プロフィールQRスキャン画面のAppBarタイトル" },
+  "profileScanQrHint": "このアプリのプロフィールQRコードにカメラを向けてください。",
+  "@profileScanQrHint": { "description": "プロフィールQRスキャン画面の説明文" },
+  "profileScanQrInvalid": "このQRコードは有効なプロフィールリンクではありません。",
+  "@profileScanQrInvalid": { "description": "スキャンしたQRがプロフィールのディープリンクでないときのスナックバー" },
+  "profileScanQrUnsupportedPlatform": "このプラットフォームではQRスキャンに対応していません。スマートフォンまたはタブレットのアプリを使うか、ブラウザでプロフィールリンクを開いてください。",
+  "@profileScanQrUnsupportedPlatform": { "description": "mobile_scannerが未対応のプラットフォーム（例: Windows/Linuxデスクトップ）向けメッセージ" },
+  "profileScanQrImportImage": "画像を読み込む",
+  "@profileScanQrImportImage": { "description": "プロフィールQRスキャン画面のギャラリーから画像を選ぶボタン" },
+  "profileScanQrFlashTooltip": "ライトを切り替え",
+  "@profileScanQrFlashTooltip": { "description": "プロフィールQRスキャン画面のライトボタンのアクセシビリティラベル" },
 
   "inboxTitle": "受信箱",
   "@inboxTitle": { "description": "受信箱画面のAppBarタイトル" },
@@ -222,8 +238,26 @@
   "@feedLoadMore": { "description": "もっと読むボタン（現在未使用 — スクロールで自動読み込み）" },
   "feedErrorLoad": "フィードの読み込みに失敗しました。再試行しますか？",
   "@feedErrorLoad": { "description": "フィード画面のエラー状態メッセージ" },
+  "feedAnswerNotFound": "この投稿は表示できません",
+  "@feedAnswerNotFound": { "description": "回答のディープリンクが存在しない／未公開の投稿を指している場合の空状態メッセージ" },
   "feedReachedEnd": "すべての投稿を見ました",
   "@feedReachedEnd": { "description": "全フィードアイテム読み込み完了時のフッターメッセージ" },
+  "feedTopicAll": "すべてのトピック",
+  "@feedTopicAll": { "description": "フィードで全トピック表示に切り替えるフィルターチップラベル" },
+  "feedTopicStudy": "学習",
+  "@feedTopicStudy": { "description": "学習関連投稿向けのメイントピックチップラベル" },
+  "feedTopicLife": "学生生活",
+  "@feedTopicLife": { "description": "学生生活関連投稿向けのメイントピックチップラベル" },
+  "feedTopicMajor": "専攻",
+  "@feedTopicMajor": { "description": "専攻・進路関連投稿向けのメイントピックチップラベル" },
+  "feedTopicStudent": "学生",
+  "@feedTopicStudent": { "description": "学生イベント・活動関連投稿向けのメイントピックチップラベル" },
+  "feedTopicOther": "その他",
+  "@feedTopicOther": { "description": "未分類投稿向けのメイントピックチップラベル" },
+  "commonCopyLink": "リンクをコピー",
+  "@commonCopyLink": { "description": "リンクをクリップボードにコピーする汎用ボタンラベル" },
+  "feedShareAnswerPill": "この回答をシェア",
+  "@feedShareAnswerPill": { "description": "回答シェアカード画像の小さなピルラベル" },
 
   "loginRequiredToLike": "この回答にいいねするにはサインインしてください",
   "@loginRequiredToLike": { "description": "未認証ユーザーがいいねタップ時のスナックバー" },
@@ -290,6 +324,8 @@
   "@reportSuccess": { "description": "報告送信成功後のスナックバー" },
   "loginRequiredToReport": "報告するにはサインインしてください",
   "@loginRequiredToReport": { "description": "未認証ユーザーがコンテンツを報告しようとした時のスナックバー" },
+  "reportAlreadyReported": "このコンテンツは既に報告済みです。",
+  "@reportAlreadyReported": { "description": "同じ対象への重複報告を試みたときのスナックバー（UC-5.1）" },
 
   "adminDashboardTitle": "管理ダッシュボード",
   "@adminDashboardTitle": { "description": "管理者ダッシュボード画面のAppBarタイトル" },
@@ -316,6 +352,27 @@
   "@adminActionDismiss": { "description": "報告を却下する管理者アクション" },
   "adminActionResolvedSuccess": "報告が解決されました",
   "@adminActionResolvedSuccess": { "description": "管理者が報告を解決した後のスナックバー" },
+  "adminReportTargetAnswer": "回答",
+  "@adminReportTargetAnswer": { "description": "フィードの回答が報告されたときのバッジラベル" },
+  "adminReportTargetComment": "コメント",
+  "@adminReportTargetComment": { "description": "コメントが報告されたときのバッジラベル" },
+  "adminReportTargetUser": "プロフィール",
+  "@adminReportTargetUser": { "description": "ユーザープロフィールが報告されたときのバッジラベル" },
+  "adminReportTargetUnknown": "報告",
+  "@adminReportTargetUnknown": { "description": "対象タイプが不明なときのバッジラベル" },
+  "adminReportReporter": "報告者: {userId}",
+  "@adminReportReporter": {
+    "description": "報告を送信したユーザーのFirebase UID",
+    "placeholders": { "userId": { "type": "String" } }
+  },
+  "adminReportSnapshotMissing": "この報告にはテキストのスナップショットがありません。",
+  "@adminReportSnapshotMissing": { "description": "Firestoreでreport.contentが空のときに表示" },
+  "adminViewReportedContent": "アプリで表示",
+  "@adminViewReportedContent": { "description": "報告された回答・コメントの文脈・プロフィールをアプリ内で開く" },
+  "adminReportMissingParentAnswer": "この報告に回答へのリンクがありません。必要ならフィードで手動で探してください。",
+  "@adminReportMissingParentAnswer": { "description": "コメント報告でparentAnswerIdがないときのスナックバー" },
+  "adminReportOpenError": "この報告の対象を開けませんでした。",
+  "@adminReportOpenError": { "description": "報告対象のタイプを開けないときのスナックバー" },
 
   "navSettings": "設定",
   "@navSettings": { "description": "ボトムナビゲーションの設定タブラベル" },
@@ -372,6 +429,9 @@
   "@settingsTermsOfService": { "description": "設定項目: 利用規約ページへ移動" },
   "settingsPrivacyPolicy": "プライバシーポリシー",
   "@settingsPrivacyPolicy": { "description": "設定項目: プライバシーポリシーページへ移動" },
+
+  "settingsUserGuide": "使い方ガイド",
+  "@settingsUserGuide": { "description": "設定項目: オンボーディング/使い方ガイドを再表示" },
 
   "settingsSignOut": "サインアウト",
   "@settingsSignOut": { "description": "設定: サインアウトボタン" },
@@ -479,5 +539,112 @@
   "editProfilePickerUnavailable": "このデバイスでは画像ピッカーを使用できません。",
   "@editProfilePickerUnavailable": { "description": "iOSシミュレーターなどでカメラ/ギャラリーが使用できない場合のSnackbar" },
   "editProfilePickerPermissionDenied": "アクセスが拒否されました。設定からアクセスを許可してください。",
-  "@editProfilePickerPermissionDenied": { "description": "カメラまたはフォトライブラリのアクセス権限が永久に拒否された場合のSnackbar" }
+  "@editProfilePickerPermissionDenied": { "description": "カメラまたはフォトライブラリのアクセス権限が永久に拒否された場合のSnackbar" },
+
+  "onboardingSkip": "スキップ",
+  "@onboardingSkip": { "description": "オンボーディング: スキップボタン" },
+  "onboardingNext": "次へ",
+  "@onboardingNext": { "description": "オンボーディング: 次へボタン" },
+  "onboardingDone": "開始",
+  "@onboardingDone": { "description": "オンボーディング: 完了ボタン" },
+  "onboardingFootnote": "これらの設定は後からいつでも変更できます。",
+  "@onboardingFootnote": { "description": "オンボーディング下部の注記" },
+
+  "onboardingSlide1Title": "HUMG向け匿名Q&A",
+  "@onboardingSlide1Title": { "description": "オンボーディング スライド1 タイトル" },
+  "onboardingSlide1Body": "匿名で質問を受け取り、回答や公開はあなたが選べます。",
+  "@onboardingSlide1Body": { "description": "オンボーディング スライド1 本文" },
+  "onboardingSlide2Title": "リンクを共有して質問を受け取る",
+  "@onboardingSlide2Title": { "description": "オンボーディング スライド2 タイトル" },
+  "onboardingSlide2Body": "プロフィールリンクを共有。ログインなしで質問できます。",
+  "@onboardingSlide2Body": { "description": "オンボーディング スライド2 本文" },
+  "onboardingSlide3Title": "認証で安全な交流",
+  "@onboardingSlide3Title": { "description": "オンボーディング スライド3 タイトル" },
+  "onboardingSlide3Body": "HUMG認証で「いいね」とコメントが解放され、信頼できる場になります。",
+  "@onboardingSlide3Body": { "description": "オンボーディング スライド3 本文" },
+
+  "onboardingHintFeedTitle": "フィードをチェック",
+  "@onboardingHintFeedTitle": { "description": "初回ヒント: フィードのタイトル" },
+  "onboardingHintFeedBody": "公開された回答を閲覧できます。いいね/コメントにはHUMG認証が必要です。",
+  "@onboardingHintFeedBody": { "description": "初回ヒント: フィードの本文" },
+  "onboardingHintInboxTitle": "受信箱",
+  "@onboardingHintInboxTitle": { "description": "初回ヒント: 受信箱のタイトル" },
+  "onboardingHintInboxBody": "あなた宛の質問がここに届きます。返信してフィードに公開できます。",
+  "@onboardingHintInboxBody": { "description": "初回ヒント: 受信箱の本文" },
+  "onboardingHintProfileTitle": "プロフィールを共有",
+  "@onboardingHintProfileTitle": { "description": "初回ヒント: プロフィールのタイトル" },
+  "onboardingHintProfileBody": "共有からリンクをコピーして、匿名の質問を受け取れます。",
+  "@onboardingHintProfileBody": { "description": "初回ヒント: プロフィールの本文" },
+  "onboardingHintSettingsTitle": "通知と認証",
+  "@onboardingHintSettingsTitle": { "description": "初回ヒント: 設定のタイトル" },
+  "onboardingHintSettingsBody": "通知を有効にし、HUMG認証でホスト機能を解放します。",
+  "@onboardingHintSettingsBody": { "description": "初回ヒント: 設定の本文" }
+
+  ,"commonCopy": "コピー"
+  ,"@commonCopy": { "description": "プレーンテキストをクリップボードにコピーする汎用ボタンラベル" }
+  ,"commonClose": "閉じる"
+  ,"@commonClose": { "description": "ダイアログやオーバーレイを閉じる汎用ボタンラベル" }
+  ,"settingsTrackQuestion": "質問追跡"
+  ,"@settingsTrackQuestion": { "description": "匿名質問の追跡画面を開く設定項目ラベル" }
+  ,"settingsTrackQuestionSubtitle": "英数字6文字のコードで回答状況を確認"
+  ,"@settingsTrackQuestionSubtitle": { "description": "手動コード入力による質問追跡の設定項目サブタイトル" }
+  ,"questionTrackingCodeDialogTitle": "あなたの追跡コード"
+  ,"@questionTrackingCodeDialogTitle": { "description": "匿名質問送信成功後の追跡コードダイアログのタイトル" }
+  ,"questionTrackingCodeDescription": "ログインなしで後からこの匿名質問の状態を確認できる唯一の方法です。英数字6文字のコードをコピーし、安全な場所に保存してください。"
+  ,"@questionTrackingCodeDescription": { "description": "匿名質問送信成功後に表示する追跡コード説明テキスト" }
+  ,"questionTrackingCodeCopyPrimary": "コードをコピー"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "送信成功ダイアログで追跡コードをコピーする主ボタンのラベル" }
+  ,"questionTrackingCodeCopyRequiredHint": "閉じる前にコードをコピーしてください。"
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "コピー前にダイアログを閉じようとしたときのヒントとスナックバー" }
+  ,"questionTrackingCodeCopied": "追跡コードをコピーしました"
+  ,"@questionTrackingCodeCopied": { "description": "送信成功ダイアログで追跡コードをコピーした後のスナックバー" }
+  ,"questionTrackingCodeTrackNow": "今すぐ確認"
+  ,"@questionTrackingCodeTrackNow": { "description": "追跡画面をすぐ開くためのダイアログアクションボタン" }
+  ,"trackQuestionTitle": "質問を追跡"
+  ,"@trackQuestionTitle": { "description": "匿名質問追跡画面のAppBarタイトル" }
+  ,"trackQuestionDescription": "英数字6文字の追跡コードを入力して、匿名質問が回答されたか確認できます。"
+  ,"@trackQuestionDescription": { "description": "質問追跡画面上部の説明文" }
+  ,"trackQuestionInputLabel": "追跡コード"
+  ,"@trackQuestionInputLabel": { "description": "追跡コード入力欄のラベル" }
+  ,"trackQuestionInputHint": "英数字6文字コード"
+  ,"@trackQuestionInputHint": { "description": "追跡コード入力欄のプレースホルダー" }
+  ,"trackQuestionLookupButton": "状態を確認"
+  ,"@trackQuestionLookupButton": { "description": "追跡コード照会を送信する主ボタンのラベル" }
+  ,"trackQuestionErrorInvalidCode": "追跡コードが無効です。"
+  ,"@trackQuestionErrorInvalidCode": { "description": "サーバー応答で追跡コード形式が無効な場合のエラーメッセージ" }
+  ,"trackQuestionErrorNotFound": "このコードの質問は見つかりませんでした。"
+  ,"@trackQuestionErrorNotFound": { "description": "入力コードに対応する質問が存在しない場合のエラーメッセージ" }
+  ,"trackQuestionErrorTooManyRequests": "照会回数が多すぎます。しばらくしてから再試行してください。"
+  ,"@trackQuestionErrorTooManyRequests": { "description": "追跡照会エンドポイントがレート制限された場合のエラーメッセージ" }
+  ,"trackQuestionErrorEmpty": "追跡コードを入力してください。"
+  ,"@trackQuestionErrorEmpty": { "description": "追跡コード入力が空の場合のクライアントバリデーションエラー" }
+  ,"trackQuestionErrorCodeLength": "追跡コードは6文字で入力してください。"
+  ,"@trackQuestionErrorCodeLength": { "description": "追跡コードの桁数が6ではない場合のクライアントバリデーションエラー" }
+  ,"trackQuestionErrorCodeFormat": "追跡コードは英数字のみで入力してください。"
+  ,"@trackQuestionErrorCodeFormat": { "description": "追跡コードに英数字以外が含まれる場合のクライアントバリデーションエラー" }
+  ,"trackQuestionStatusAnswered": "回答済み"
+  ,"@trackQuestionStatusAnswered": { "description": "匿名質問が回答済みの場合のステータスラベル" }
+  ,"trackQuestionStatusUnanswered": "回答待ち"
+  ,"@trackQuestionStatusUnanswered": { "description": "匿名質問が未回答の場合のステータスラベル" }
+  ,"trackQuestionCreatedAt": "{timeAgo}に質問"
+  ,"@trackQuestionCreatedAt": {
+    "description": "匿名質問の送信時刻を示す相対時間ラベル",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnsweredAt": "{timeAgo}に回答"
+  ,"@trackQuestionAnsweredAt": {
+    "description": "匿名質問の回答時刻を示す相対時間ラベル",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnswerNotPublished": "ホストは回答しましたが、まだ公開されていません。"
+  ,"@trackQuestionAnswerNotPublished": { "description": "回答は存在するがフィードに公開されていない場合の案内文" }
+  ,"trackQuestionOpenAnswer": "回答を開く"
+  ,"@trackQuestionOpenAnswer": { "description": "追跡画面から公開済み回答詳細を開くボタンラベル" }
+
+  ,"adminEntryTitle": "管理ダッシュボード"
+  ,"@adminEntryTitle": { "description": "管理者向けにプロフィールタブに表示する管理画面エントリーバナーのタイトル" }
+  ,"adminEntrySubtitle": "保留中のコンテンツ報告を確認して対応します。"
+  ,"@adminEntrySubtitle": { "description": "管理者向けエントリーバナーのサブタイトル（対応すべき内容の説明）" }
+  ,"adminEntryButton": "開く"
+  ,"@adminEntryButton": { "description": "管理者を /admin に遷移させるボタンのラベル" }
 }

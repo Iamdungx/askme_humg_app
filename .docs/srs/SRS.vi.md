@@ -1,6 +1,6 @@
 # AskmeHUMG – Đặc Tả Yêu Cầu Phần Mềm (SRS)
 
-> **Phiên bản:** 2.1 | **Cập nhật lần cuối:** 01-03-2026
+> **Phiên bản:** 2.2 | **Cập nhật lần cuối:** 23-03-2026
 
 ---
 
@@ -51,6 +51,9 @@ Hệ thống được thiết kế **chỉ dành cho sinh viên nội bộ HUMG*
 | Người gửi ẩn danh | Người dùng gửi câu hỏi mà không tiết lộ danh tính |
 | Host (Người chủ) | Sinh viên đã đăng nhập bằng tài khoản `@humg.edu.vn`, nhận và trả lời câu hỏi |
 | Feed (Bảng tin) | Danh sách công khai các câu hỏi đã được trả lời và công bố |
+| Sắp xếp theo thời gian (chronological) | Thứ tự theo `createdAt` giảm dần — dùng làm **fallback** khi truy vấn xu hướng gặp lỗi chỉ mục hoặc tạm thời không dùng được |
+| Xếp hạng xu hướng (hot / trending) | Thứ tự **mặc định** trên Feed công khai: điểm denormalized `hotScore` (tương tác + suy giảm theo thời gian); tham chiếu nguyên lý tương tự Reddit “hot” |
+| Phân loại AI (feed) | Gán nhãn danh mục/tag cho câu trả lời đã xuất bản nhằm lọc chủ đề trên Feed (tùy cấu hình) |
 | Kiểm duyệt | Quá trình lọc hoặc gỡ bỏ nội dung không phù hợp |
 | Deep Link | Đường dẫn URL duy nhất mở thẳng vào trang hồ sơ của Host trong ứng dụng |
 | Rate Limiting | Cơ chế giới hạn số lượng yêu cầu mà một thiết bị có thể thực hiện trong một khung thời gian |
@@ -67,7 +70,7 @@ AskmeHUMG là ứng dụng di động độc lập sử dụng:
 - **Flutter** (Giao diện người dùng)
 - **Firebase** (Dịch vụ backend)
 
-Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời gian thực. Các yêu cầu gửi câu hỏi ẩn danh được bảo vệ bởi Firebase App Check nhằm ngăn chặn tấn công từ bot tự động.
+Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời gian thực. Gửi câu hỏi ẩn danh được giới hạn tốc độ và xác minh nguồn yêu cầu (mục tiêu: App Check và/hoặc API máy chủ — xem FR-01).
 
 ### 2.2 Các loại người dùng
 
@@ -99,8 +102,8 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 **Xử lý:**
 1. Kiểm tra độ dài và định dạng nội dung
 2. Lọc từ ngữ không phù hợp qua danh sách từ khóa cấm
-3. Xác minh tính hợp lệ của yêu cầu bằng **Firebase App Check** (chặn bot và các lời gọi từ emulator)
-4. Áp dụng **rate limiting**: tối đa **5 câu hỏi mỗi thiết bị mỗi giờ**, thực thi qua Cloud Functions
+3. Xác minh tính hợp lệ của yêu cầu (mục tiêu kiến trúc: **Firebase App Check** chặn bot/giả lập; triển khai có thể dùng HTTPS API máy chủ kèm kiểm soát tương đương)
+4. Áp dụng **rate limiting**: tối đa **5 câu hỏi mỗi thiết bị mỗi giờ** (thực thi phía máy chủ — Cloud Functions hoặc dịch vụ HTTP được triển khai)
 5. Lưu câu hỏi vào collection `questions`
 
 **Đầu ra:**
@@ -115,8 +118,8 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 **Mô tả:** Bất kỳ tài khoản Google nào cũng có thể đăng nhập vào ứng dụng. Các tính năng Host đầy đủ (nhận câu hỏi, trả lời, đăng lên Feed) yêu cầu xác minh danh tính HUMG bổ sung.
 
 **Mô hình xác thực hai tầng:**
-- **Tầng 1 — Đăng nhập Google:** Bất kỳ tài khoản Google nào đều có thể đăng nhập. Document `users` được tạo khi đăng nhập lần đầu. Người dùng có thể xem Feed và tương tác (thích, bình luận).
-- **Tầng 2 — Xác minh HUMG:** Để mở khóa tính năng Host, người dùng phải xác minh quyền sở hữu địa chỉ email `@humg.edu.vn`. Sau khi xác minh thành công, `isHumgVerified: true` và `humgEmail` được lưu vào document `users`.
+- **Tầng 1 — Đăng nhập Google:** Bất kỳ tài khoản Google nào đều có thể đăng nhập. Document `users` được tạo khi đăng nhập lần đầu. Người dùng có thể **xem Feed** công khai. **Thích và bình luận** yêu cầu **Tầng 2** (`isHumgVerified == true`).
+- **Tầng 2 — Xác minh HUMG:** Để mở khóa tính năng Host và **tương tác đầy đủ (thích, bình luận)** trên Feed, người dùng phải xác minh quyền sở hữu địa chỉ email `@humg.edu.vn`. Sau khi xác minh thành công, `isHumgVerified: true` và `humgEmail` được lưu vào document `users`.
 
 **Xử lý (Tầng 1):**
 1. Người dùng khởi tạo đăng nhập bằng Google
@@ -155,14 +158,24 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 ### FR-05: Bảng tin công khai
 
-**Mô tả:** Hiển thị tất cả câu trả lời đã được công bố từ các sinh viên.
+**Mô tả:** Hiển thị các câu trả lời đã được công bố (`isPublished == true`) từ các Host.
 
-**Hiển thị:**
-- Tên & ảnh đại diện của Host
+**Hiển thị (mỗi mục):**
+- Tên & ảnh đại diện của Host (badge xác minh HUMG khi áp dụng)
 - Nội dung câu hỏi
 - Nội dung câu trả lời
 - Số lượt thích
 - Số lượng bình luận
+- (Tùy cấu hình) Nhãn phân loại AI: danh mục và/hoặc tag gợi ý chủ đề
+
+**Sắp xếp và lọc — triển khai hiện tại:**
+- **Mặc định (xu hướng):** Truy vấn **`hotScore` giảm dần** trên các câu trả lời `isPublished == true`. Trường `hotScore` là điểm denormalized (kết hợp tương tác và suy giảm theo thời gian từ `createdAt`), cập nhật khi thích / bình luận / xuất bản (xem tài liệu kỹ thuật và `firestore.indexes.json`).
+- **Dự phòng:** Nếu chỉ mục composite cho `hotScore` chưa sẵn sàng hoặc truy vấn thất bại, ứng dụng có thể tạm dùng **`createdAt` giảm dần** để người dùng vẫn xem được bảng tin.
+- **Phân trang:** Cursor-based (`limit` cố định, `startAfterDocument`), không trùng mục khi tải thêm.
+- **Lọc chủ đề (tùy chọn):** Khi người dùng chọn danh mục hoặc tag, truy vấn bổ sung điều kiện trên `aiCategory` và/hoặc `aiTagIds` — cần chỉ mục Firestore tương ứng.
+- **Giao diện:** Một luồng feed mặc định xu hướng; **không** có chuyển tab “Mới nhất / Xu hướng” trên màn Feed chính.
+
+**Ghi chú:** Sắp xếp thuần **`createdAt`** vẫn được dùng ở các màn hợp lệ khác (ví dụ “câu trả lời gần đây” trên hồ sơ người dùng).
 
 ---
 
@@ -274,7 +287,8 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | **Firebase Authentication** | Đăng nhập và xác thực danh tính |
 | **Cloud Firestore** | Cơ sở dữ liệu NoSQL thời gian thực |
 | **Firebase Storage** | Lưu trữ ảnh đại diện và media |
-| **Cloud Functions** | Rate limiting cho gửi ẩn danh, gửi OTP (Resend API), kiểm duyệt nội dung phía server |
+| **Cloud Functions** | (Tùy triển khai) Rate limiting, kiểm duyệt nội dung phía server; gửi ẩn danh có thể qua HTTP API riêng |
+| **Dịch vụ HTTP (ví dụ Vercel)** | Endpoint gửi câu hỏi ẩn danh / phân loại AI khi được cấu hình |
 | **Firebase App Check** | Xác thực phiên bản ứng dụng hợp lệ cho các endpoint ẩn danh |
 | **Package `app_links`** | Xử lý deep link `askme-humg-app.web.app/user/{userId}` — thay thế Firebase Dynamic Links đã bị deprecated |
 
@@ -335,8 +349,13 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 | `likedBy` | Array\<String\> | Danh sách `userId` đã thích – đảm bảo quy tắc một lượt thích mỗi người |
 | `commentCount` | Number | Tổng số bình luận (bộ đệm denormalized để hiển thị nhanh) |
 | `isPublished` | Boolean | Câu trả lời có được hiển thị công khai trên Feed không |
+| `aiCategory` | String (nullable) | Danh mục chính do phân loại AI gán (khi bật tính năng) |
+| `aiTags` | Array\<String\> | Danh sách nhãn tag hiển thị (tùy pipeline AI) |
+| `aiTagIds` | Array\<String\> | ID tag để lọc `array-contains` trên Feed |
+| `aiClassificationStatus` | String (nullable) | Trạng thái pipeline phân loại (ví dụ `done`, `failed`, `pending`) |
+| `hotScore` | Number (nullable) | Điểm xếp hạng xu hướng denormalized cho **`orderBy` mặc định** trên Feed công khai (FR-05); cập nhật khi thích / bình luận / xuất bản |
 
-> **Ghi chú thiết kế:** Cả `likeCount` và `commentCount` đều là bộ đệm denormalized được cập nhật nguyên tử qua `FieldValue.increment()`. Với lượt thích, mảng `likedBy` được cập nhật trong cùng thao tác. Cách này tránh việc đọc sub-collection để lấy số đếm mỗi khi render item trên Feed. Cả hai cập nhật đều dùng `WriteBatch` để đảm bảo tính nguyên tử.
+> **Ghi chú thiết kế:** `likeCount` đồng bộ với độ dài `likedBy` (transaction); `commentCount` cập nhật trong transaction cùng bình luận. Phân loại AI và `hotScore` phục vụ UC-4.1 (lọc chủ đề + feed xu hướng).
 
 ### Collection: `comments` (Bình luận)
 
@@ -364,7 +383,7 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 ### Collection: `otpRequests` (Yêu cầu OTP)
 
-Được quản lý hoàn toàn bởi Cloud Functions. Client không có quyền đọc/ghi trực tiếp.
+Theo UC-1.3: client sinh OTP, băm SHA-256, ghi vào `otpRequests/{uid}`; gửi email qua Gmail SMTP (`mailer`). Xác thực thành công cập nhật `users` và xóa yêu cầu OTP.
 
 | Trường | Kiểu dữ liệu | Mô tả |
 |---|---|---|
@@ -395,6 +414,7 @@ Hệ thống theo mô hình **client-server** với cơ sở dữ liệu thời 
 
 ### Phiên bản 3+ (Định hướng dài hạn)
 
+- **Feed — tùy chọn nâng cao:** ví dụ chế độ “chỉ mới nhất” tách biệt trên UI nếu sau này có nhu cầu sản phẩm (hiện mặc định một chế độ xu hướng)
 - Gợi ý câu trả lời bằng AI (tích hợp LLM API)
 - Bảng phân tích thống kê câu hỏi phổ biến và xu hướng nổi bật
 - Phân tích xu hướng theo khoa/bộ môn

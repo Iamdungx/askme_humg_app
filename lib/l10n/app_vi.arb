@@ -113,12 +113,14 @@
   "@profileLinkCopied": { "description": "Thông báo đã copy link profile" },
   "profileShareCardTitle": "Hãy hỏi tôi bất cứ điều gì!",
   "@profileShareCardTitle": { "description": "Tiêu đề thẻ chia sẻ profile" },
-  "profileShareCardTagline": "Hỏi tui đi 👀\nKhông biết ai đâu mà lo",
+  "profileShareCardTagline": "Hãy hỏi tôi bất cứ điều gì 👀\nBạn có thể hỏi ẩn danh",
   "@profileShareCardTagline": { "description": "Tagline kích thích tò mò trên thẻ chia sẻ profile" },
   "profileShareCardStyleLabel": "Đổi style",
   "@profileShareCardStyleLabel": { "description": "Nhãn nút mở style picker trên share card" },
   "profileShareCardStyleApply": "Áp dụng",
   "@profileShareCardStyleApply": { "description": "Nút xác nhận chọn style trên share card picker" },
+  "shareCardImageSaved": "Đã lưu ảnh vào thư viện",
+  "@shareCardImageSaved": { "description": "Snackbar sau khi lưu ảnh share card vào thư viện ảnh trên máy" },
   "profileTitle": "Hồ sơ",
   "@profileTitle": { "description": "Tiêu đề AppBar màn profile" },
   "profileYourLink": "Link hồ sơ của bạn",
@@ -216,8 +218,26 @@
   "@feedLoadMore": { "description": "Nút tải thêm bài trong feed" },
   "feedErrorLoad": "Không tải được feed. Thử lại?",
   "@feedErrorLoad": { "description": "Lỗi tải feed" },
+  "feedAnswerNotFound": "Bài viết không tồn tại hoặc đã bị ẩn",
+  "@feedAnswerNotFound": { "description": "Trạng thái khi mở link bài trả lời nhưng bài không tồn tại hoặc chưa được công khai" },
   "feedReachedEnd": "Bạn đã xem hết bài đăng",
   "@feedReachedEnd": { "description": "Thông báo cuối danh sách feed" },
+  "feedTopicAll": "Tất cả chủ đề",
+  "@feedTopicAll": { "description": "Nhãn chip lọc để hiển thị tất cả chủ đề trên feed" },
+  "feedTopicStudy": "Học Tập",
+  "@feedTopicStudy": { "description": "Nhãn chip chủ đề chính cho bài viết liên quan học tập" },
+  "feedTopicLife": "Đời Sống",
+  "@feedTopicLife": { "description": "Nhãn chip chủ đề chính cho bài viết đời sống sinh viên" },
+  "feedTopicMajor": "Chuyên Ngành",
+  "@feedTopicMajor": { "description": "Nhãn chip chủ đề chính cho bài viết chuyên ngành/nghề nghiệp" },
+  "feedTopicStudent": "Sinh Viên",
+  "@feedTopicStudent": { "description": "Nhãn chip chủ đề chính cho bài viết hoạt động/sự kiện sinh viên" },
+  "feedTopicOther": "Khác",
+  "@feedTopicOther": { "description": "Nhãn chip chủ đề chính cho bài viết chưa phân nhóm cụ thể" },
+  "commonCopyLink": "Sao chép link",
+  "@commonCopyLink": { "description": "Nút sao chép đường link vào clipboard" },
+  "feedShareAnswerPill": "CHIA SẺ CÂU TRẢ LỜI",
+  "@feedShareAnswerPill": { "description": "Nhãn pill nhỏ trên ảnh share bài trả lời" },
 
   "loginRequiredToLike": "Đăng nhập để thích câu trả lời này",
   "@loginRequiredToLike": { "description": "Snackbar khi khách thích bài" },
@@ -284,6 +304,8 @@
   "@reportSuccess": { "description": "Thông báo gửi báo cáo thành công" },
   "loginRequiredToReport": "Đăng nhập để báo cáo",
   "@loginRequiredToReport": { "description": "Snackbar khi khách cố báo cáo nội dung" },
+  "reportAlreadyReported": "Bạn đã báo cáo nội dung này rồi.",
+  "@reportAlreadyReported": { "description": "Snackbar khi người dùng báo cáo trùng cùng mục tiêu (UC-5.1)" },
 
   "adminDashboardTitle": "Admin Dashboard",
   "@adminDashboardTitle": { "description": "Tiêu đề màn admin" },
@@ -310,6 +332,27 @@
   "@adminActionDismiss": { "description": "Hành động bỏ qua báo cáo" },
   "adminActionResolvedSuccess": "Đã xử lý báo cáo",
   "@adminActionResolvedSuccess": { "description": "Thông báo xử lý báo cáo thành công" },
+  "adminReportTargetAnswer": "Câu trả lời",
+  "@adminReportTargetAnswer": { "description": "Nhãn badge khi báo cáo bài trả lời trên feed" },
+  "adminReportTargetComment": "Bình luận",
+  "@adminReportTargetComment": { "description": "Nhãn badge khi báo cáo bình luận" },
+  "adminReportTargetUser": "Hồ sơ",
+  "@adminReportTargetUser": { "description": "Nhãn badge khi báo cáo hồ sơ người dùng" },
+  "adminReportTargetUnknown": "Báo cáo",
+  "@adminReportTargetUnknown": { "description": "Nhãn badge khi loại mục tiêu không xác định" },
+  "adminReportReporter": "Người báo cáo: {userId}",
+  "@adminReportReporter": {
+    "description": "Hiển thị uid Firebase của người gửi báo cáo",
+    "placeholders": { "userId": { "type": "String" } }
+  },
+  "adminReportSnapshotMissing": "Báo cáo này không có bản chụp nội dung văn bản.",
+  "@adminReportSnapshotMissing": { "description": "Hiển thị khi report.content rỗng trên Firestore" },
+  "adminViewReportedContent": "Xem trong ứng dụng",
+  "@adminViewReportedContent": { "description": "Mở câu trả lời, ngữ cảnh bình luận hoặc hồ sơ được báo cáo" },
+  "adminReportMissingParentAnswer": "Báo cáo thiếu liên kết tới bài trả lời. Hãy tìm nội dung trên bảng tin nếu cần.",
+  "@adminReportMissingParentAnswer": { "description": "Snackbar khi báo cáo bình luận thiếu parentAnswerId" },
+  "adminReportOpenError": "Không mở được mục tiêu của báo cáo này.",
+  "@adminReportOpenError": { "description": "Snackbar khi không thể mở loại mục tiêu báo cáo" },
 
   "navSettings": "Cài đặt",
   "@navSettings": { "description": "Nhãn tab điều hướng dưới - cài đặt" },
@@ -367,6 +410,9 @@
   "settingsPrivacyPolicy": "Chính sách bảo mật",
   "@settingsPrivacyPolicy": { "description": "Mục cài đặt: chuyển đến trang chính sách bảo mật" },
 
+  "settingsUserGuide": "Hướng dẫn sử dụng",
+  "@settingsUserGuide": { "description": "Mục cài đặt: mở lại hướng dẫn/onboarding" },
+
   "settingsSignOut": "Đăng xuất",
   "@settingsSignOut": { "description": "Cài đặt: nút đăng xuất" },
   "settingsSignOutConfirm": "Bạn có chắc muốn đăng xuất không?",
@@ -423,6 +469,20 @@
   "@profileStatAnswers": { "description": "Nhãn thống kê số câu trả lời" },
   "profileStatLikes": "Lượt thích",
   "@profileStatLikes": { "description": "Nhãn thống kê tổng lượt thích" },
+  "profileScanQrTooltip": "Quét mã QR hồ sơ",
+  "@profileScanQrTooltip": { "description": "Tooltip nút mở màn quét QR trong app" },
+  "profileScanQrTitle": "Quét QR",
+  "@profileScanQrTitle": { "description": "Tiêu đề AppBar màn quét QR hồ sơ" },
+  "profileScanQrHint": "Hướng camera vào mã QR hồ sơ (cùng ứng dụng).",
+  "@profileScanQrHint": { "description": "Hướng dẫn trên màn quét QR hồ sơ" },
+  "profileScanQrInvalid": "Mã QR không phải liên kết hồ sơ hợp lệ.",
+  "@profileScanQrInvalid": { "description": "Snackbar khi QR không phải deep link profile" },
+  "profileScanQrUnsupportedPlatform": "Không thể quét QR trên nền tảng này. Hãy dùng app trên điện thoại/máy tính bảng, hoặc mở liên kết hồ sơ trên trình duyệt.",
+  "@profileScanQrUnsupportedPlatform": { "description": "Thông báo khi không có plugin quét QR (ví dụ Windows/Linux desktop)" },
+  "profileScanQrImportImage": "Nhập ảnh",
+  "@profileScanQrImportImage": { "description": "Nút chọn ảnh có QR từ thư viện trên màn quét QR hồ sơ" },
+  "profileScanQrFlashTooltip": "Bật/tắt đèn flash",
+  "@profileScanQrFlashTooltip": { "description": "Nhãn hỗ trợ tiếp cận cho nút đèn flash trên màn quét QR hồ sơ" },
   "settingsTagline": "Được phát triển bởi Sinh viên Mỏ & Địa chất",
   "@settingsTagline": { "description": "Tagline hiển thị ở cuối màn hình Cài đặt" },
   "feedAnonymousAsked": "hỏi:",
@@ -482,5 +542,112 @@
   "editProfilePickerUnavailable": "Trình chọn ảnh không khả dụng trên thiết bị này.",
   "@editProfilePickerUnavailable": { "description": "Snackbar khi camera/gallery không khả dụng (vd: iOS Simulator)" },
   "editProfilePickerPermissionDenied": "Quyền truy cập bị từ chối. Vui lòng cho phép trong Cài đặt.",
-  "@editProfilePickerPermissionDenied": { "description": "Snackbar khi quyền camera hoặc thư viện ảnh bị từ chối vĩnh viễn" }
+  "@editProfilePickerPermissionDenied": { "description": "Snackbar khi quyền camera hoặc thư viện ảnh bị từ chối vĩnh viễn" },
+
+  "onboardingSkip": "Bỏ qua",
+  "@onboardingSkip": { "description": "Nút onboarding: bỏ qua intro" },
+  "onboardingNext": "Tiếp",
+  "@onboardingNext": { "description": "Nút onboarding: chuyển sang slide tiếp theo" },
+  "onboardingDone": "Bắt đầu",
+  "@onboardingDone": { "description": "Nút onboarding: hoàn tất intro" },
+  "onboardingFootnote": "Bạn có thể thay đổi các cài đặt này bất cứ lúc nào.",
+  "@onboardingFootnote": { "description": "Ghi chú nhỏ dưới onboarding" },
+
+  "onboardingSlide1Title": "Hỏi đáp ẩn danh cho HUMG",
+  "@onboardingSlide1Title": { "description": "Tiêu đề slide 1 onboarding" },
+  "onboardingSlide1Body": "Cho phép mọi người hỏi bạn ẩn danh. Bạn quyết định trả lời và công khai.",
+  "@onboardingSlide1Body": { "description": "Nội dung slide 1 onboarding" },
+  "onboardingSlide2Title": "Chia sẻ link, nhận câu hỏi",
+  "@onboardingSlide2Title": { "description": "Tiêu đề slide 2 onboarding" },
+  "onboardingSlide2Body": "Chia sẻ link hồ sơ. Bất kỳ ai cũng có thể gửi câu hỏi mà không cần đăng nhập.",
+  "@onboardingSlide2Body": { "description": "Nội dung slide 2 onboarding" },
+  "onboardingSlide3Title": "Tương tác cho sinh viên đã xác minh",
+  "@onboardingSlide3Title": { "description": "Tiêu đề slide 3 onboarding" },
+  "onboardingSlide3Body": "Xác minh HUMG để mở like và bình luận, giúp cộng đồng đáng tin cậy hơn.",
+  "@onboardingSlide3Body": { "description": "Nội dung slide 3 onboarding" },
+
+  "onboardingHintFeedTitle": "Khám phá Bảng tin",
+  "@onboardingHintFeedTitle": { "description": "Tiêu đề hint lần đầu ở tab Feed" },
+  "onboardingHintFeedBody": "Xem các câu trả lời được công khai. Like và bình luận cần xác minh HUMG.",
+  "@onboardingHintFeedBody": { "description": "Nội dung hint lần đầu ở tab Feed" },
+  "onboardingHintInboxTitle": "Hộp thư của bạn",
+  "@onboardingHintInboxTitle": { "description": "Tiêu đề hint lần đầu ở tab Inbox" },
+  "onboardingHintInboxBody": "Câu hỏi gửi tới bạn sẽ nằm ở đây. Trả lời để có thể đăng lên Bảng tin.",
+  "@onboardingHintInboxBody": { "description": "Nội dung hint lần đầu ở tab Inbox" },
+  "onboardingHintProfileTitle": "Chia sẻ link hồ sơ",
+  "@onboardingHintProfileTitle": { "description": "Tiêu đề hint lần đầu ở tab Profile" },
+  "onboardingHintProfileBody": "Nhấn Chia sẻ để copy link và nhận câu hỏi ẩn danh.",
+  "@onboardingHintProfileBody": { "description": "Nội dung hint lần đầu ở tab Profile" },
+  "onboardingHintSettingsTitle": "Thông báo & xác minh",
+  "@onboardingHintSettingsTitle": { "description": "Tiêu đề hint lần đầu ở tab Settings" },
+  "onboardingHintSettingsBody": "Bật thông báo và hoàn tất xác minh HUMG để mở các tính năng host.",
+  "@onboardingHintSettingsBody": { "description": "Nội dung hint lần đầu ở tab Settings" }
+
+  ,"commonCopy": "Sao chép"
+  ,"@commonCopy": { "description": "Nút chung để sao chép văn bản vào clipboard" }
+  ,"commonClose": "Đóng"
+  ,"@commonClose": { "description": "Nút chung để đóng dialog hoặc lớp phủ" }
+  ,"settingsTrackQuestion": "Theo dõi phiếu hỏi"
+  ,"@settingsTrackQuestion": { "description": "Mục cài đặt mở màn hình tra cứu câu hỏi ẩn danh" }
+  ,"settingsTrackQuestionSubtitle": "Nhập mã 6 ký tự (chữ và số) để xem trạng thái trả lời"
+  ,"@settingsTrackQuestionSubtitle": { "description": "Mô tả phụ cho mục theo dõi phiếu hỏi bằng mã thủ công" }
+  ,"questionTrackingCodeDialogTitle": "Mã tra cứu của bạn"
+  ,"@questionTrackingCodeDialogTitle": { "description": "Tiêu đề dialog mã tra cứu sau khi gửi câu hỏi ẩn danh thành công" }
+  ,"questionTrackingCodeDescription": "Đây là cách duy nhất để xem trạng thái câu hỏi ẩn danh này sau này (không cần đăng nhập). Hãy sao chép và lưu mã 6 ký tự (chữ và số) ở nơi an toàn."
+  ,"@questionTrackingCodeDescription": { "description": "Mô tả trong dialog sau khi gửi câu hỏi thành công, hướng dẫn dùng mã tra cứu" }
+  ,"questionTrackingCodeCopyPrimary": "Sao chép mã"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "Nút chính sao chép mã tra cứu trong dialog sau khi gửi thành công" }
+  ,"questionTrackingCodeCopyRequiredHint": "Vui lòng sao chép mã trước khi đóng."
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "Gợi ý và snackbar khi chưa sao chép mã mà đóng dialog tra cứu" }
+  ,"questionTrackingCodeCopied": "Đã sao chép mã tra cứu"
+  ,"@questionTrackingCodeCopied": { "description": "Snackbar sau khi người dùng sao chép mã tra cứu" }
+  ,"questionTrackingCodeTrackNow": "Tra cứu ngay"
+  ,"@questionTrackingCodeTrackNow": { "description": "Nút trong dialog để mở ngay màn hình tra cứu" }
+  ,"trackQuestionTitle": "Theo dõi câu hỏi"
+  ,"@trackQuestionTitle": { "description": "Tiêu đề AppBar của màn hình theo dõi câu hỏi ẩn danh" }
+  ,"trackQuestionDescription": "Nhập mã tra cứu 6 ký tự (chữ và số) để kiểm tra câu hỏi ẩn danh của bạn đã được trả lời hay chưa."
+  ,"@trackQuestionDescription": { "description": "Đoạn mô tả ở đầu màn hình theo dõi câu hỏi" }
+  ,"trackQuestionInputLabel": "Mã tra cứu"
+  ,"@trackQuestionInputLabel": { "description": "Nhãn ô nhập mã tra cứu" }
+  ,"trackQuestionInputHint": "Mã 6 ký tự"
+  ,"@trackQuestionInputHint": { "description": "Placeholder cho ô nhập mã tra cứu" }
+  ,"trackQuestionLookupButton": "Tra cứu trạng thái"
+  ,"@trackQuestionLookupButton": { "description": "Nút chính để gửi yêu cầu tra cứu mã" }
+  ,"trackQuestionErrorInvalidCode": "Mã tra cứu không hợp lệ."
+  ,"@trackQuestionErrorInvalidCode": { "description": "Lỗi khi mã tra cứu không hợp lệ từ phản hồi server" }
+  ,"trackQuestionErrorNotFound": "Không tìm thấy câu hỏi với mã này."
+  ,"@trackQuestionErrorNotFound": { "description": "Lỗi khi không có câu hỏi tương ứng với mã tra cứu" }
+  ,"trackQuestionErrorTooManyRequests": "Bạn tra cứu quá nhiều lần. Vui lòng thử lại sau."
+  ,"@trackQuestionErrorTooManyRequests": { "description": "Lỗi khi endpoint tra cứu bị giới hạn tần suất" }
+  ,"trackQuestionErrorEmpty": "Vui lòng nhập mã tra cứu."
+  ,"@trackQuestionErrorEmpty": { "description": "Lỗi client khi ô mã tra cứu để trống" }
+  ,"trackQuestionErrorCodeLength": "Mã tra cứu phải gồm đúng 6 ký tự."
+  ,"@trackQuestionErrorCodeLength": { "description": "Lỗi client khi độ dài mã tra cứu không phải 6" }
+  ,"trackQuestionErrorCodeFormat": "Mã tra cứu chỉ được chứa chữ và số."
+  ,"@trackQuestionErrorCodeFormat": { "description": "Lỗi client khi mã tra cứu có ký tự không phải chữ hoặc số" }
+  ,"trackQuestionStatusAnswered": "Đã trả lời"
+  ,"@trackQuestionStatusAnswered": { "description": "Nhãn trạng thái khi câu hỏi ẩn danh đã có câu trả lời" }
+  ,"trackQuestionStatusUnanswered": "Đang chờ trả lời"
+  ,"@trackQuestionStatusUnanswered": { "description": "Nhãn trạng thái khi câu hỏi ẩn danh chưa được trả lời" }
+  ,"trackQuestionCreatedAt": "Đã hỏi {timeAgo}"
+  ,"@trackQuestionCreatedAt": {
+    "description": "Mốc thời gian tương đối cho thời điểm gửi câu hỏi",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnsweredAt": "Đã trả lời {timeAgo}"
+  ,"@trackQuestionAnsweredAt": {
+    "description": "Mốc thời gian tương đối cho thời điểm host trả lời",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnswerNotPublished": "Host đã trả lời nhưng chưa công khai câu trả lời này."
+  ,"@trackQuestionAnswerNotPublished": { "description": "Thông tin khi đã có câu trả lời nhưng chưa được publish lên feed" }
+  ,"trackQuestionOpenAnswer": "Mở câu trả lời"
+  ,"@trackQuestionOpenAnswer": { "description": "Nhãn nút mở chi tiết câu trả lời đã công khai từ màn tra cứu" }
+
+  ,"adminEntryTitle": "Admin Dashboard"
+  ,"@adminEntryTitle": { "description": "Tiêu đề banner entry Admin hiển thị ở tab Hồ sơ khi user là admin" }
+  ,"adminEntrySubtitle": "Xem và xử lý các báo cáo nội dung đang chờ."
+  ,"@adminEntrySubtitle": { "description": "Mô tả ngắn cho banner entry Admin: việc cần làm của admin" }
+  ,"adminEntryButton": "Mở"
+  ,"@adminEntryButton": { "description": "Nhãn nút điều hướng admin đến /admin" }
 }

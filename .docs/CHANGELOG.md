@@ -39,12 +39,12 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Localization `timeago` đa ngôn ngữ (vi/en/ja)
 
 #### Phase 4 — Feed & Tương tác (UC-4.1, UC-4.2, UC-4.3)
-- Feed công khai: `isPublished == true`, sort `createdAt desc`, cursor pagination limit 20
-- Like / Unlike: `arrayUnion/arrayRemove` + `FieldValue.increment(±1)` — yêu cầu `isHumgVerified`
-- Bình luận: Batch Write `comments` + `answers.commentCount++` — yêu cầu `isHumgVerified`
+- Feed công khai: `isPublished == true`, sort mặc định **`hotScore` desc** (xu hướng), dự phòng `createdAt` khi cần; phân trang cursor limit 20; không toggle UI “Mới nhất / Xu hướng”
+- Like / Unlike: **Transaction** cập nhật `likedBy`, `likeCount` (khớp mảng), `hotScore` — yêu cầu `isHumgVerified`
+- Bình luận: **Transaction** tạo `comments` + cập nhật `answers.commentCount` và `hotScore` — yêu cầu `isHumgVerified`
 - Guard cho Like/Comment: snackbar `verifyRequiredToLike` / `verifyRequiredToComment`
 - `VerifiedBadge` trên `FeedItemCard` và `CommentTile`
-- Composite Firestore index đã deploy (`isPublished ASC, createdAt DESC, __name__ DESC`)
+- Composite Firestore indexes: cặp `isPublished` + `hotScore` (và biến thể lọc `aiCategory` / `aiTagIds`); `createdAt` dùng khi fallback
 
 #### Phase 4.5 — Navigation Shell & Settings
 - `AppShell` (`StatefulShellRoute`): 4 tab — Feed / Inbox / Profile / Settings
@@ -89,10 +89,50 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] — v1.1 (kế hoạch)
+## [Unreleased]
+
+- Chưa có thay đổi.
+
+---
+
+## [1.1.0] — 2026-04-10
+
+### Added (develop — 2026-03-22)
+
+- **QR quét profile (UC-2.1):** màn `ProfileQrScanScreen`, route `/scan-profile-qr` (full-screen, yêu cầu đăng nhập), dependency `mobile_scanner`; nút quét trên `ProfileScreen` khi platform hỗ trợ (`mobile_scanner_support.dart`).
+- **Deep link:** helper `parseProfileDeepLinkToPath` cho chuỗi quét được (HTTPS hoặc custom scheme `askme://user/{userId}`); redirect router: user đã đăng nhập mở `/user/{ownUid}` → `/me` (có bottom nav).
+- **Shell:** `AppShellTabController` + `AppShellTab` để chuyển tab programmatic (cùng animation với tap bottom bar).
+- **Chia sẻ / lưu ảnh:** `ShareAnswerCardWidget` và `ShareCardWidget` — lưu card PNG vào thư viện ảnh (`gal`); iOS `NSPhotoLibraryAddUsageDescription`; nút tải/xuất thay cho một số luồng chỉ copy link.
+- **Hosting:** meta Open Graph / Twitter Card trên `hosting/public/index.html` (preview link Zalo/Facebook/iMessage).
+- **Firestore / API:** xóa câu hỏi trong Inbox — batch: xóa `questions` + `isPublished: false` trên các `answers` cùng `questionId`; submit ẩn danh — nếu App Check token lỗi thì vẫn gọi API (không gửi header), tránh chặn hoàn toàn khi App Check không lấy được token.
+
+### Changed (develop — 2026-03-22)
+
+- **Android:** `JavaCompile` 11 toàn subproject; `release` tắt minify/shrink tạm thời; `android.javaCompile.suppressSourceTargetDeprecationWarning=true`.
+- **iOS:** mô tả camera mở rộng (avatar + quét QR).
+
+### Added
+- UC-3.1 moved to Vercel backend (`askme-humg.vercel.app/api`) for production without Firebase Blaze plan.
+- New endpoints:
+  - `POST /api/submitQuestion` (server-side rate limiting + returns tracking code)
+  - `POST /api/getQuestionTrackingStatus` (lookup by tracking code)
+- Anonymous tracking flow on app + web:
+  - Tracking screen in app (`/track-question`)
+  - Tracking section on hosting page (`askme-humg-app.web.app`)
+- Tracking code format upgraded from `6 digits` to `6 alphanumeric chars` (example: `AD79HQ`).
+
+### Changed
+- Submit success UX now shows tracking code dialog + copy action.
+- Web tracking input now accepts alphanumeric codes and normalizes uppercase input.
+- `qna` datasource defaults to Vercel API base (`https://askme-humg.vercel.app/api`) when env is absent.
+
+### Security Notes
+- Added `// TODO(security)` markers for:
+  - stronger submit request verification
+  - stricter lookup brute-force protection independent from client-provided key
 
 ### Planned
-- BACKLOG-01: App Check + Cloud Function rate limiting (chờ Blaze plan)
+- BACKLOG-01: Harden Vercel API security for submit/tracking
 - BACKLOG-03: `showRealName` persist lên Firestore
 - BACKLOG-06: "View All Answers" screen với pagination
 

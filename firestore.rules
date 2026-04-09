@@ -55,12 +55,12 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isSignedIn() && (
         resource.data.userId == request.auth.uid || isAdmin() ||
-        // Like/unlike: only likeCount and likedBy change
+        // Like/unlike: likedBy, likeCount (kept in sync), hotScore (UC-4.2)
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['likeCount', 'likedBy'])) ||
-        // Comment: only commentCount incremented by any signed-in user (UC-4.3)
+          .hasOnly(['likeCount', 'likedBy', 'hotScore'])) ||
+        // Comment path: commentCount + hotScore (UC-4.3 transaction)
         (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['commentCount']))
+          .hasOnly(['commentCount', 'hotScore']))
       );
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
@@ -78,10 +78,12 @@ service cloud.firestore {
     }
 
     // ── reports ───────────────────────────────────────────────────────
-    // UC-5.1: any signed-in user can report
-    // UC-5.2: only admin can read/update reports
+    // UC-5.1: any signed-in user can report; users may read only their own
+    //         report docs (for duplicate-report checks). Admins read all.
+    // UC-5.2: admin updates report status / resolves
     match /reports/{reportId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.reportedBy == request.auth.uid);
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();
@@ -97,6 +99,16 @@ service cloud.firestore {
       allow create: if isOwner(uid);
       allow update: if isOwner(uid);
       allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // ── app_config ─────────────────────────────────────────────────────
+    // AI classification taxonomy for feed topics:
+    // - app_config/ai_classification
+    // Public read so app can render topic chips/filter.
+    // Write restricted to admin only.
+    match /app_config/{docId} {
+      allow read: if docId == 'ai_classification';
+      allow create, update, delete: if isAdmin();
     }
   }
 }

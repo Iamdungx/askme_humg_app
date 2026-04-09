@@ -70,7 +70,11 @@ class AuthRepositoryImpl implements IAuthRepository {
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } catch (e, s) {
-      logger.e('AuthRepository.generateOtp unexpected error', error: e, stackTrace: s);
+      logger.e(
+        'AuthRepository.generateOtp unexpected error',
+        error: e,
+        stackTrace: s,
+      );
       throw UnknownFailure(e.toString());
     }
   }
@@ -88,7 +92,11 @@ class AuthRepositoryImpl implements IAuthRepository {
     } on FirestoreException catch (e) {
       throw FirestoreFailure(e.message);
     } catch (e, s) {
-      logger.e('AuthRepository.verifyOtp unexpected error', error: e, stackTrace: s);
+      logger.e(
+        'AuthRepository.verifyOtp unexpected error',
+        error: e,
+        stackTrace: s,
+      );
       throw UnknownFailure(e.toString());
     }
   }

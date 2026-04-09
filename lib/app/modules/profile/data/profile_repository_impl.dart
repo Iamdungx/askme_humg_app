@@ -61,4 +61,28 @@ class ProfileRepositoryImpl implements IProfileRepository {
       throw UnknownFailure(e.toString());
     }
   }
+
+  @override
+  Future<void> updateNotificationPrefs({
+    required String userId,
+    required bool notifNewQuestion,
+    required bool notifNewComment,
+  }) async {
+    try {
+      await _datasource.updateNotificationPrefs(
+        userId: userId,
+        notifNewQuestion: notifNewQuestion,
+        notifNewComment: notifNewComment,
+      );
+    } on FirestoreException catch (e) {
+      throw FirestoreFailure(e.message);
+    } catch (e, st) {
+      logger.e(
+        'updateNotificationPrefs unexpected error',
+        error: e,
+        stackTrace: st,
+      );
+      throw UnknownFailure(e.toString());
+    }
+  }
 }

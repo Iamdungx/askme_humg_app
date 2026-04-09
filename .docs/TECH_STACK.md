@@ -151,23 +151,20 @@ GoRouter appRouter(Ref ref) {
 ### Firebase write patterns
 
 ```dart
-// Multi-collection → WriteBatch (UC-3.3, UC-4.3)
+// Multi-collection → WriteBatch (UC-3.3). UC-4.3 uses a transaction (see firebase_feed_datasource.postComment).
 final batch = FirebaseFirestore.instance.batch();
 batch.set(answersCol.doc(), answerData);
 batch.update(questionsCol.doc(questionId), {'status': 'answered'});
 await batch.commit();
 
-// Like toggle (UC-4.2)
-await answersCol.doc(answerId).update({
-  'likedBy': FieldValue.arrayUnion([userId]),
-  'likeCount': FieldValue.increment(1),
-});
+// Like toggle (UC-4.2) — use a transaction: rewrite likedBy, set likeCount == likedBy.length, recompute hotScore
+// (see firebase_feed_datasource.toggleLike).
 
-// Cursor pagination (UC-4.1)
+// Cursor pagination (UC-4.1) — default feed: hotScore; createdAt as fallback
 Query query = firestore
     .collection('answers')
     .where('isPublished', isEqualTo: true)
-    .orderBy('createdAt', descending: true)
+    .orderBy('hotScore', descending: true)
     .limit(20);
 if (lastDoc != null) query = query.startAfterDocument(lastDoc);
 ```

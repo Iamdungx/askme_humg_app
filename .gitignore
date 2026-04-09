@@ -78,6 +78,9 @@ Thumbs.db
 scripts/node_modules/
 scripts/lib/
 scripts/clear.ts
+scripts/*serviceAccount*.json
+scripts/*adminsdk*.json
+scripts/serviceAccount.json
 
 # Cloud Functions
 functions/node_modules/
@@ -86,3 +89,9 @@ firepit-log.txt
 
 # Flutter iOS build artifacts
 ios/build/
+.vercel
+# Draw.io
+.docs/use_case/diagrams/
+.docs/report_use_cases/
+.docs/report_sequence_diagrams/
+.docs/report_activity_diagrams/

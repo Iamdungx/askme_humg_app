@@ -4,6 +4,7 @@
 > **SRS Reference:** FR-02, NFR-03
 > **Actor:** Host / Any Google user
 > **Priority:** Critical (blocker for all authenticated features)
+> **Use-case diagram:** [diagrams/UC-1.1_google_sign_in.drawio](./diagrams/UC-1.1_google_sign_in.drawio) (mở bằng draw.io / diagrams.net để chỉnh sửa)
 
 ---
 

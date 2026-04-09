@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
 import 'package:askme_humg/config/app_routes.dart';
 import 'package:askme_humg/app/core/extensions/context_extensions.dart';
+import 'package:askme_humg/app/core/utils/mobile_scanner_support.dart';
 import 'package:askme_humg/app/core/values/app_spacing.dart';
 import 'package:askme_humg/app/global_widgets/states/empty_state.dart';
 import 'package:askme_humg/app/global_widgets/states/error_state.dart';
@@ -17,8 +18,11 @@ import 'package:askme_humg/app/modules/profile/presentation/widgets/answer_previ
 import 'package:askme_humg/app/modules/profile/presentation/widgets/ask_question_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/profile_header.dart';
 import 'package:askme_humg/app/global_widgets/layout/app_bottom_sheet.dart';
+import 'package:askme_humg/app/modules/moderation/presentation/moderation_providers.dart';
 import 'package:askme_humg/app/modules/moderation/presentation/widgets/show_report_sheet.dart';
 import 'package:askme_humg/app/modules/profile/presentation/widgets/share_card_widget.dart';
+import 'package:askme_humg/app/modules/onboarding/domain/onboarding.dart';
+import 'package:askme_humg/app/modules/onboarding/presentation/widgets/onboarding_hint_banner.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -70,9 +74,21 @@ class _ProfileContent extends ConsumerWidget {
     );
   }
 
-  void _showMoreMenu(BuildContext context, AppLocalizations l10n, WidgetRef ref) {
+  void _showMoreMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+    bool alreadyReported,
+  ) {
     final uid = ref.read(authStateProvider).asData?.value?.uid;
     if (!context.requireAuth(uid, l10n.loginRequiredToReport)) return;
+
+    if (alreadyReported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.reportAlreadyReported)),
+      );
+      return;
+    }
 
     showAppBottomSheet<void>(
       context: context,
@@ -103,11 +119,18 @@ class _ProfileContent extends ConsumerWidget {
     final deepLink = ref
         .read(generateDeepLinkUseCaseProvider)
         .call(profile.userId);
+    final alreadyReportedUser = !isOwner
+        ? ref
+              .watch(userHasReportedTargetProvider(profile.userId, 'user'))
+              .maybeWhen(data: (v) => v, orElse: () => false)
+        : false;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
+        backgroundColor: Theme.of(
+          context,
+        ).scaffoldBackgroundColor.withValues(alpha: 0.9),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 1,
@@ -116,8 +139,9 @@ class _ProfileContent extends ConsumerWidget {
             ? null
             : IconButton(
                 icon: Icon(LucideIcons.arrowLeft, color: cs.onSurface),
-                onPressed: () =>
-                    context.canPop() ? context.pop() : context.go(AppRoutes.feed),
+                onPressed: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.feed),
               ),
         title: Text(
           l10n.profileTitle,
@@ -130,9 +154,15 @@ class _ProfileContent extends ConsumerWidget {
           if (isOwner) ...[
             IconButton(
               icon: Icon(LucideIcons.userPen, color: cs.onSurface),
-              tooltip: 'Edit Profile',
+              tooltip: l10n.settingsEditProfile,
               onPressed: () => context.push('/me/edit'),
             ),
+            if (isMobileScannerPlatformSupported)
+              IconButton(
+                icon: Icon(LucideIcons.scanLine, color: cs.onSurface),
+                tooltip: l10n.profileScanQrTooltip,
+                onPressed: () => context.push(AppRoutes.scanProfileQr),
+              ),
             IconButton(
               icon: Icon(LucideIcons.share2, color: cs.onSurface),
               onPressed: () => _showShareCard(context, deepLink),
@@ -140,17 +170,31 @@ class _ProfileContent extends ConsumerWidget {
           ] else
             IconButton(
               icon: Icon(LucideIcons.ellipsisVertical, color: cs.onSurface),
-              onPressed: () => _showMoreMenu(context, l10n, ref),
+              onPressed: () =>
+                  _showMoreMenu(context, l10n, ref, alreadyReportedUser),
             ),
         ],
       ),
       body: profile.isBlocked
           ? _BlockedUserView(message: l10n.profileBlockedUser)
-          : _ProfileBody(
-              profile: profile,
-              isOwner: isOwner,
-              deepLink: deepLink,
-              l10n: l10n,
+          : Column(
+              children: [
+                if (isOwner)
+                  OnboardingHintBanner(
+                    hint: OnboardingHint.profile,
+                    title: l10n.onboardingHintProfileTitle,
+                    message: l10n.onboardingHintProfileBody,
+                    icon: LucideIcons.share2,
+                  ),
+                Expanded(
+                  child: _ProfileBody(
+                    profile: profile,
+                    isOwner: isOwner,
+                    deepLink: deepLink,
+                    l10n: l10n,
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -184,15 +228,15 @@ class _ProfileBody extends StatelessWidget {
       ),
       children: [
         // Profile header: avatar + name + stats
-          Center(
-            child: ProfileHeader(
-              name: profile.name,
-              avatarUrl: profile.avatar,
-              answerCount: profile.answerCount,
-              totalLikes: profile.totalLikes,
-              isHumgVerified: profile.isHumgVerified,
-            ),
+        Center(
+          child: ProfileHeader(
+            name: profile.name,
+            avatarUrl: profile.avatar,
+            answerCount: profile.answerCount,
+            totalLikes: profile.totalLikes,
+            isHumgVerified: profile.isHumgVerified,
           ),
+        ),
         const SizedBox(height: AppSpacing.xl),
 
         // isOwner: share link card + inbox shortcut (UC-2.2 §2)
@@ -357,7 +401,13 @@ class _RecentAnswersSection extends ConsumerWidget {
                 children: [
                   for (int i = 0; i < answers.length; i++) ...[
                     if (i > 0) const SizedBox(height: AppSpacing.md),
-                    AnswerPreviewCard(item: answers[i]),
+                    AnswerPreviewCard(
+                      item: answers[i],
+                      onLikeToggleSuccess: () {
+                        ref.invalidate(userAnswersProvider(userId));
+                        ref.invalidate(userProfileProvider(userId));
+                      },
+                    ),
                   ],
                 ],
               );

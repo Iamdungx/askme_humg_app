@@ -63,8 +63,9 @@ class AppTextInput extends StatelessWidget {
       autocorrect: autocorrect,
       onChanged: onChanged,
       onSubmitted: onSubmitted ?? (_) => FocusScope.of(context).unfocus(),
-      buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-          const SizedBox.shrink(),
+      buildCounter:
+          (_, {required currentLength, required isFocused, maxLength}) =>
+              const SizedBox.shrink(),
       style: tt.bodyLarge?.copyWith(color: cs.onSurface),
       decoration: InputDecoration(
         hintText: hintText,

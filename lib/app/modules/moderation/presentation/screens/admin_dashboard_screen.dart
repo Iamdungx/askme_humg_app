@@ -21,10 +21,7 @@ class AdminDashboardScreen extends ConsumerWidget {
     final reportsAsync = ref.watch(pendingReportsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminDashboardTitle),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: Text(l10n.adminDashboardTitle), centerTitle: false),
       body: reportsAsync.when(
         loading: () => const ShimmerList(count: 3),
         error: (e, _) => ErrorState(

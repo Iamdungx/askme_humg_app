@@ -44,8 +44,7 @@ class DevDrawer extends ConsumerWidget {
               _NavTile(
                 icon: LucideIcons.circleUser,
                 label: 'My Profile  ${AppRoutes.userProfile}/:uid',
-                onTap: () =>
-                    _go(context, '/me'),
+                onTap: () => _go(context, '/me'),
               ),
               _NavTile(
                 icon: LucideIcons.userSearch,

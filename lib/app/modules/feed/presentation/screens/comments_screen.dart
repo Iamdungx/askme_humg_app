@@ -8,8 +8,10 @@ import 'package:askme_humg/app/global_widgets/input/app_comment_input.dart';
 import 'package:askme_humg/app/global_widgets/states/error_state.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/core/error/failures.dart';
+import 'package:askme_humg/app/core/network/firebase_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/feed_providers.dart';
 import 'package:askme_humg/app/modules/feed/presentation/widgets/comment_tile.dart';
+import 'package:askme_humg/app/modules/settings/presentation/settings_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
 
 /// Opens the comments bottom sheet for a given answer.
@@ -48,7 +50,7 @@ class _CommentsSheetContent extends ConsumerWidget {
 
     return Column(
       children: [
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -60,7 +62,10 @@ class _CommentsSheetContent extends ConsumerWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: Icon(LucideIcons.x, color: cs.onSurface.withValues(alpha: 0.6)),
+                icon: Icon(
+                  LucideIcons.x,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -68,7 +73,11 @@ class _CommentsSheetContent extends ConsumerWidget {
             ],
           ),
         ),
-        Divider(color: cs.outline.withValues(alpha: 0.3)),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: cs.outline.withValues(alpha: 0.3),
+        ),
 
         // Comment list
         Expanded(
@@ -135,6 +144,8 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
+    final rawText = _controller.text;
+
     final authUser = ref.read(authStateProvider).asData?.value;
     final uid = authUser?.uid;
     final isVerified = authUser?.isHumgVerified == true;
@@ -143,15 +154,20 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
       isVerified: isVerified,
       loginMessage: l10n.loginRequiredToComment,
       verifyMessage: l10n.verifyRequiredToComment,
-    )) { return; }
+    )) {
+      return;
+    }
 
     setState(() => _error = null);
 
-    final failure = await ref.read(postCommentProvider.notifier).post(
+    final result = await ref
+        .read(postCommentProvider.notifier)
+        .post(
           answerId: widget.answerId,
-          content: _controller.text,
+          content: rawText,
           isAnonymous: _isAnonymous,
         );
+    final failure = result.failure;
 
     if (!mounted) return;
 
@@ -164,16 +180,35 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
     }
     if (failure != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.commonError),
-          backgroundColor: cs.error,
-        ),
+        SnackBar(content: Text(l10n.commonError), backgroundColor: cs.error),
       );
       return;
     }
 
     _controller.clear();
     setState(() => _error = null);
+
+    final persistedContent = result.persistedContent;
+    if (persistedContent != null && persistedContent.isNotEmpty) {
+      await _triggerNotifyNewComment(ref, widget.answerId, persistedContent);
+    }
+  }
+
+  Future<void> _triggerNotifyNewComment(
+    WidgetRef ref,
+    String answerId,
+    String content,
+  ) async {
+    final client = ref.read(notifyWebhookClientProvider);
+    if (!client.isAvailable) return;
+    final auth = ref.read(firebaseAuthProvider);
+    final token = await auth.currentUser?.getIdToken(true);
+    if (token == null) return;
+    await client.sendNewComment(
+      idToken: token,
+      answerId: answerId,
+      content: content,
+    );
   }
 
   @override
@@ -197,7 +232,11 @@ class _CommentInputBarState extends ConsumerState<_CommentInputBar> {
           // Anonymous toggle row
           Row(
             children: [
-              Icon(LucideIcons.lock, size: 18, color: cs.onSurface.withValues(alpha: 0.5)),
+              Icon(
+                LucideIcons.lock,
+                size: 18,
+                color: cs.onSurface.withValues(alpha: 0.5),
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 l10n.commentAnonymousToggle,

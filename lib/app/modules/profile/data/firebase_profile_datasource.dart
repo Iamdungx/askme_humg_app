@@ -11,9 +11,8 @@ import 'package:askme_humg/app/modules/profile/data/user_profile_model.dart';
 import 'package:askme_humg/app/modules/profile/domain/user_profile.dart';
 
 class FirebaseProfileDatasource {
-  FirebaseProfileDatasource({
-    required FirebaseFirestore firestore,
-  }) : _firestore = firestore;
+  FirebaseProfileDatasource({required FirebaseFirestore firestore})
+    : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 
@@ -74,8 +73,7 @@ class FirebaseProfileDatasource {
 
       if (avatarLocalPath != null) {
         // Enforce 7-day avatar cooldown.
-        final userDoc =
-            await _firestore.collection('users').doc(userId).get();
+        final userDoc = await _firestore.collection('users').doc(userId).get();
         final raw = userDoc.data()?['avatarUpdatedAt'];
         if (raw != null) {
           final lastChanged = (raw as Timestamp).toDate();
@@ -135,12 +133,28 @@ class FirebaseProfileDatasource {
     return bytes;
   }
 
+  /// Cập nhật preference thông báo (webhook OneSignal đọc từ đây khi chưa có Blaze).
+  Future<void> updateNotificationPrefs({
+    required String userId,
+    required bool notifNewQuestion,
+    required bool notifNewComment,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'notifNewQuestion': notifNewQuestion,
+        'notifNewComment': notifNewComment,
+      });
+    } on FirebaseException catch (e, s) {
+      logger.e('updateNotificationPrefs failed', error: e, stackTrace: s);
+      throw FirestoreException(e.message ?? 'Firestore update failed');
+    }
+  }
+
   /// Returns the DateTime when the user last changed their avatar,
   /// or null if they have never changed it.
   Future<DateTime?> getAvatarUpdatedAt(String userId) async {
     try {
-      final doc =
-          await _firestore.collection('users').doc(userId).get();
+      final doc = await _firestore.collection('users').doc(userId).get();
       final raw = doc.data()?['avatarUpdatedAt'];
       if (raw == null) return null;
       return (raw as Timestamp).toDate();

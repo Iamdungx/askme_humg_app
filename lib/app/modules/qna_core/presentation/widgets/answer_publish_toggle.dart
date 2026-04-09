@@ -54,9 +54,9 @@ class AnswerPublishToggle extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   l10n.answerPublishToggleSubtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),

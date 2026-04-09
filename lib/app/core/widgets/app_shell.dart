@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:askme_humg/app/core/values/app_durations.dart';
+import 'package:askme_humg/app/core/widgets/app_shell_tab_controller.dart';
 import 'package:askme_humg/app/modules/auth/presentation/auth_providers.dart';
 import 'package:askme_humg/app/modules/qna_core/presentation/qna_providers.dart';
 import 'package:askme_humg/l10n/app_localizations.dart';
@@ -63,58 +64,61 @@ class _AppShellState extends ConsumerState<AppShell> {
               0)
         : 0;
 
-    return Scaffold(
-      body: AnimatedOpacity(
-        opacity: _visible ? 1.0 : 0.0,
-        duration: AppDuration.fast,
-        curve: Curves.easeInOut,
-        child: navigationShell,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _switchTab,
-        indicatorColor: cs.secondary.withValues(alpha: 0.15),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(LucideIcons.house),
-            selectedIcon: Icon(LucideIcons.house, color: cs.secondary),
-            label: l10n.navFeed,
-          ),
-          NavigationDestination(
-            icon: Badge(
-              label: Text('$unansweredCount'),
-              isLabelVisible: unansweredCount > 0,
-              child: const Icon(LucideIcons.mailbox),
+    return AppShellTabController(
+      switchToTab: _switchTab,
+      child: Scaffold(
+        body: AnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: AppDuration.fast,
+          curve: Curves.easeInOut,
+          child: navigationShell,
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: _switchTab,
+          indicatorColor: cs.secondary.withValues(alpha: 0.15),
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(LucideIcons.house),
+              selectedIcon: Icon(LucideIcons.house, color: cs.secondary),
+              label: l10n.navFeed,
             ),
-            selectedIcon: Badge(
-              label: Text('$unansweredCount'),
-              isLabelVisible: unansweredCount > 0,
-              child: Icon(LucideIcons.mailbox, color: cs.secondary),
+            NavigationDestination(
+              icon: Badge(
+                label: Text('$unansweredCount'),
+                isLabelVisible: unansweredCount > 0,
+                child: const Icon(LucideIcons.mailbox),
+              ),
+              selectedIcon: Badge(
+                label: Text('$unansweredCount'),
+                isLabelVisible: unansweredCount > 0,
+                child: Icon(LucideIcons.mailbox, color: cs.secondary),
+              ),
+              label: l10n.navInbox,
             ),
-            label: l10n.navInbox,
-          ),
-          NavigationDestination(
-            icon: Icon(
-              isLoggedIn ? LucideIcons.circleUserRound : LucideIcons.logIn,
+            NavigationDestination(
+              icon: Icon(
+                isLoggedIn ? LucideIcons.circleUserRound : LucideIcons.logIn,
+              ),
+              selectedIcon: Icon(
+                isLoggedIn ? LucideIcons.circleUserRound : LucideIcons.logIn,
+                color: cs.secondary,
+              ),
+              label: l10n.navProfile,
             ),
-            selectedIcon: Icon(
-              isLoggedIn ? LucideIcons.circleUserRound : LucideIcons.logIn,
-              color: cs.secondary,
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: needsVerification,
+                child: const Icon(LucideIcons.settings),
+              ),
+              selectedIcon: Badge(
+                isLabelVisible: needsVerification,
+                child: Icon(LucideIcons.settings, color: cs.secondary),
+              ),
+              label: l10n.navSettings,
             ),
-            label: l10n.navProfile,
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: needsVerification,
-              child: const Icon(LucideIcons.settings),
-            ),
-            selectedIcon: Badge(
-              isLabelVisible: needsVerification,
-              child: Icon(LucideIcons.settings, color: cs.secondary),
-            ),
-            label: l10n.navSettings,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

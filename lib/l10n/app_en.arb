@@ -117,6 +117,8 @@
   "@profileShareCardStyleLabel": { "description": "Button label to open share card style picker" },
   "profileShareCardStyleApply": "Apply",
   "@profileShareCardStyleApply": { "description": "Confirm button in share card style picker" },
+  "shareCardImageSaved": "Image saved to gallery",
+  "@shareCardImageSaved": { "description": "Snackbar after share card PNG is saved to the device photo library" },
   "profileTitle": "Profile",
   "@profileTitle": { "description": "AppBar title on profile screen" },
   "profileYourLink": "Your profile link",
@@ -137,6 +139,20 @@
   "@profileStatAnswers": { "description": "Stat label for answer count" },
   "profileStatLikes": "Likes",
   "@profileStatLikes": { "description": "Stat label for total likes" },
+  "profileScanQrTooltip": "Scan profile QR code",
+  "@profileScanQrTooltip": { "description": "Tooltip for app bar button that opens in-app QR scanner" },
+  "profileScanQrTitle": "Scan QR",
+  "@profileScanQrTitle": { "description": "App bar title on profile QR scan screen" },
+  "profileScanQrHint": "Point the camera at a profile QR code from this app.",
+  "@profileScanQrHint": { "description": "Instructions on profile QR scan screen" },
+  "profileScanQrInvalid": "This QR code is not a valid profile link.",
+  "@profileScanQrInvalid": { "description": "Snackbar when scanned QR is not a profile deep link" },
+  "profileScanQrUnsupportedPlatform": "QR scanning is not available on this platform. Use the app on a phone or tablet, or open the profile link in a browser.",
+  "@profileScanQrUnsupportedPlatform": { "description": "Message when mobile_scanner has no implementation (e.g. Windows/Linux desktop)" },
+  "profileScanQrImportImage": "Import image",
+  "@profileScanQrImportImage": { "description": "Outlined button label to pick a QR image from gallery on profile QR scan screen" },
+  "profileScanQrFlashTooltip": "Toggle flash",
+  "@profileScanQrFlashTooltip": { "description": "Accessibility label for torch flash button on profile QR scan screen" },
 
   "inboxTitle": "Inbox",
   "@inboxTitle": { "description": "AppBar title on inbox screen" },
@@ -222,8 +238,26 @@
   "@feedLoadMore": { "description": "Load more button label (currently unused — auto-load via scroll)" },
   "feedErrorLoad": "Failed to load feed. Try again?",
   "@feedErrorLoad": { "description": "Error state message on feed screen" },
+  "feedAnswerNotFound": "This post is unavailable",
+  "@feedAnswerNotFound": { "description": "Empty state message when an answer deep link points to a missing/unpublished post" },
   "feedReachedEnd": "You've seen all posts",
   "@feedReachedEnd": { "description": "Footer message when all feed items have been loaded" },
+  "feedTopicAll": "All topics",
+  "@feedTopicAll": { "description": "Filter chip label to show all feed topics" },
+  "feedTopicStudy": "Study",
+  "@feedTopicStudy": { "description": "Main feed topic chip label for study-related posts" },
+  "feedTopicLife": "Life",
+  "@feedTopicLife": { "description": "Main feed topic chip label for student life posts" },
+  "feedTopicMajor": "Major",
+  "@feedTopicMajor": { "description": "Main feed topic chip label for major/career-related posts" },
+  "feedTopicStudent": "Student",
+  "@feedTopicStudent": { "description": "Main feed topic chip label for student activities/events posts" },
+  "feedTopicOther": "Other",
+  "@feedTopicOther": { "description": "Main feed topic chip label for uncategorized posts" },
+  "commonCopyLink": "Copy link",
+  "@commonCopyLink": { "description": "Generic button label to copy a link to clipboard" },
+  "feedShareAnswerPill": "SHARE THIS ANSWER",
+  "@feedShareAnswerPill": { "description": "Small pill label on answer share card image" },
 
   "loginRequiredToLike": "Sign in to like this answer",
   "@loginRequiredToLike": { "description": "Snackbar when unauthenticated user taps like" },
@@ -290,6 +324,8 @@
   "@reportSuccess": { "description": "Snackbar after successful report submission" },
   "loginRequiredToReport": "Sign in to report",
   "@loginRequiredToReport": { "description": "Snackbar when unauthenticated user tries to report content" },
+  "reportAlreadyReported": "You already reported this content.",
+  "@reportAlreadyReported": { "description": "Snackbar when user tries to report the same target again (UC-5.1)" },
 
   "adminDashboardTitle": "Admin Dashboard",
   "@adminDashboardTitle": { "description": "AppBar title on admin dashboard screen" },
@@ -316,6 +352,27 @@
   "@adminActionDismiss": { "description": "Admin action to dismiss a report" },
   "adminActionResolvedSuccess": "Report resolved",
   "@adminActionResolvedSuccess": { "description": "Snackbar after admin resolves a report" },
+  "adminReportTargetAnswer": "Answer",
+  "@adminReportTargetAnswer": { "description": "Badge label when a feed answer is reported" },
+  "adminReportTargetComment": "Comment",
+  "@adminReportTargetComment": { "description": "Badge label when a comment is reported" },
+  "adminReportTargetUser": "Profile",
+  "@adminReportTargetUser": { "description": "Badge label when a user profile is reported" },
+  "adminReportTargetUnknown": "Report",
+  "@adminReportTargetUnknown": { "description": "Badge label when target type is unrecognized" },
+  "adminReportReporter": "Reporter: {userId}",
+  "@adminReportReporter": {
+    "description": "Shows Firebase uid of the user who submitted the report",
+    "placeholders": { "userId": { "type": "String" } }
+  },
+  "adminReportSnapshotMissing": "No text snapshot was stored for this report.",
+  "@adminReportSnapshotMissing": { "description": "Shown when report.content is empty in Firestore" },
+  "adminViewReportedContent": "View in app",
+  "@adminViewReportedContent": { "description": "Opens the reported answer, comment context, or profile in the app" },
+  "adminReportMissingParentAnswer": "This report has no linked answer. Open the feed to find the content manually.",
+  "@adminReportMissingParentAnswer": { "description": "Snackbar when a comment report is missing parentAnswerId" },
+  "adminReportOpenError": "Unable to open this report target.",
+  "@adminReportOpenError": { "description": "Snackbar when report target type cannot be opened" },
 
   "navSettings": "Settings",
   "@navSettings": { "description": "Bottom navigation tab label for settings" },
@@ -372,6 +429,9 @@
   "@settingsTermsOfService": { "description": "Settings item: navigate to terms of service" },
   "settingsPrivacyPolicy": "Privacy Policy",
   "@settingsPrivacyPolicy": { "description": "Settings item: navigate to privacy policy" },
+
+  "settingsUserGuide": "User guide",
+  "@settingsUserGuide": { "description": "Settings item: re-open onboarding/user guide" },
 
   "settingsSignOut": "Sign out",
   "@settingsSignOut": { "description": "Settings: sign out button" },
@@ -479,5 +539,112 @@
   "editProfilePickerUnavailable": "Image picker is not available on this device.",
   "@editProfilePickerUnavailable": { "description": "Snackbar when camera/gallery is unavailable (e.g. iOS Simulator)" },
   "editProfilePickerPermissionDenied": "Permission denied. Please allow access in Settings.",
-  "@editProfilePickerPermissionDenied": { "description": "Snackbar when camera or photo library permission is permanently denied" }
+  "@editProfilePickerPermissionDenied": { "description": "Snackbar when camera or photo library permission is permanently denied" },
+
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": { "description": "Onboarding button: skip the intro carousel" },
+  "onboardingNext": "Next",
+  "@onboardingNext": { "description": "Onboarding button: go to next slide" },
+  "onboardingDone": "Get started",
+  "@onboardingDone": { "description": "Onboarding button: finish the intro carousel" },
+  "onboardingFootnote": "You can change these settings anytime later.",
+  "@onboardingFootnote": { "description": "Small footer note under onboarding actions" },
+
+  "onboardingSlide1Title": "Anonymous Q&A for HUMG",
+  "@onboardingSlide1Title": { "description": "Onboarding slide 1 title" },
+  "onboardingSlide1Body": "Let others ask you questions anonymously. You choose what to answer and publish.",
+  "@onboardingSlide1Body": { "description": "Onboarding slide 1 body" },
+  "onboardingSlide2Title": "Share your link, receive questions",
+  "@onboardingSlide2Title": { "description": "Onboarding slide 2 title" },
+  "onboardingSlide2Body": "Share your profile link. Anyone can send a question without logging in.",
+  "@onboardingSlide2Body": { "description": "Onboarding slide 2 body" },
+  "onboardingSlide3Title": "Verified actions for students",
+  "@onboardingSlide3Title": { "description": "Onboarding slide 3 title" },
+  "onboardingSlide3Body": "HUMG verification unlocks likes and comments to keep the community trusted.",
+  "@onboardingSlide3Body": { "description": "Onboarding slide 3 body" },
+
+  "onboardingHintFeedTitle": "Explore the Feed",
+  "@onboardingHintFeedTitle": { "description": "First-run hint title on Feed tab" },
+  "onboardingHintFeedBody": "Browse published answers. Likes and comments require HUMG verification.",
+  "@onboardingHintFeedBody": { "description": "First-run hint body on Feed tab" },
+  "onboardingHintInboxTitle": "Your Inbox",
+  "@onboardingHintInboxTitle": { "description": "First-run hint title on Inbox tab" },
+  "onboardingHintInboxBody": "Questions sent to you appear here. Reply to publish an answer to the Feed.",
+  "@onboardingHintInboxBody": { "description": "First-run hint body on Inbox tab" },
+  "onboardingHintProfileTitle": "Share your profile link",
+  "@onboardingHintProfileTitle": { "description": "First-run hint title on Profile tab" },
+  "onboardingHintProfileBody": "Use Share to copy your link and let anyone ask you anonymously.",
+  "@onboardingHintProfileBody": { "description": "First-run hint body on Profile tab" },
+  "onboardingHintSettingsTitle": "Notifications & verification",
+  "@onboardingHintSettingsTitle": { "description": "First-run hint title on Settings tab" },
+  "onboardingHintSettingsBody": "Enable notifications and complete HUMG verification to unlock host features.",
+  "@onboardingHintSettingsBody": { "description": "First-run hint body on Settings tab" }
+
+  ,"commonCopy": "Copy"
+  ,"@commonCopy": { "description": "Generic button label to copy plain text to clipboard" }
+  ,"commonClose": "Close"
+  ,"@commonClose": { "description": "Generic button label to close dialogs and overlays" }
+  ,"settingsTrackQuestion": "Track anonymous question"
+  ,"@settingsTrackQuestion": { "description": "Settings item label to open anonymous question tracking screen" }
+  ,"settingsTrackQuestionSubtitle": "Enter a 6-character code (letters and numbers) to check answer status"
+  ,"@settingsTrackQuestionSubtitle": { "description": "Settings item subtitle describing manual tracking code lookup" }
+  ,"questionTrackingCodeDialogTitle": "Your tracking code"
+  ,"@questionTrackingCodeDialogTitle": { "description": "Dialog title for the anonymous question tracking code after successful submit" }
+  ,"questionTrackingCodeDescription": "This is the only way to check this anonymous question later without signing in. Copy the 6-character code (letters and numbers) and keep it somewhere safe."
+  ,"@questionTrackingCodeDescription": { "description": "Dialog body shown after anonymous submit success to explain tracking code usage" }
+  ,"questionTrackingCodeCopyPrimary": "Copy code"
+  ,"@questionTrackingCodeCopyPrimary": { "description": "Primary button label to copy the tracking code in the submit success dialog" }
+  ,"questionTrackingCodeCopyRequiredHint": "Copy the code before closing."
+  ,"@questionTrackingCodeCopyRequiredHint": { "description": "Helper text and snackbar when user tries to dismiss tracking code dialog before copying" }
+  ,"questionTrackingCodeCopied": "Tracking code copied"
+  ,"@questionTrackingCodeCopied": { "description": "Snackbar shown after copying tracking code from submit success dialog" }
+  ,"questionTrackingCodeTrackNow": "Track now"
+  ,"@questionTrackingCodeTrackNow": { "description": "Dialog action button to open the tracking screen immediately" }
+  ,"trackQuestionTitle": "Track question"
+  ,"@trackQuestionTitle": { "description": "AppBar title for anonymous question tracking screen" }
+  ,"trackQuestionDescription": "Enter your 6-character tracking code (letters and numbers) to check whether your anonymous question has been answered."
+  ,"@trackQuestionDescription": { "description": "Description text at top of tracking screen" }
+  ,"trackQuestionInputLabel": "Tracking code"
+  ,"@trackQuestionInputLabel": { "description": "Input label for tracking code field" }
+  ,"trackQuestionInputHint": "6-character code"
+  ,"@trackQuestionInputHint": { "description": "Placeholder hint for tracking code input field" }
+  ,"trackQuestionLookupButton": "Check status"
+  ,"@trackQuestionLookupButton": { "description": "Primary button label to submit tracking code lookup" }
+  ,"trackQuestionErrorInvalidCode": "Invalid tracking code."
+  ,"@trackQuestionErrorInvalidCode": { "description": "Error message when tracking code format is invalid on server response" }
+  ,"trackQuestionErrorNotFound": "No question found for this code."
+  ,"@trackQuestionErrorNotFound": { "description": "Error message when no question exists for provided tracking code" }
+  ,"trackQuestionErrorTooManyRequests": "Too many lookup attempts. Please try again later."
+  ,"@trackQuestionErrorTooManyRequests": { "description": "Error message when tracking lookup endpoint is rate-limited" }
+  ,"trackQuestionErrorEmpty": "Please enter your tracking code."
+  ,"@trackQuestionErrorEmpty": { "description": "Client-side validation error when tracking code input is empty" }
+  ,"trackQuestionErrorCodeLength": "Tracking code must be exactly 6 characters."
+  ,"@trackQuestionErrorCodeLength": { "description": "Client-side validation error when tracking code length is not 6" }
+  ,"trackQuestionErrorCodeFormat": "Tracking code must contain letters and numbers only."
+  ,"@trackQuestionErrorCodeFormat": { "description": "Client-side validation error when tracking code contains non-alphanumeric characters" }
+  ,"trackQuestionStatusAnswered": "Answered"
+  ,"@trackQuestionStatusAnswered": { "description": "Status label when anonymous question has been answered" }
+  ,"trackQuestionStatusUnanswered": "Waiting for answer"
+  ,"@trackQuestionStatusUnanswered": { "description": "Status label when anonymous question is not answered yet" }
+  ,"trackQuestionCreatedAt": "Asked {timeAgo}"
+  ,"@trackQuestionCreatedAt": {
+    "description": "Relative timestamp showing when anonymous question was submitted",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnsweredAt": "Answered {timeAgo}"
+  ,"@trackQuestionAnsweredAt": {
+    "description": "Relative timestamp showing when anonymous question was answered",
+    "placeholders": { "timeAgo": { "type": "String" } }
+  }
+  ,"trackQuestionAnswerNotPublished": "The host has answered, but this answer is not public yet."
+  ,"@trackQuestionAnswerNotPublished": { "description": "Informational text when answer exists but is not published to feed" }
+  ,"trackQuestionOpenAnswer": "Open answer"
+  ,"@trackQuestionOpenAnswer": { "description": "Button label to open published answer detail from tracking screen" }
+
+  ,"adminEntryTitle": "Admin Dashboard"
+  ,"@adminEntryTitle": { "description": "Title for the admin entry banner shown on the Profile tab for admins" }
+  ,"adminEntrySubtitle": "Review and resolve pending content reports."
+  ,"@adminEntrySubtitle": { "description": "Subtitle for the admin entry banner explaining what admins should do" }
+  ,"adminEntryButton": "Open"
+  ,"@adminEntryButton": { "description": "Button label that navigates admins to /admin" }
 }
