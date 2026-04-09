@@ -89,7 +89,13 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] — v1.1 (kế hoạch)
+## [Unreleased]
+
+- Chưa có thay đổi.
+
+---
+
+## [1.1.0] — 2026-04-10
 
 ### Added (develop — 2026-03-22)
 
