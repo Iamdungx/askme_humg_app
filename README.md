@@ -1,6 +1,49 @@
-# AskMe HUMG — Flutter App
+# AskMe HUMG
 
-Q&A community platform for HUMG students & lecturers.
+Anonymous Q&A platform for HUMG students and lecturers, built with Flutter + Firebase.
+
+AskMe HUMG allows users to receive anonymous questions, answer them, and publish to a moderated trending feed with HUMG verification and anti-abuse protections.
+
+---
+
+## Why this project
+
+- Support a safe anonymous Q&A space for HUMG community members.
+- Keep user trust with moderation, reporting, and verification flows.
+- Provide a clean Flutter architecture example (Riverpod + GoRouter + Firebase).
+
+---
+
+## Key Features
+
+- Google Sign-In + HUMG OTP verification flow.
+- Anonymous question submission and host inbox workflow.
+- Answer publishing to public feed with trending `hotScore`.
+- Verified badge across profile/feed/comments.
+- Like/comment interactions with verification guard.
+- Report and admin moderation pipeline.
+- Profile deep link + QR share/scan flow.
+- Multi-language support (`vi`, `en`, `ja`).
+
+---
+
+## Tech Stack
+
+- Flutter (Dart 3)
+- Riverpod (`AsyncNotifier`, codegen)
+- Firebase Auth, Firestore, Storage, App Check, Messaging
+- GoRouter (typed routes)
+- Dio (REST integration for API flows)
+- Vercel API for anonymous tracking endpoints
+
+---
+
+## Roadmap
+
+- Harden API security for submit/tracking flow.
+- Persist `showRealName` to Firestore.
+- Add "View All Answers" screen with pagination.
+- Improve optimistic UI for likes.
 
 ---
 
@@ -35,6 +78,34 @@ make run
 > | `lib/l10n/app_localizations*.dart` | ✗ gitignored | `make l10n` |
 > | `lib/firebase_options.dart` | ✓ committed | FlutterFire CLI (one-time) |
 > | `google-services.json` / `GoogleService-Info.plist` | ✓ committed | Download from Firebase Console nếu mất |
+
+---
+
+## Contributing
+
+Contributions are welcome and appreciated.
+
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feat/your-feature`.
+3. Run setup and checks:
+   - `make setup`
+   - `make check`
+4. Commit with clear messages.
+5. Open a Pull Request with:
+   - purpose/scope summary
+   - screenshots (if UI changes)
+   - test/verification notes
+
+Please keep changes aligned with existing architecture and use-case constraints in project docs.
+
+---
+
+## Security
+
+If you discover a security issue, please do not post it publicly first.
+
+- Contact: `buidxng299@gmail.com`
+- Include reproduction steps and impact assessment
 
 ---
 
@@ -324,3 +395,10 @@ See:
 - `COMMERCIAL_LICENSE.md`
 
 For commercial permission, contact: `buidxng299@gmail.com`.
+
+---
+
+## Acknowledgments
+
+- HUMG student community for real use-case feedback.
+- Flutter and Firebase ecosystems.
